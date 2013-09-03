@@ -23,15 +23,21 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Event args for a request to prompt the user for a command target.
 		/// </summary>
-		public class CommandTargetRequestedEventArgs : Models.WherigoObjectEventArgs<Command>
+		public class CommandTargetRequestedEventArgs : EventArgs
 		{
-			internal CommandTargetRequestedEventArgs(Command command, IEnumerable<Thing> allTargets, Action<Command, Thing> callback) : base(command)
+			internal CommandTargetRequestedEventArgs(Command command, IEnumerable<Thing> allTargets, Action<Command, Thing> callback)
 			{
 				AllCommandTargets = allTargets;
 				_GotTargetCallback = callback;
+				Command = command;
 			}
 
 			private Action<Command, Thing> _GotTargetCallback;
+
+			/// <summary>
+			/// Gets the command.
+			/// </summary>
+			public Command Command { get; private set; }
 
 			/// <summary>
 			/// Gets the possible command targets.
@@ -44,7 +50,7 @@ namespace Geowigo.ViewModels
 			/// <param name="commandTarget"></param>
 			public void GiveResult(Thing commandTarget)
 			{
-				_GotTargetCallback(this.Object, commandTarget);
+				_GotTargetCallback(this.Command, commandTarget);
 			}
 		}
 

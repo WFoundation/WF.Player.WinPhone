@@ -176,7 +176,7 @@ namespace Geowigo.ViewModels
 		/// Displays a message box. If a message box is currently on-screen, it will be cancelled.
 		/// </summary>
 		/// <param name="mbox"></param>
-		public void ShowMessageBox(WherigoMessageBox mbox)
+		public void ShowMessageBox(WF.Player.Core.MessageBox mbox)
 		{
 			// Delegates this to the message box manager.
 			MessageBoxManagerInstance.Show(mbox);
@@ -196,18 +196,18 @@ namespace Geowigo.ViewModels
 
 		private void RegisterModel(WherigoModel model)
 		{
-			model.Core.InputRequested += new EventHandler<WherigoObjectEventArgs<Input>>(Core_InputRequested);
-			model.Core.MessageBoxRequested += new EventHandler<WherigoMessageBoxEventArgs>(Core_MessageBoxRequested);
-			model.Core.ScreenRequested += new EventHandler<WherigoScreenEventArgs>(Core_ScreenRequested);
-			model.Core.PlaySoundRequested += new EventHandler<WherigoObjectEventArgs<Media>>(Core_PlaySoundRequested);
+			model.Core.InputRequested += new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
+			model.Core.ShowMessageBoxRequested += new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
+			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
+			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 		}
 
 		private void UnregisterModel(WherigoModel model)
 		{
-			model.Core.InputRequested -= new EventHandler<WherigoObjectEventArgs<Input>>(Core_InputRequested);
-			model.Core.MessageBoxRequested -= new EventHandler<WherigoMessageBoxEventArgs>(Core_MessageBoxRequested);
-			model.Core.ScreenRequested -= new EventHandler<WherigoScreenEventArgs>(Core_ScreenRequested);
-			model.Core.PlaySoundRequested -= new EventHandler<WherigoObjectEventArgs<Media>>(Core_PlaySoundRequested);
+			model.Core.InputRequested -= new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
+			model.Core.ShowMessageBoxRequested -= new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
+			model.Core.ShowScreenRequested -= new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
+			model.Core.PlayMediaRequested -= new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 		}
 
 		private void PlayMediaSound(Media media)
@@ -222,53 +222,50 @@ namespace Geowigo.ViewModels
 
 		#region Core Event Handlers
 
-		private void Core_InputRequested(object sender, WherigoObjectEventArgs<Input> e)
+		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
 		{
 			// Navigates to the input view.
 			NavigateToView(e.Object);
 		}
 
-		private void Core_MessageBoxRequested(object sender, WherigoMessageBoxEventArgs e)
+		private void Core_MessageBoxRequested(object sender, MessageBoxEventArgs e)
 		{
 			// Displays the message box.
 			ShowMessageBox(e.Descriptor);
 		}
 
-		private void Core_ScreenRequested(object sender, WherigoScreenEventArgs e)
+		private void Core_ScreenRequested(object sender, ScreenEventArgs e)
 		{
 			// Shows the right screen depending on the event.
 			switch (e.Screen)
 			{
-				case WherigoScreenKind.Main:
+				case ScreenType.Main:
 					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Overview);
 					break;
 
-				case WherigoScreenKind.Locations:
-				case WherigoScreenKind.Items:
+				case ScreenType.Locations:
+				case ScreenType.Items:
 					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_World);
 					break;
 
-				case WherigoScreenKind.Inventory:
+				case ScreenType.Inventory:
 					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Inventory);
 					break;
 
-				case WherigoScreenKind.Tasks:
+				case ScreenType.Tasks:
 					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Tasks);
 					break;
 
-				case WherigoScreenKind.Details:
+				case ScreenType.Details:
 					NavigateToView(e.Object);
 					break;
 
-				case WherigoScreenKind.Unknown:
-					throw new InvalidOperationException("Unknown WherigoScreenKind cannot be processed.");
-
 				default:
-					break;
+					throw new InvalidOperationException(String.Format("Unknown WherigoScreenKind cannot be processed: {0}", e.Screen.ToString()));
 			}
 		}
 
-		private void Core_PlaySoundRequested(object sender, WherigoObjectEventArgs<Media> e)
+		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
 		{
 			// TODO: Pass to SoundManager for uncompressing to isolated storage and playing using a MediaElement?
 			//PlayMediaSound(e.Object);

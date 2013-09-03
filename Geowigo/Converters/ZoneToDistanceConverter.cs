@@ -25,7 +25,7 @@ namespace Geowigo.Converters
 				return null;
 			}
 
-			return App.Current.Model.Core.GetDistanceOf(z).ValueAs("m");
+			return App.Current.Model.Core.GetDistanceTextOf(z);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

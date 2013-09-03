@@ -157,15 +157,14 @@
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\GitHub\WF.Player.Core\Core.WP7.csproj">
+    <Resource Include="Views\windowsphone_grid_red_transparent.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WF.Player.Core\Core.WP7.csproj">
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Views\windowsphone_grid_red_transparent.png" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

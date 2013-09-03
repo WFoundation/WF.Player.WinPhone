@@ -19,15 +19,15 @@ namespace Geowigo.Controls
 
 		#region MessageBox
 
-		public WherigoMessageBox MessageBox
+		public WF.Player.Core.MessageBox MessageBox
 		{
-			get { return (WherigoMessageBox)GetValue(MessageBoxProperty); }
+			get { return (WF.Player.Core.MessageBox)GetValue(MessageBoxProperty); }
 			set { SetValue(MessageBoxProperty, value); }
 		}
 
 		// Using a DependencyProperty as the backing store for MessageBox.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty MessageBoxProperty =
-			DependencyProperty.Register("MessageBox", typeof(WherigoMessageBox), typeof(WherigoMessageBoxContentControl), new PropertyMetadata(null));
+			DependencyProperty.Register("MessageBox", typeof(WF.Player.Core.MessageBox), typeof(WherigoMessageBoxContentControl), new PropertyMetadata(null));
 
 		#endregion
 

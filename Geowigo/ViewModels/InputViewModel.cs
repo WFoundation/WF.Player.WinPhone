@@ -75,7 +75,7 @@ namespace Geowigo.ViewModels
 			App.Current.ViewModel.NavigateBack();
 
 			// Calls back on the input.
-			Input.Callback(Answer);
+			Input.GiveResult(Answer);
 		}
 	}
 }

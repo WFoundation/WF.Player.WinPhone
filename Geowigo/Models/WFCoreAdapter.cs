@@ -19,250 +19,29 @@ namespace Geowigo.Models
 	#region Event Classes
 
 	/// <summary>
-	/// Event arguments for a wherigo object of a certain type.
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public class WherigoObjectEventArgs<T> : EventArgs where T : class
-	{
-		/// <summary>
-		/// Gets the wherigo object that this event is associated to.
-		/// </summary>
-		public T Object { get; private set; }
-
-		internal WherigoObjectEventArgs(T obj)
-		{
-			Object = obj;
-		}
-	}
-
-	/// <summary>
 	/// Event arguments with regards to the player object.
 	/// </summary>
-	public class WherigoPlayerEventArgs : WherigoObjectEventArgs<Character>
+	public class PlayerLocationChangedEventArgs : EventArgs
 	{
 		/// <summary>
 		/// Gets the current location of the player.
 		/// </summary>
 		public GeoCoordinate Location { get; private set; }
 
-		internal WherigoPlayerEventArgs(Character player, GeoCoordinate gc) : base(player)
+		/// <summary>
+		/// Gets the player character.
+		/// </summary>
+		public Character Player { get; private set; }
+
+		internal PlayerLocationChangedEventArgs(Character player, GeoCoordinate gc)
 		{
 			Location = gc;
-		}
-	}
-
-	/// <summary>
-	/// Event arguments for a change in an attribute of a Wherigo object.
-	/// </summary>
-	public class WherigoAttributeChangedEventArgs : WherigoObjectEventArgs<Table>
-	{
-		/// <summary>
-		/// Gets the name of the attribute that changed.
-		/// </summary>
-		public string Field { get; private set; }
-
-		internal WherigoAttributeChangedEventArgs(Table obj, string field) : base(obj)
-		{
-			Field = field;
-		}
-	}
-
-	/// <summary>
-	/// Event arguments for a change in the cartridge entity.
-	/// </summary>
-	public class WherigoCartridgeEventArgs : EventArgs
-	{
-		/// <summary>
-		/// Gets the cartridge entity that changed.
-		/// </summary>
-		public Cartridge Cartridge { get; private set; }
-
-		internal WherigoCartridgeEventArgs(Cartridge cart)
-		{
-			Cartridge = cart;
-		}
-	}
-
-	/// <summary>
-	/// Event arguments for a change in the inventory of a container.
-	/// </summary>
-	public class WherigoInventoryChangedEventArgs : WherigoObjectEventArgs<Thing>
-	{
-		/// <summary>
-		/// Gets the old container for the object, or null if there are none.
-		/// </summary>
-		public Thing OldContainer { get; private set; }
-
-		/// <summary>
-		/// Gets the new container for the object, or null if there are none.
-		/// </summary>
-		public Thing NewContainer { get; private set; }
-		
-		internal WherigoInventoryChangedEventArgs(Thing obj, Thing fromContainer, Thing toContainer)
-			: base(obj)
-		{
-			OldContainer = fromContainer;
-			NewContainer = toContainer;
-		}
-	}
-
-	/// <summary>
-	/// Event arguments for a message box.
-	/// </summary>
-	public class WherigoMessageBoxEventArgs : EventArgs
-	{
-		/// <summary>
-		/// Gets the message box descriptor.
-		/// </summary>
-		public WherigoMessageBox Descriptor { get; private set; }
-
-		internal WherigoMessageBoxEventArgs(WherigoMessageBox desc)
-		{
-			Descriptor = desc;
-		}
-	}
-
-	/// <summary>
-	/// Event arguments for a screen.
-	/// </summary>
-	public class WherigoScreenEventArgs : WherigoObjectEventArgs<UIObject>
-	{
-		/// <summary>
-		/// Gets the kind of screen.
-		/// </summary>
-		public WherigoScreenKind Screen { get; private set; }
-
-		internal WherigoScreenEventArgs(WherigoScreenKind kind, UIObject obj)
-			: base(obj)
-		{
-			Screen = kind;
+			Player = player;
 		}
 	}
 
 	#endregion
 
-	/// <summary>
-	/// Describes a message box.
-	/// </summary>
-	public class WherigoMessageBox
-	{
-		/// <summary>
-		/// Represents the different kinds of results a message box can have.
-		/// </summary>
-		public enum Result
-		{
-			FirstButton,
-			SecondButton,
-			Cancel
-		}
-
-		#region Properties
-		/// <summary>
-		/// Gets the text of the message box to display.
-		/// </summary>
-		public string Text { get; private set; }
-
-		/// <summary>
-		/// Gets the media object associated to the message box.
-		/// </summary>
-		public Media MediaObject { get; private set; }
-
-		/// <summary>
-		/// Gets the text of the first button label. If null, a default value should be provided.
-		/// </summary>
-		public string FirstButtonLabel { get; private set; }
-
-		/// <summary>
-		/// Gets the text of the second button label. If null, the button shouldn't be displayed.
-		/// </summary>
-		public string SecondButtonLabel { get; private set; }
-
-		#endregion
-
-		#region Fields
-
-		private CallbackFunction _Callback;
-
-		#endregion
-
-		/// <summary>
-		/// Creates a message box descriptor.
-		/// </summary>
-		/// <param name="text">Text to display.</param>
-		/// <param name="mediaObj">Media object to display (can be null.)</param>
-		/// <param name="btn1label">Label of the first button (if null or empty, a default value will be used.)</param>
-		/// <param name="btn2label">Label of the second button (if null or empty, the button will not be shown.)</param>
-		/// <param name="callback">Function to call once the message box has gotten a result.</param>
-		public WherigoMessageBox(string text, Media mediaObj, string btn1label, string btn2label, CallbackFunction callback)
-		{
-			Text = text;
-			MediaObject = mediaObj;
-			FirstButtonLabel = String.IsNullOrEmpty(btn1label) ? null : btn1label;
-			SecondButtonLabel = String.IsNullOrEmpty(btn2label) ? null : btn2label;
-
-			_Callback = callback;
-		}
-
-		/// <summary>
-		/// Gives a result to the message box, allowing its underlying execution tree to continue.
-		/// </summary>
-		/// <param name="result"></param>
-		public void GiveResult(Result result)
-		{
-			if (_Callback == null)
-			{
-				throw new InvalidOperationException("No callback has been specified for this message box.");
-			}
-
-			switch (result)
-			{
-				case Result.FirstButton:
-					if (FirstButtonLabel == null)
-					{
-						throw new InvalidOperationException("There is no first button on this message box.");
-					}
-
-					_Callback(FirstButtonLabel);
-
-					break;
-
-				case Result.SecondButton:
-
-					if (SecondButtonLabel == null)
-					{
-						throw new InvalidOperationException("There is no second button on this message box.");
-					}
-
-					_Callback(SecondButtonLabel);
-
-					break;
-
-				case Result.Cancel:
-
-					// Cancelled message boxes are like whispers in LOST.
-
-					break;
-
-				default:
-					throw new NotImplementedException("This result type is not implemented: " + result.ToString());
-			}
-		}
-	}
-
-	/// <summary>
-	/// The different kinds of screens specified by Wherigo.
-	/// </summary>
-	public enum WherigoScreenKind
-	{
-		Main,
-		Locations,
-		Items,
-		Inventory,
-		Tasks,
-		Details,
-		Unknown
-	}
-	
 	public class WFCoreAdapter : Engine, INotifyPropertyChanged
 	{
 		#region Classes
@@ -270,7 +49,7 @@ namespace Geowigo.Models
 		/// <summary>
 		/// A class that processes the events from Wherigo Foundation's Core engine.
 		/// </summary>
-		private class WFCoreUIImpl : IUserInterface
+		/*private class WFCoreUIImpl : IUserInterface
 		{
 			private WFCoreAdapter _Parent;
 
@@ -479,66 +258,17 @@ namespace Geowigo.Models
 			}
 			#endregion
 
-			private string GetTableNameOrId(Table entity)
-			{
-				string eName = entity == null ? null : entity.GetNameOrId();
-				return String.IsNullOrEmpty(eName) ? "<null>" : eName;
-			}
-		}
+			
+		}*/
 
 		#endregion
-		
+
 		#region Events
-
-		/// <summary>
-		/// Raised when an attribute has changed in a Wherigo object.
-		/// </summary>
-		public event EventHandler<WherigoAttributeChangedEventArgs> AttributeChanged;
-
-		/// <summary>
-		/// Raised when a user input is requested.
-		/// </summary>
-		public event EventHandler<WherigoObjectEventArgs<Input>> InputRequested;
-
-		/// <summary>
-		/// Raised when a property has changed.
-		/// </summary>
-		public event PropertyChangedEventHandler PropertyChanged;
 
 		/// <summary>
 		/// raised when the player location has changed.
 		/// </summary>
-		public event EventHandler<WherigoPlayerEventArgs> PlayerLocationChanged;
-
-		/// <summary>
-		/// Raised when a message box is requested.
-		/// </summary>
-		public event EventHandler<WherigoMessageBoxEventArgs> MessageBoxRequested;
-
-		/// <summary>
-		/// Raised when the contents of an inventory have changed.
-		/// </summary>
-		public event EventHandler<WherigoInventoryChangedEventArgs> InventoryChanged;
-
-		/// <summary>
-		/// Raised when the state of a command has changed.
-		/// </summary>
-		public event EventHandler<WherigoObjectEventArgs<Command>> CommandChanged;
-
-		/// <summary>
-		/// Raised when the Cartridge has been marked as completed.
-		/// </summary>
-		public event EventHandler<WherigoCartridgeEventArgs> CartridgeCompleted;
-
-		/// <summary>
-		/// Raised when a screen is requested to be shown.
-		/// </summary>
-		public event EventHandler<WherigoScreenEventArgs> ScreenRequested;
-
-		/// <summary>
-		/// Raised when a sound is requested to be played.
-		/// </summary>
-		public event EventHandler<WherigoObjectEventArgs<Media>> PlaySoundRequested;
+		public event EventHandler<PlayerLocationChangedEventArgs> PlayerLocationChanged;
 
 		#endregion
 
@@ -558,18 +288,14 @@ namespace Geowigo.Models
 
 		#region Constructors
 
-		public WFCoreAdapter() : base(null)
+		public WFCoreAdapter() : base()
 		{
-			// Creates the UI implementation of WF Core.
-			this.UI = new WFCoreUIImpl(this);
-
 			// Creates and starts the location service.
 			_GeoWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
 			_GeoWatcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(GeoWatcher_StatusChanged);
 			_GeoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(GeoWatcher_PositionChanged);
 			_GeoWatcher.Start();
 		}
-
 
 		#endregion
 
@@ -678,115 +404,11 @@ namespace Geowigo.Models
 
 		#region Event Raisers
 
-		private void RaisePropertyChanged(string prop)
-		{
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(prop));
-			}
-		}
-
 		private void RaisePlayerLocationChanged(GeoCoordinate gc)
 		{
 			if (PlayerLocationChanged != null)
 			{
-				PlayerLocationChanged(this, new WherigoPlayerEventArgs(Player, gc));
-			}
-		}
-
-		private void RaiseInputRequested(Input input, bool throwIfNoHandler = false)
-		{
-			if (InputRequested == null)
-			{
-				if (throwIfNoHandler)
-				{
-					throw new InvalidOperationException("No InputRequested handler has been found.");
-				}
-				else
-				{
-					return;
-				}
-			}
-
-			// Raises the parent event.
-			InputRequested(this, new WherigoObjectEventArgs<Input>(input));
-		}
-
-		private void RaiseMessageBoxRequested(WherigoMessageBox mb, bool throwIfNoHandler = false)
-		{
-			if (MessageBoxRequested == null)
-			{
-				if (throwIfNoHandler)
-				{
-					throw new InvalidOperationException("No MessageBoxRequested handler has been found.");
-				}
-				else
-				{
-					return;
-				}
-			}
-
-			// Raises the parent event.
-			MessageBoxRequested(this, new WherigoMessageBoxEventArgs(mb));
-		}
-
-		private void RaisePlaySoundRequested(Media media, bool throwIfNoHandler = false)
-		{
-			if (PlaySoundRequested == null)
-			{
-				if (throwIfNoHandler)
-				{
-					throw new InvalidOperationException("No PlaySoundRequested handler has been found.");
-				}
-				else
-				{
-					return;
-				}
-			}
-
-			// Raises the parent event.
-			PlaySoundRequested(this, new WherigoObjectEventArgs<Media>(media));
-		}
-
-		private void RaiseScreenRequested(WherigoScreenKind kind, UIObject obj, bool throwIfNoHandler = false)
-		{
-			if (ScreenRequested == null)
-			{
-				if (throwIfNoHandler)
-				{
-					throw new InvalidOperationException("No ScreenRequested handler has been found.");
-				}
-				else
-				{
-					return;
-				}
-			}
-
-			// Raises the parent event.
-			ScreenRequested(this, new WherigoScreenEventArgs(kind, obj));
-		}
-
-		private void RaiseInventoryChanged(Thing obj, Thing fromContainer, Thing toContainer)
-		{
-			if (InventoryChanged != null)
-			{
-				InventoryChanged(this, new WherigoInventoryChangedEventArgs(obj, fromContainer, toContainer));
-			}
-		}
-
-		private void RaiseCommandChanged(Command command)
-		{
-			if (CommandChanged != null)
-			{
-				CommandChanged(this, new WherigoObjectEventArgs<Command>(command));
-			}
-		}
-
-		private void RaiseCartridgeCompleted(Cartridge cartridge)
-		{
-			if (CartridgeCompleted != null)
-			{
-				CartridgeCompleted(this, new WherigoCartridgeEventArgs(cartridge));
+				PlayerLocationChanged(this, new PlayerLocationChangedEventArgs(Player, gc));
 			}
 		}
 

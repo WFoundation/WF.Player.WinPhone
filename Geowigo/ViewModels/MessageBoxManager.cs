@@ -26,7 +26,7 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Matches a custom message box to its wherigo equivalent.
 		/// </summary>
-		private Dictionary<CustomMessageBox, WherigoMessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WherigoMessageBox>();
+		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
 
 		#endregion
 
@@ -35,7 +35,7 @@ namespace Geowigo.ViewModels
 		/// Displays a message box from a Wherigo game. If a message box is on-screen, it is dismissed.
 		/// </summary>
 		/// <param name="mbox"></param>
-		public void Show(WherigoMessageBox mbox)
+		public void Show(WF.Player.Core.MessageBox mbox)
 		{
 			if (mbox == null)
 			{
@@ -49,13 +49,13 @@ namespace Geowigo.ViewModels
 		/// Makes sure a message box is managed by this manager.
 		/// </summary>
 		/// <param name="wmb"></param>
-		private CustomMessageBox Accept(WherigoMessageBox wmb)
+		private CustomMessageBox Accept(WF.Player.Core.MessageBox wmb)
 		{
-			CustomMessageBox cmb;
+			CustomMessageBox cmb = null;
 			
 			// Checks if this instance already manages this message box.
 			// If not, starts to manage the box.
-			KeyValuePair<CustomMessageBox, WherigoMessageBox> pair = _WherigoMessageBoxes.SingleOrDefault(kv => kv.Value == wmb);
+			KeyValuePair<CustomMessageBox, WF.Player.Core.MessageBox> pair = _WherigoMessageBoxes.SingleOrDefault(kv => kv.Value == wmb);
 			if (pair.Value == wmb)
 			{
 				// The target message box exists already.
@@ -103,7 +103,7 @@ namespace Geowigo.ViewModels
 
 			// Looks the corresponding wherigo message box up in the dictionary, and 
 			// gives it a result depending on the custom message box result.
-			WherigoMessageBox wmb;
+			WF.Player.Core.MessageBox wmb;
 			if (_WherigoMessageBoxes.TryGetValue(cmb, out wmb))
 			{
 				// Bye bye box.
@@ -112,18 +112,18 @@ namespace Geowigo.ViewModels
 				switch (e.Result)
 				{
 					case CustomMessageBoxResult.LeftButton:
-						wmb.GiveResult(WherigoMessageBox.Result.FirstButton);
+						wmb.GiveResult(WF.Player.Core.MessageBox.Result.FirstButton);
 						break;
 
 					case CustomMessageBoxResult.RightButton:
-						wmb.GiveResult(WherigoMessageBox.Result.SecondButton);
+						wmb.GiveResult(WF.Player.Core.MessageBox.Result.SecondButton);
 						break;
 
 					case CustomMessageBoxResult.None:
 						// TODO: Keep track of lost message boxes.
 						System.Diagnostics.Debug.WriteLine("Dismissed message box with no result: " + wmb.Text);
 
-						wmb.GiveResult(WherigoMessageBox.Result.Cancel);
+						wmb.GiveResult(WF.Player.Core.MessageBox.Result.Cancel);
 						break;
 
 					default:
