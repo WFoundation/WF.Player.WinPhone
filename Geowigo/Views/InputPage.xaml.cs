@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shapes;
+using Microsoft.Phone.Controls;
+using Geowigo.ViewModels;
+
+namespace Geowigo.Views
+{
+	public partial class InputPage : BasePage
+	{
+		#region Properties
+
+		public new InputViewModel ViewModel
+		{
+			get
+			{
+				return (InputViewModel) base.ViewModel;
+			}
+			set
+			{
+				base.ViewModel = value;
+			}
+		}
+
+		#endregion
+
+		#region Fields
+
+		private ListBox _ChoicesList;
+
+		#endregion
+		
+		public InputPage()
+		{
+			InitializeComponent();
+		}
+
+		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
+		{
+			if (lb == _ChoicesList)
+			{
+				// Invokes the view model command.
+				ViewModel.AcceptAnswerCommand.Execute(null);
+			}
+		}
+
+		private void ChoicesList_Loaded(object sender, RoutedEventArgs e)
+		{
+			// Registers the list box.
+			_ChoicesList = (ListBox)sender;
+			RegisterListBoxHelpers(_ChoicesList);
+		}
+	}
+}

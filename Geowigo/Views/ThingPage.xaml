@@ -1,0 +1,83 @@
+﻿<Geowigo_Views:BasePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    x:Class="Geowigo.Views.ThingPage"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
+    shell:SystemTray.IsVisible="True">
+ 
+	<Geowigo_Views:BasePage.Resources>
+		<Geowigo_Converters:LowercaseStringConverter x:Key="LowercaseStringConverter"/>
+		<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+		<DataTemplate x:Key="CommandListItemTemplate">
+			<Grid>
+				<TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height"/>
+			</Grid>
+		</DataTemplate>
+		<sys:String x:Key="ListPickerFullModeHeader">Select a target</sys:String>
+		<DataTemplate x:Key="CommandTargetListPickerItemTemplate">
+			<Grid>
+				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name}" d:LayoutOverrides="Width, Height"/>
+			</Grid>
+		</DataTemplate>
+	</Geowigo_Views:BasePage.Resources>
+<!--Exemple de code illustrant l'utilisation de l'ApplicationBar--><!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 1"/>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+	<Geowigo_Views:BasePage.FontFamily>
+		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
+	</Geowigo_Views:BasePage.FontFamily>
+	<Geowigo_Views:BasePage.FontSize>
+		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
+	</Geowigo_Views:BasePage.FontSize>
+	<Geowigo_Views:BasePage.Foreground>
+		<StaticResource ResourceKey="PhoneForegroundBrush"/>
+	</Geowigo_Views:BasePage.Foreground>
+
+	<Geowigo_Views:BasePage.DataContext>
+		<Geowigo_ViewModels:ThingViewModel/>
+	</Geowigo_Views:BasePage.DataContext>
+
+    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RowDefinitions>
+        	<RowDefinition Height="Auto"/>
+        	<RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--TitlePanel contient le nom de l'application et le titre de la page-->
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+        	<TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, FallbackValue=APP TITLE}" Style="{StaticResource PhoneTextNormalStyle}"/>
+        	<TextBlock x:Name="CartridgeTitle" Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}"/>
+        	<TextBlock x:Name="PageTitle" Text="{Binding WherigoObject.Name, Converter={StaticResource LowercaseStringConverter}, FallbackValue=thing}" Margin="9,-10,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+        </StackPanel>
+        <Grid x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
+        	<ScrollViewer>
+        		<StackPanel>
+        			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None"/>
+        			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,0" />
+        			<ListBox x:Name="CommandList" Margin="0,40,0,0" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource CommandListItemTemplate}"/>
+					<toolkit:ListPicker x:Name="CommandTargetListPicker" Margin="0" Visibility="Collapsed" ExpansionMode="FullScreenOnly" FullModeHeader="{StaticResource ListPickerFullModeHeader}" PickerPageUri="/Microsoft.Phone.Controls.Toolkit;component/ListPicker/ListPickerPage.xaml" FullModeItemTemplate="{StaticResource CommandTargetListPickerItemTemplate}"/>
+        		</StackPanel>
+        	</ScrollViewer>
+        </Grid>
+
+        <!--ContentPanel - placez tout contenu supplémentaire ici-->
+    </Grid>
+
+</Geowigo_Views:BasePage>
