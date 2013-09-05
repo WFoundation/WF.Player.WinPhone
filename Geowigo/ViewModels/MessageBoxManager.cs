@@ -112,18 +112,18 @@ namespace Geowigo.ViewModels
 				switch (e.Result)
 				{
 					case CustomMessageBoxResult.LeftButton:
-						wmb.GiveResult(WF.Player.Core.MessageBox.Result.FirstButton);
+						wmb.GiveResult(WF.Player.Core.MessageBoxResult.FirstButton);
 						break;
 
 					case CustomMessageBoxResult.RightButton:
-						wmb.GiveResult(WF.Player.Core.MessageBox.Result.SecondButton);
+						wmb.GiveResult(WF.Player.Core.MessageBoxResult.SecondButton);
 						break;
 
 					case CustomMessageBoxResult.None:
 						// TODO: Keep track of lost message boxes.
 						System.Diagnostics.Debug.WriteLine("Dismissed message box with no result: " + wmb.Text);
 
-						wmb.GiveResult(WF.Player.Core.MessageBox.Result.Cancel);
+						wmb.GiveResult(WF.Player.Core.MessageBoxResult.Cancel);
 						break;
 
 					default:

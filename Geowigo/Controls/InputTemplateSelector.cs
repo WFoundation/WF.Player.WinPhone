@@ -20,7 +20,7 @@ namespace Geowigo.Controls
 		
 		public override DataTemplate SelectTemplate(object item, DependencyObject container)
 		{
-			InputTypes iType = InputTypes.Unknown;
+			InputType iType = InputType.Unknown;
 
 			if (item is Input)
 			{
@@ -34,10 +34,10 @@ namespace Geowigo.Controls
 			// Returns the proper template according to the type of the input.
 			switch (iType)
 			{
-				case InputTypes.MultipleChoice:
+				case InputType.MultipleChoice:
 					return MultipleChoiceTemplate;
 
-				case InputTypes.Text:
+				case InputType.Text:
 					return TextTemplate;
 	
 				default:

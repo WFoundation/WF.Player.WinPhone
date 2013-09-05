@@ -25,7 +25,7 @@ namespace Geowigo.Mockups
 		/// Gets the standard input type.
 		/// </summary>
 		/// <value>The input type.</value>
-		public InputTypes InputType
+		public InputType InputType
 		{
 			get;
 			set;

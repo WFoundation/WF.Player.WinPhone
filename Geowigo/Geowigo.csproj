@@ -160,7 +160,7 @@
     <Resource Include="Views\windowsphone_grid_red_transparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\WF.Player.Core\Core.WP7.csproj">
+    <ProjectReference Include="..\..\WF.Player.Core\Core\Core.WP7.csproj">
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
     </ProjectReference>
