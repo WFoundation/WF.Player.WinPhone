@@ -67,26 +67,26 @@
         <!--Contrôle Pivot-->
 		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" Loaded="ContentPivot_Loaded" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
-            <controls:PivotItem x:Name="OverviewPivotItem" Header="overview">
+            <controls:PivotItem x:Name="OverviewPivotItem" Header="overview" Margin="22,28,12,0">
             	<Grid/>
             </controls:PivotItem>
             <!--Élément un de tableau croisé dynamique-->
-            <controls:PivotItem x:Name="WorldPivotItem" Header="world">
+            <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">
                 <StackPanel>
-            		<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource ZoneListItemTemplate}"/>
-            		<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" Margin="0,30,0,0" ItemTemplate="{StaticResource ObjectListItemTemplate}"/>
+            		<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
+            		<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" Margin="0,30,0,0" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
             	</StackPanel>
             </controls:PivotItem>
 
             <!--Élément deux de tableau croisé dynamique-->
-            <controls:PivotItem x:Name="InventoryPivotItem" Header="inventory">
+            <controls:PivotItem x:Name="InventoryPivotItem" Header="inventory" Margin="22,28,12,0">
                 <Grid>
-                	<ListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource InventoryListItemTemplate}" />
+                	<ListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" />
                 </Grid>
             </controls:PivotItem>
-            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks">
+            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0">
             	<Grid>
-            		<ListBox x:Name="TaskList" HorizontalAlignment="Left" VerticalAlignment="Top" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource TaskItemTemplate}"/>
+            		<ListBox x:Name="TaskList" HorizontalAlignment="Left" VerticalAlignment="Top" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
             	</Grid>
             </controls:PivotItem>
         </controls:Pivot>

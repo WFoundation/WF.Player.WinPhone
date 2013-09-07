@@ -77,6 +77,7 @@
     </Compile>
     <Compile Include="Converters\ByteArrayToImageSourceConverter.cs" />
     <Compile Include="Converters\LowercaseStringConverter.cs" />
+    <Compile Include="Converters\ObjectToVisibilityConverter.cs" />
     <Compile Include="Converters\ThingToDistanceConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
     <Compile Include="Converters\ZoneToDistanceConverter.cs" />

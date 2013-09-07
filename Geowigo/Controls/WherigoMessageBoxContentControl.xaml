@@ -64,7 +64,7 @@
     
     <ScrollViewer x:Name="LayoutRoot" Margin="10,0,30,0" >
 		<StackPanel>
-			<Image Source="{Binding MessageBox.MediaObject.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=This}" Stretch="None" Margin="0"/>
+			<Image Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=This}" Stretch="None" Margin="0"/>
 			<TextBlock TextWrapping="Wrap" Text="{Binding MessageBox.Text, ElementName=This}" Margin="0,40,0,0" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" />
 		</StackPanel>
 	</ScrollViewer>

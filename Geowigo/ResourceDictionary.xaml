@@ -1,4 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+	<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+	<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 	
 	<DataTemplate x:Key="GamePivotTitleTemplate">
 		<StackPanel>
@@ -8,4 +10,17 @@
 	</DataTemplate>
 	
 	<Geowigo_Converters:UppercaseStringConverter x:Key="UppercaseStringConverter"/>
+	
+	<DataTemplate x:Key="WherigoObjectGenericListItemTemplate">
+		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">
+			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
+			<StackPanel Orientation="Horizontal">
+				<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Visibility="{Binding Image, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0"/>
+				<StackPanel Orientation="Vertical" Margin="0,-10,0,0">
+					<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
+					<TextBlock x:Name="Description" Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis"/>
+				</StackPanel>
+			</StackPanel>
+		</Grid>
+	</DataTemplate>
 </ResourceDictionary>
