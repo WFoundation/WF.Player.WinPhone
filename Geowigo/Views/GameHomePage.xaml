@@ -9,8 +9,6 @@
 	x:Name="This"
 	toolkit:TiltEffect.IsTiltEnabled="True">
 	<Geowigo_Views:BasePage.Resources>
-		<Geowigo_Converters:ThingToDistanceConverter x:Key="ThingToDistanceConverter"/>
-		<Geowigo_Converters:ZoneToDistanceConverter x:Key="ZoneToDistanceConverter"/>
 		<DataTemplate x:Key="TaskItemTemplate">
 			<Grid>
 				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
@@ -19,13 +17,13 @@
 		<DataTemplate x:Key="ZoneListItemTemplate">
 			<StackPanel>
 				<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Unnamed Zone, Mode=OneWay}"/>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Converter={StaticResource ZoneToDistanceConverter}, FallbackValue=Distance unknown., Mode=OneWay}"/>
+				<TextBlock TextWrapping="Wrap" Text="distance missing"/>
 			</StackPanel>
 		</DataTemplate>
 		<DataTemplate x:Key="ObjectListItemTemplate">
 			<StackPanel>
 				<TextBlock TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}"/>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Converter={StaticResource ThingToDistanceConverter}, Mode=OneWay}"/>
+				<TextBlock TextWrapping="Wrap" Text="distance missing"/>
 			</StackPanel>
 		</DataTemplate>
 		<DataTemplate x:Key="InventoryListItemTemplate">
@@ -63,7 +61,7 @@
     <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Contrôle Pivot-->
-		<Image Margin="0,-31,0,0" Source="windowsphone_grid_red_transparent.png"/>
+		<Image Margin="0,-31,0,0" Source="windowsphone_grid_red_transparent.png" Visibility="Collapsed"/>
         <!--Contrôle Pivot-->
 		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" Loaded="ContentPivot_Loaded" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
@@ -73,8 +71,8 @@
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">
                 <StackPanel>
-            		<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
-            		<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" Margin="0,30,0,0" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
+            		<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}"/>
+            		<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" Margin="0,30,0,0" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}"/>
             	</StackPanel>
             </controls:PivotItem>
 

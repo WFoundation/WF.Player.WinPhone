@@ -13,19 +13,33 @@ using WF.Player.Core;
 
 namespace Geowigo.Converters
 {
-	public class ThingToDistanceConverter : IValueConverter
+	public class PlayerZoneStateToStringConverter : IValueConverter
 	{
 
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			Thing t = value as Thing;
-
-			if (t == null)
+			if (!(value is PlayerZoneState))
 			{
 				return null;
 			}
 
-			return App.Current.Model.Core.GetDistanceTextOf(t);
+			switch ((PlayerZoneState)value)
+			{
+				case PlayerZoneState.Inside:
+					return "Inside";
+
+				case PlayerZoneState.Proximity:
+					return "In proximity";
+
+				case PlayerZoneState.Distant:
+					return "Distant";
+
+				case PlayerZoneState.NotInRange:
+					return "Not in range";
+
+				default:
+					return null;
+			}
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

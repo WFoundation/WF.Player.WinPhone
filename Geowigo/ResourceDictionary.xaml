@@ -1,4 +1,5 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" mc:Ignorable="d">
+	<Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
 	<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
 	<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 	
@@ -21,6 +22,21 @@
 					<TextBlock x:Name="Description" Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis"/>
 				</StackPanel>
 			</StackPanel>
+		</Grid>
+	</DataTemplate>
+	<DataTemplate x:Key="WherigoThingWithDistanceListItemTemplate">
+		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">
+			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
+			<Grid>
+				<StackPanel Orientation="Horizontal">
+					<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+					<StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,-13,0,0"/>
+						<TextBlock x:Name="Description" Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0"/>
+						<Geowigo_Controls:DistanceControl Vector="{Binding VectorFromPlayer, Mode=OneWay}" Orientation="Horizontal" TextMargin="4,0,0,0" FontSize="{StaticResource PhoneFontSizeSmall}" FontFamily="{StaticResource PhoneFontFamilyNormal}" Foreground="{StaticResource PhoneAccentBrush}" Height="25" Margin="0,4,0,0"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
 		</Grid>
 	</DataTemplate>
 </ResourceDictionary>

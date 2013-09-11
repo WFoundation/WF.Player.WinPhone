@@ -50,6 +50,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit">
@@ -70,6 +71,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DataTemplateSelector.cs" />
+    <Compile Include="Controls\DistanceControl.xaml.cs">
+      <DependentUpon>DistanceControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\InputTemplateSelector.cs" />
     <Compile Include="Controls\RelayCommand.cs" />
     <Compile Include="Controls\WherigoMessageBoxContentControl.xaml.cs">
@@ -78,9 +82,8 @@
     <Compile Include="Converters\ByteArrayToImageSourceConverter.cs" />
     <Compile Include="Converters\LowercaseStringConverter.cs" />
     <Compile Include="Converters\ObjectToVisibilityConverter.cs" />
-    <Compile Include="Converters\ThingToDistanceConverter.cs" />
+    <Compile Include="Converters\PlayerZoneStateToStringConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
-    <Compile Include="Converters\ZoneToDistanceConverter.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -114,6 +117,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="Controls\DistanceControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\WherigoMessageBoxContentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

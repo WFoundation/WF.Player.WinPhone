@@ -71,6 +71,8 @@ namespace Geowigo.Models
 
 		public WFCoreAdapter() : base()
 		{
+			// TODO: Base properties (device and such).
+			
 			// Creates and starts the location service.
 			_GeoWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
 			_GeoWatcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(GeoWatcher_StatusChanged);
