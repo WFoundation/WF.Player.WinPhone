@@ -29,7 +29,7 @@
 			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
 			<Grid>
 				<StackPanel Orientation="Horizontal">
-					<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+					<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
 					<StackPanel Orientation="Vertical">
 						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,-13,0,0"/>
 						<TextBlock x:Name="Description" Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0"/>

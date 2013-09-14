@@ -9,6 +9,7 @@
 	x:Name="This"
 	toolkit:TiltEffect.IsTiltEnabled="True">
 	<Geowigo_Views:BasePage.Resources>
+		<Geowigo_Converters:ListBoxToVisibilityConverter x:Key="ListBoxToVisibilityConverter"/>
 		<DataTemplate x:Key="TaskItemTemplate">
 			<Grid>
 				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
@@ -70,10 +71,14 @@
             </controls:PivotItem>
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">
-                <StackPanel>
-            		<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}"/>
-            		<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" Margin="0,30,0,0" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}"/>
-            	</StackPanel>
+                <ScrollViewer>
+            		<StackPanel>
+            			<TextBlock TextWrapping="Wrap" Text="ZONES" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15" Visibility="{Binding Converter={StaticResource ListBoxToVisibilityConverter}, ElementName=ZoneList, Mode=OneWay}"/>
+            			<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,0,25"/>
+            			<TextBlock TextWrapping="Wrap" Text="CHARACTERS &amp; OBJECTS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15" Visibility="{Binding Converter={StaticResource ListBoxToVisibilityConverter}, ElementName=ObjectList, Mode=OneWay}"/>
+            			<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            		</StackPanel>
+            	</ScrollViewer>
             </controls:PivotItem>
 
             <!--Élément deux de tableau croisé dynamique-->
@@ -83,9 +88,12 @@
                 </Grid>
             </controls:PivotItem>
             <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0">
-            	<Grid>
-            		<ListBox x:Name="TaskList" HorizontalAlignment="Left" VerticalAlignment="Top" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}"/>
-            	</Grid>
+            	<StackPanel>
+            		<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            		<ListBox x:Name="CurrentTaskList" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0,0,0,25"/>
+            		<TextBlock TextWrapping="Wrap" Text="HISTORY" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            		<ListBox x:Name="HistoryTaskList" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0"/>
+            	</StackPanel>
             </controls:PivotItem>
         </controls:Pivot>
     </Grid>
