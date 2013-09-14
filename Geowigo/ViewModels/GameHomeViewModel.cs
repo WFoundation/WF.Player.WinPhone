@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Geowigo.Controls;
 using Microsoft.Phone.Controls;
+using System.Windows.Data;
 
 namespace Geowigo.ViewModels
 {
@@ -46,7 +47,7 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		#endregion		
+		#endregion
 
 		#region Commands
 
@@ -69,7 +70,34 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		#region Properties
+		#region Tasks Collection View Sources
+		/// <summary>
+		/// Initializes filters for task collection view sources.
+		/// </summary>
+		/// <param name="_CurrentTasksSource"></param>
+		/// <param name="_HistoryTasksSource"></param>
+		public void InitCollectionViewSourcesForTasks(CollectionViewSource currrentTs, CollectionViewSource historyTs)
+		{
+			// Makes sure that there is one and only one event handler per source.
+			
+			currrentTs.Filter -= new FilterEventHandler(OnCurrentTasksSourceFilter);
+			currrentTs.Filter += new FilterEventHandler(OnCurrentTasksSourceFilter);
+			
+			historyTs.Filter -= new FilterEventHandler(OnHistoryTasksSourceFilter);
+			historyTs.Filter += new FilterEventHandler(OnHistoryTasksSourceFilter);
+		}
+
+		private void OnHistoryTasksSourceFilter(object sender, FilterEventArgs e)
+		{
+			// Only take completed tasks.
+			e.Accepted = e.Item is Task && ((Task)e.Item).Complete;
+		}
+
+		private void OnCurrentTasksSourceFilter(object sender, FilterEventArgs e)
+		{
+			// Only take uncompleted tasks.
+			e.Accepted = e.Item is Task && !((Task)e.Item).Complete;
+		} 
 
 		#endregion
 		

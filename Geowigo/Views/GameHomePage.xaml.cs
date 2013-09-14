@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Geowigo.ViewModels;
 using WF.Player.Core;
+using System.Windows.Data;
 
 namespace Geowigo.Views
 {
@@ -32,20 +33,32 @@ namespace Geowigo.Views
 		}
 
 		#endregion
+
+		#region Fields
+
+		CollectionViewSource _HistoryTasksSource;
+		CollectionViewSource _CurrentTasksSource;
+
+		#endregion
 		
 		public GameHomePage()
 		{
 			InitializeComponent();
 
+			_HistoryTasksSource = (CollectionViewSource)this.Resources["HistoryTasksSource"];
+			_CurrentTasksSource = (CollectionViewSource)this.Resources["CurrentTasksSource"];
+			
 			RegisterListBoxHelpers(this.InventoryList);
 			RegisterListBoxHelpers(this.ObjectList);
 			RegisterListBoxHelpers(this.ZoneList);
-			RegisterListBoxHelpers(this.TaskList);
+			RegisterListBoxHelpers(this.HistoryTaskList);
+			RegisterListBoxHelpers(this.CurrentTaskList);
 		}
+
 
 		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
 		{
-			if (lb == InventoryList || lb == ObjectList || lb == ZoneList || lb == TaskList)
+			if (lb == InventoryList || lb == ObjectList || lb == ZoneList || lb == HistoryTaskList || lb == CurrentTaskList)
 			{
 				// Gets the first selected item to navigate to.
 				UIObject thing = e.AddedItems.OfType<UIObject>().FirstOrDefault();
@@ -59,6 +72,12 @@ namespace Geowigo.Views
 		{
 			// Sets the initial selected index.
 			((Pivot)sender).SelectedIndex = ViewModel.PivotSelectedIndex;
+		}
+
+		private void TasksPivotItem_Loaded(object sender, RoutedEventArgs e)
+		{
+			// Sets the filters for the task collection views.
+			ViewModel.InitCollectionViewSourcesForTasks(_CurrentTasksSource, _HistoryTasksSource);
 		}
 	}
 }

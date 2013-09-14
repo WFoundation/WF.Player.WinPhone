@@ -32,6 +32,9 @@
 				<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
 			</Grid>
 		</DataTemplate>
+
+		<CollectionViewSource x:Key="HistoryTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
+		<CollectionViewSource x:Key="CurrentTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
 	</Geowigo_Views:BasePage.Resources>
 
     <!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
@@ -87,13 +90,15 @@
                 	<ListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" />
                 </Grid>
             </controls:PivotItem>
-            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0">
-            	<StackPanel>
-            		<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-            		<ListBox x:Name="CurrentTaskList" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0,0,0,25"/>
-            		<TextBlock TextWrapping="Wrap" Text="HISTORY" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-            		<ListBox x:Name="HistoryTaskList" ItemsSource="{Binding Model.Core.ActiveVisibleTasks}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0"/>
-            	</StackPanel>
+            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0" Loaded="TasksPivotItem_Loaded">
+            	<ScrollViewer>
+            		<StackPanel>
+            			<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            			<ListBox x:Name="CurrentTaskList" ItemsSource="{Binding Source={StaticResource CurrentTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0,0,0,25" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            			<TextBlock TextWrapping="Wrap" Text="COMPLETED" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            			<ListBox x:Name="HistoryTaskList" ItemsSource="{Binding Source={StaticResource HistoryTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            		</StackPanel>
+            	</ScrollViewer>
             </controls:PivotItem>
         </controls:Pivot>
     </Grid>

@@ -107,7 +107,6 @@ namespace Geowigo.Models
 
 			ProcessPosition(_LastKnownPosition);
 
-
 			// Run Time: the game starts.
 			lock (_SyncRoot)
 			{

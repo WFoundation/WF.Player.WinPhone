@@ -200,6 +200,13 @@ namespace Geowigo.ViewModels
 			model.Core.ShowMessageBoxRequested += new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
 			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
 			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
+
+			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
+		}
+
+		void Core_SaveRequested(object sender, CartridgeEventArgs e)
+		{
+			
 		}
 
 		private void UnregisterModel(WherigoModel model)
