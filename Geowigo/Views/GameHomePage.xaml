@@ -9,7 +9,6 @@
 	x:Name="This"
 	toolkit:TiltEffect.IsTiltEnabled="True">
 	<Geowigo_Views:BasePage.Resources>
-		<Geowigo_Converters:ListBoxToVisibilityConverter x:Key="ListBoxToVisibilityConverter"/>
 		<DataTemplate x:Key="TaskItemTemplate">
 			<Grid>
 				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
@@ -66,6 +65,7 @@
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Contrôle Pivot-->
 		<Image Margin="0,-31,0,0" Source="windowsphone_grid_red_transparent.png" Visibility="Collapsed"/>
+		<Image x:Name="PosterBackground" Source="{Binding Model.Core.Cartridge.Poster.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Opacity="0.3" Stretch="UniformToFill"/>
         <!--Contrôle Pivot-->
 		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" Loaded="ContentPivot_Loaded" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
@@ -76,27 +76,38 @@
             <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">
                 <ScrollViewer>
             		<StackPanel>
-            			<TextBlock TextWrapping="Wrap" Text="ZONES" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15" Visibility="{Binding Converter={StaticResource ListBoxToVisibilityConverter}, ElementName=ZoneList, Mode=OneWay}"/>
-            			<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,0,25"/>
-            			<TextBlock TextWrapping="Wrap" Text="CHARACTERS &amp; OBJECTS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15" Visibility="{Binding Converter={StaticResource ListBoxToVisibilityConverter}, ElementName=ObjectList, Mode=OneWay}"/>
-            			<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            			<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" Visibility="{Binding IsWorldEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="Here "/><Run Text="are displayed the various zones, items and characters that populate the world."/><Run Text=" "/><Run Text="Unfortunately, "/><Run Text="there is nothing right now. Try to follow the "/><Run Text="current tasks"/><Run Text=","/><Run Text=" you may need to do something in order for the game to progress"/><Run Text="."/></TextBlock>
+            			<StackPanel x:Name="WorldZonesPanel" Orientation="Vertical" Margin="0,0,0,25" Visibility="{Binding AreZonesVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
+            				<TextBlock TextWrapping="Wrap" Text="ZONES" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<ListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
+            			</StackPanel>
+            			<StackPanel x:Name="WorldObjectsPanel" Orientation="Vertical" Visibility="{Binding AreObjectsVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
+            				<TextBlock TextWrapping="Wrap" Text="CHARACTERS &amp; OBJECTS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<ListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
+            			</StackPanel>
             		</StackPanel>
             	</ScrollViewer>
             </controls:PivotItem>
 
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="InventoryPivotItem" Header="inventory" Margin="22,28,12,0">
-                <Grid>
-                	<ListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" />
-                </Grid>
+                <StackPanel>
+            		<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" d:LayoutOverrides="Width" Text="This is your inventory. Usually, it displays the objects that you own and the characters that accompany you. Unfortunately, your inventory is empty right now. Try to check the world for items to collect and characters to interact with." Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+            		<ListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+            	</StackPanel>
             </controls:PivotItem>
             <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0" Loaded="TasksPivotItem_Loaded">
             	<ScrollViewer>
             		<StackPanel>
-            			<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-            			<ListBox x:Name="CurrentTaskList" ItemsSource="{Binding Source={StaticResource CurrentTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0,0,0,25" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-            			<TextBlock TextWrapping="Wrap" Text="COMPLETED" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-            			<ListBox x:Name="HistoryTaskList" ItemsSource="{Binding Source={StaticResource HistoryTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            			<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" Visibility="{Binding IsTasksEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="Here are "/><Run Text="usually "/><Run Text="the "/><Run Text="various "/><Run Text="tasks that you have to "/><Run Text="carry out"/><Run Text=". Unfortunately, "/><Run Text="there is nothing right now"/><Run Text=". Try to explore the elements of the world or your inventory"/><Run Text=":"/><Run Text=" "/><Run Text="you may need to perform an action for the game to progress."/></TextBlock>
+            			<StackPanel x:Name="TasksCurrentPanel" Orientation="Vertical" Width="446" Margin="0,0,0,25" Visibility="{Binding AreCurrentTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
+            				<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<ListBox x:Name="CurrentTaskList" ItemsSource="{Binding Source={StaticResource CurrentTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
+            			</StackPanel>
+            			<StackPanel x:Name="TasksHistoryPanel" Orientation="Vertical" Width="446" Visibility="{Binding AreHistoryTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
+            				<TextBlock TextWrapping="Wrap" Text="COMPLETED" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<ListBox x:Name="HistoryTaskList" ItemsSource="{Binding Source={StaticResource HistoryTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
+            			</StackPanel>
             		</StackPanel>
             	</ScrollViewer>
             </controls:PivotItem>

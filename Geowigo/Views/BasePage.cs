@@ -54,14 +54,37 @@ namespace Geowigo.Views
 		/// Registers event helpers for a ListBox.
 		/// </summary>
 		/// <param name="lb"></param>
-		protected void RegisterListBoxHelpers(ListBox lb)
+		protected void RegisterListBoxHelpers(ListBox lb, bool deferUntilLoaded = false)
 		{
-			lb.SelectionChanged += new SelectionChangedEventHandler(OnListBoxSelectionChanged);
+			if (deferUntilLoaded)
+			{
+				lb.Loaded -= new RoutedEventHandler(OnListBoxLoaded);
+				lb.Loaded += new RoutedEventHandler(OnListBoxLoaded);
+			}
+			else
+			{
+				lb.SelectionChanged -= new SelectionChangedEventHandler(OnListBoxSelectionChanged);
+				lb.SelectionChanged += new SelectionChangedEventHandler(OnListBoxSelectionChanged);
+			}
 		}
 
+		/// <summary>
+		/// Called when the selection of a monitored list box has changed.
+		/// </summary>
+		/// <param name="lb"></param>
+		/// <param name="e"></param>
 		protected virtual void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
 		{
 
+		}
+
+		private void OnListBoxLoaded(object sender, RoutedEventArgs e)
+		{
+			// Clears the listbox selection.
+			((ListBox)sender).SelectedItem = null;
+			
+			// Registers the helpers.
+			RegisterListBoxHelpers((ListBox)sender, false);
 		}
 
 		private void OnListBoxSelectionChanged(object sender, SelectionChangedEventArgs e)

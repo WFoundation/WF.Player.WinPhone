@@ -9,27 +9,27 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Data;
+using System.Collections;
 
 namespace Geowigo.Converters
 {
-	/// <summary>
-	/// A converter from ListBox item count to Visibility.
-	/// </summary>
-	/// <remarks>
-	/// Visible if the count of items is greater than 0, Collapsed otherwise.
-	/// </remarks>
-	public class ListBoxToVisibilityConverter : IValueConverter
+	public class ItemSourceToVisibilityConverter : IValueConverter
 	{
+
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			ListBox lb = value as ListBox;
-
-			if (lb == null)
+			if (value is IEnumerable)
 			{
-				return null;
+				int count = 0;
+				foreach (var item in (IEnumerable)value)
+				{
+					count++;
+				}
+
+				return count > 0 ? Visibility.Visible : Visibility.Collapsed;
 			}
 
-			return lb.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+			return null;
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

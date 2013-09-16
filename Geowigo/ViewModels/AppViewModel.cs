@@ -201,7 +201,14 @@ namespace Geowigo.ViewModels
 			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
 			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 
+			// Temp debug
 			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
+			model.Core.SynchronizeRequested += new EventHandler<SynchronizeEventArgs>(Core_SynchronizeRequested);
+		}
+
+		void Core_SynchronizeRequested(object sender, SynchronizeEventArgs e)
+		{
+			
 		}
 
 		void Core_SaveRequested(object sender, CartridgeEventArgs e)

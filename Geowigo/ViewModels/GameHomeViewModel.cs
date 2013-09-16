@@ -47,6 +47,117 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region AreZonesVisible
+
+
+		public bool AreZonesVisible
+		{
+			get { return (bool)GetValue(AreZonesVisibleProperty); }
+			set { SetValue(AreZonesVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for AreZonesVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AreZonesVisibleProperty =
+			DependencyProperty.Register("AreZonesVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
+
+		
+		#endregion
+
+		#region AreObjectsVisible
+
+
+		public bool AreObjectsVisible
+		{
+			get { return (bool)GetValue(AreObjectsVisibleProperty); }
+			set { SetValue(AreObjectsVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for AreObjectsVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AreObjectsVisibleProperty =
+			DependencyProperty.Register("AreObjectsVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
+
+
+		#endregion
+
+		#region AreCurrentTasksVisible
+
+
+		public bool AreCurrentTasksVisible
+		{
+			get { return (bool)GetValue(AreCurrentTasksVisibleProperty); }
+			set { SetValue(AreCurrentTasksVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for AreCurrentTasksVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AreCurrentTasksVisibleProperty =
+			DependencyProperty.Register("AreCurrentTasksVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
+
+
+		#endregion
+
+		#region AreHistoryTasksVisible
+
+
+		public bool AreHistoryTasksVisible
+		{
+			get { return (bool)GetValue(AreHistoryTasksVisibleProperty); }
+			set { SetValue(AreHistoryTasksVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for AreHistoryTasksVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AreHistoryTasksVisibleProperty =
+			DependencyProperty.Register("AreHistoryTasksVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
+
+
+		#endregion
+
+		#region IsWorldEmpty
+
+
+		public bool IsWorldEmpty
+		{
+			get { return (bool)GetValue(IsWorldEmptyProperty); }
+			set { SetValue(IsWorldEmptyProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsWorldEmpty.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsWorldEmptyProperty =
+			DependencyProperty.Register("IsWorldEmpty", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(true));
+
+
+		#endregion
+
+		#region IsInventoryEmpty
+
+
+		public bool IsInventoryEmpty
+		{
+			get { return (bool)GetValue(IsInventoryEmptyProperty); }
+			set { SetValue(IsInventoryEmptyProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsInventoryEmpty.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsInventoryEmptyProperty =
+			DependencyProperty.Register("IsInventoryEmpty", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(true));
+
+
+		#endregion
+
+		#region IsTasksEmpty
+
+		public bool IsTasksEmpty
+		{
+			get { return (bool)GetValue(IsTasksEmptyProperty); }
+			set { SetValue(IsTasksEmptyProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsTasksEmpty.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsTasksEmptyProperty =
+			DependencyProperty.Register("IsTasksEmpty", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(true));
+
+		
+		#endregion
+
 		#endregion
 
 		#region Commands
@@ -100,6 +211,18 @@ namespace Geowigo.ViewModels
 		} 
 
 		#endregion
+
+		protected override void OnCorePropertyChanged(string propName)
+		{
+			// Refreshes the visibilities.
+			RefreshVisibilities(propName);
+		}
+
+		protected override void OnModelChanged(Models.WherigoModel newModel)
+		{
+			// Refreshes all visibilities.
+			RefreshVisibilities();
+		}
 		
 		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
 		{
@@ -148,6 +271,48 @@ namespace Geowigo.ViewModels
 		{
 			// Navigates to the appropriate view.
 			App.Current.ViewModel.NavigateToView(t);
+		}
+
+		/// <summary>
+		/// Refreshes the visibility of one or all wherigo object panels.
+		/// </summary>
+		/// <param name="propName"></param>
+		private void RefreshVisibilities(string propName = null)
+		{
+			bool refreshAll = propName == null;
+			bool refreshWorldEmpty = false;
+
+			if (refreshAll || "ActiveVisibleZones".Equals(propName))
+			{
+				AreZonesVisible = Model.Core.ActiveVisibleZones.Count > 0;
+				refreshWorldEmpty = true;
+			}
+
+			if (refreshAll || "VisibleObjects".Equals(propName))
+			{
+				AreObjectsVisible = Model.Core.VisibleObjects.Count > 0;
+				refreshWorldEmpty = true;
+			}
+
+			if (refreshAll || "ActiveVisibleTasks".Equals(propName))
+			{
+				int incompleteTasksCount = Model.Core.ActiveVisibleTasks.Select(t => !t.Complete).Count();
+
+				AreCurrentTasksVisible = incompleteTasksCount > 0;
+				AreHistoryTasksVisible = Model.Core.ActiveVisibleTasks.Count - incompleteTasksCount > 0;
+
+				IsTasksEmpty = !AreCurrentTasksVisible && !AreHistoryTasksVisible;
+			}
+
+			if (refreshAll || "VisibleInventory".Equals(propName))
+			{
+				IsInventoryEmpty = Model.Core.VisibleInventory.Count <= 0; 
+			}
+
+			if (refreshAll || refreshWorldEmpty)
+			{
+				IsWorldEmpty = !AreZonesVisible && !AreObjectsVisible; 
+			}
 		}
 	}
 }

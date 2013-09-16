@@ -16,11 +16,28 @@ namespace Geowigo.Converters
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
+			// If isStrict is true, the convertor only checks for null/non-null objects.
+			// If it is false, it checks for object values as well.
+			bool isStrict = String.Equals(parameter, "strict");
+			
 			Visibility target = Visibility.Visible;
 
 			if (value == null)
 			{
+				// Null values are always collapsed.
 				target = Visibility.Collapsed;
+			}
+			else
+			{
+				// Non-strict mode
+				if (!isStrict)
+				{
+					// Booleans give collapsed only if they are false.
+					if (value is bool && !(bool)value)
+					{
+						target = Visibility.Collapsed;
+					}
+				}
 			}
 
 			return target;

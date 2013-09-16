@@ -42,19 +42,20 @@ namespace Geowigo.Views
 		#endregion
 		
 		public GameHomePage()
-		{
+		{		
 			InitializeComponent();
 
+			// Registers the selection helpers.
+			RegisterListBoxHelpers(this.InventoryList, true);
+			RegisterListBoxHelpers(this.ObjectList, true);
+			RegisterListBoxHelpers(this.ZoneList, true);
+			RegisterListBoxHelpers(this.HistoryTaskList, true);
+			RegisterListBoxHelpers(this.CurrentTaskList, true);
+
+			// Gets resources.
 			_HistoryTasksSource = (CollectionViewSource)this.Resources["HistoryTasksSource"];
 			_CurrentTasksSource = (CollectionViewSource)this.Resources["CurrentTasksSource"];
-			
-			RegisterListBoxHelpers(this.InventoryList);
-			RegisterListBoxHelpers(this.ObjectList);
-			RegisterListBoxHelpers(this.ZoneList);
-			RegisterListBoxHelpers(this.HistoryTaskList);
-			RegisterListBoxHelpers(this.CurrentTaskList);
 		}
-
 
 		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
 		{

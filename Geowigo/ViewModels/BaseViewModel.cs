@@ -36,9 +36,11 @@ namespace Geowigo.ViewModels
 			{
 				if (_Model != value)
 				{
-					OnModelChanging(value, _Model);
+					OnModelChanging(_Model, value);
 
 					_Model = value;
+
+					OnModelChanged(_Model);
 				}
 			}
 		}
@@ -146,10 +148,19 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
-		/// Raised when a property of the Wherigo Core has changed.
+		/// Called when a property of the Wherigo Core has changed.
 		/// </summary>
 		/// <param name="propName">Property that has changed.</param>
 		protected virtual void OnCorePropertyChanged(string propName)
+		{
+
+		}
+
+		/// <summary>
+		/// Called when the underlying model has changed.
+		/// </summary>
+		/// <param name="newModel"></param>
+		protected virtual void OnModelChanged(Models.WherigoModel newModel)
 		{
 
 		}
