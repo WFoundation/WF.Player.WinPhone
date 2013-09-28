@@ -121,7 +121,7 @@
         							<DataTemplate>
         								<StackPanel>
         									<TextBlock TextWrapping="Wrap" Text="Choose the answer below:" Margin="0"/>
-        									<ListBox
+        									<Geowigo_Controls:NavigationListBox
 												x:Name="ChoicesList"
         										FontSize="{StaticResource PhoneFontSizeExtraLarge}" 
         										FontFamily="{StaticResource PhoneFontFamilySemiLight}" 
@@ -129,7 +129,7 @@
         										Margin="0,5,0,0"
         										ItemsSource="{Binding Choices}" 
         										SelectedValue="{Binding DataContext.Answer, ElementName=This, Mode=TwoWay}"
-												Loaded="ChoicesList_Loaded"
+												NavigationCommand="{Binding DataContext.AcceptAnswerCommand, ElementName=This}"
 												/>
         								</StackPanel>
         							</DataTemplate>

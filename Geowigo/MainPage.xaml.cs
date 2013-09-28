@@ -34,8 +34,8 @@ namespace Geowigo
 		{
 			//App.Current.ViewModel.NavigateToGameHome("/unit_test.gwc");
 			//App.Current.ViewModel.NavigateToGameHome("/butor_internal_beta5_all.gwc");
-			App.Current.ViewModel.NavigateToGameHome("/dixieme_promenade_all.gwc");
-			//App.Current.ViewModel.NavigateToGameHome("/battleship.gwc");
+			//App.Current.ViewModel.NavigateToGameHome("/dixieme_promenade_all.gwc");
+			App.Current.ViewModel.NavigateToGameHome("/battleship.gwc");
 			//App.Current.ViewModel.NavigateToGameHome("/Wherigo Tutorial.gwc");
 			//App.Current.ViewModel.NavigateToGameHome("/kelownas_challenge.gwc");
 			//App.Current.ViewModel.NavigateToGameHome("/hail_to_the_victor.gwc");

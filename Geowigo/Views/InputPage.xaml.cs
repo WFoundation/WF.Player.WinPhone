@@ -42,21 +42,5 @@ namespace Geowigo.Views
 		{
 			InitializeComponent();
 		}
-
-		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
-		{
-			if (lb == _ChoicesList)
-			{
-				// Invokes the view model command.
-				ViewModel.AcceptAnswerCommand.Execute(null);
-			}
-		}
-
-		private void ChoicesList_Loaded(object sender, RoutedEventArgs e)
-		{
-			// Registers the list box.
-			_ChoicesList = (ListBox)sender;
-			RegisterListBoxHelpers(_ChoicesList);
-		}
 	}
 }

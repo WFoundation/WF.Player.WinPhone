@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
@@ -71,7 +72,7 @@
         		<StackPanel>
         			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,0" />
-        			<ListBox x:Name="CommandList" Margin="0,40,0,0" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource CommandListItemTemplate}"/>
+        			<Geowigo_Controls:NavigationListBox x:Name="CommandList" Margin="0,40,0,0" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource CommandListItemTemplate}" NavigationCommand="{Binding ExecuteCommand}"/>
 					<toolkit:ListPicker x:Name="CommandTargetListPicker" Margin="0" Visibility="Collapsed" ExpansionMode="FullScreenOnly" FullModeHeader="{StaticResource ListPickerFullModeHeader}" PickerPageUri="/Microsoft.Phone.Controls.Toolkit;component/ListPicker/ListPickerPage.xaml" FullModeItemTemplate="{StaticResource CommandTargetListPickerItemTemplate}"/>
         		</StackPanel>
         	</ScrollViewer>

@@ -75,6 +75,7 @@
       <DependentUpon>DistanceControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\InputTemplateSelector.cs" />
+    <Compile Include="Controls\NavigationListBox.cs" />
     <Compile Include="Controls\RelayCommand.cs" />
     <Compile Include="Controls\WherigoMessageBoxContentControl.xaml.cs">
       <DependentUpon>WherigoMessageBoxContentControl.xaml</DependentUpon>

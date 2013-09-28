@@ -45,28 +45,9 @@ namespace Geowigo.Views
 		{		
 			InitializeComponent();
 
-			// Registers the selection helpers.
-			RegisterListBoxHelpers(this.InventoryList, true);
-			RegisterListBoxHelpers(this.ObjectList, true);
-			RegisterListBoxHelpers(this.ZoneList, true);
-			RegisterListBoxHelpers(this.HistoryTaskList, true);
-			RegisterListBoxHelpers(this.CurrentTaskList, true);
-
 			// Gets resources.
 			_HistoryTasksSource = (CollectionViewSource)this.Resources["HistoryTasksSource"];
 			_CurrentTasksSource = (CollectionViewSource)this.Resources["CurrentTasksSource"];
-		}
-
-		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
-		{
-			if (lb == InventoryList || lb == ObjectList || lb == ZoneList || lb == HistoryTaskList || lb == CurrentTaskList)
-			{
-				// Gets the first selected item to navigate to.
-				UIObject thing = e.AddedItems.OfType<UIObject>().FirstOrDefault();
-
-				// Navigates to the details.
-				ViewModel.ShowDetailsCommand.Execute(thing);
-			}
 		}
 
 		private void ContentPivot_Loaded(object sender, RoutedEventArgs e)

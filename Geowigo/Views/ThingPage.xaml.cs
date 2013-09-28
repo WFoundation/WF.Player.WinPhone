@@ -52,20 +52,7 @@ namespace Geowigo.Views
 			_CommandTargetListPicker = (ListPicker)this.FindName("CommandTargetListPicker");
 
 			// Event handlers.
-			RegisterListBoxHelpers(this.CommandList);
 			ViewModel.CommandTargetRequested += new EventHandler<ThingViewModel.CommandTargetRequestedEventArgs>(ViewModel_CommandTargetRequested);
-		}
-
-		protected override void OnListBoxSelectionChangedOverride(ListBox lb, SelectionChangedEventArgs e)
-		{
-			if (lb == CommandList)
-			{
-				// Gets the first selected item to navigate to.
-				Command command = e.AddedItems.OfType<Command>().FirstOrDefault();
-
-				// Runs the command.
-				ViewModel.ExecuteCommand.Execute(command);
-			}
 		}
 
 		#region Command Target Selection
