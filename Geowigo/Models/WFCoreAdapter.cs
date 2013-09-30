@@ -61,8 +61,6 @@ namespace Geowigo.Models
 
 		private GeoCoordinateWatcher _GeoWatcher;
 		private GeoPosition<GeoCoordinate> _LastKnownPosition;
-		private bool _IsPlaying = false;
-		private bool _IsBooting = false;
 		private object _SyncRoot = new Object();
 
 		#endregion
@@ -92,12 +90,6 @@ namespace Geowigo.Models
 		public Cartridge InitAndStartCartridge(string filename)
 		{
 			// Boot Time: inits the cartridge and process position.
-			lock (_SyncRoot)
-			{
-				_IsPlaying = false;
-				_IsBooting = true;
-			}
-
 			Cartridge cart = new Cartridge(filename);
 
 			using (IsolatedStorageFileStream fs = IsolatedStorageFile.GetUserStoreForApplication().OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
@@ -108,12 +100,7 @@ namespace Geowigo.Models
 			ProcessPosition(_LastKnownPosition);
 
 			// Run Time: the game starts.
-			lock (_SyncRoot)
-			{
-				_IsBooting = false;
-				_IsPlaying = true;
-			}
-						
+
 			Start();
 
 			return cart;
@@ -156,19 +143,10 @@ namespace Geowigo.Models
 		{
 			// Stores the position.
 			_LastKnownPosition = position ?? _LastKnownPosition;
-			
-			// Checks if the game is running.
-			bool isRunning = false;
-			bool isBooting = false;
-			lock (_SyncRoot)
-			{
-				isRunning = _IsPlaying;
-				isBooting = _IsBooting;
-			}
 
 			// No refresh if no position or if no game is running.
 			// Force refresh if the game is booting.
-			if ((!isBooting && !isRunning) || position == null || position.Location == null)
+			if (!IsReady || position == null || position.Location == null)
 			{
 				return;
 			}

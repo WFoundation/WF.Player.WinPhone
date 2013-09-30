@@ -214,14 +214,18 @@ namespace Geowigo.ViewModels
 
 		protected override void OnCorePropertyChanged(string propName)
 		{
-			// Refreshes the visibilities.
-			RefreshVisibilities(propName);
+			// Refreshes all visibilities if the model is now ready. Otherwise tries our best
+			// with the prop name we get.
+			RefreshVisibilities("IsReady".Equals(propName) && Model.Core.IsReady ? null : propName);
 		}
 
 		protected override void OnModelChanged(Models.WherigoModel newModel)
 		{
-			// Refreshes all visibilities.
-			RefreshVisibilities();
+			if (newModel.Core.IsReady)
+			{
+				// Refreshes all visibilities.
+				RefreshVisibilities();
+			}
 		}
 		
 		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
