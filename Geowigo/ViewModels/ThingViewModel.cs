@@ -169,6 +169,14 @@ namespace Geowigo.ViewModels
 				// Refreshes the visibilities.
 				RefreshVisibilities();
 			}
+			else if ("Visible".Equals(propName) || "Active".Equals(propName))
+			{
+				// If this Thing is not active-visible anymore, get back to previous screen.
+				if (!WherigoObject.Visible || (WherigoObject is Zone && !((Zone)WherigoObject).Active))
+				{
+					App.Current.ViewModel.NavigateBack();
+				}
+			}
 		}
 
 		protected override void OnWherigoObjectChanged(Table table)
