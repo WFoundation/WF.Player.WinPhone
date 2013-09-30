@@ -204,6 +204,13 @@ namespace Geowigo.ViewModels
 			// Temp debug
 			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
 			model.Core.SynchronizeRequested += new EventHandler<SynchronizeEventArgs>(Core_SynchronizeRequested);
+			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
+		}
+
+		void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
+		{
+			string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
+			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
 		}
 
 		void Core_SynchronizeRequested(object sender, SynchronizeEventArgs e)

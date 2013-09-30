@@ -18,7 +18,7 @@
 			<StackPanel Orientation="Horizontal">
 				<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Visibility="{Binding Image, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0"/>
 				<StackPanel Orientation="Vertical" Margin="0,-10,0,0">
-					<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
+					<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
 					<TextBlock x:Name="Description" Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis"/>
 				</StackPanel>
 			</StackPanel>
@@ -39,4 +39,17 @@
 			</Grid>
 		</Grid>
 	</DataTemplate>
+	<DataTemplate x:Key="WherigoObjectNameOnlyListItem">
+		<Grid>
+			<TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeExtraLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}"/>
+		</Grid>
+	</DataTemplate>
+	<Style x:Key="ListHeaderTextBlockStyle" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeNormal}"/>
+	</Style>
+	<Style x:Key="EmptyListTextStyle" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+	</Style>
 </ResourceDictionary>

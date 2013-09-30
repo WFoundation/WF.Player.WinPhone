@@ -77,15 +77,35 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region Dependency Properties
+
+		#region AreActionsVisible
+
+
+		public bool AreActionsVisible
+		{
+			get { return (bool)GetValue(AreActionsVisibleProperty); }
+			set { SetValue(AreActionsVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for AreActionsVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AreActionsVisibleProperty =
+			DependencyProperty.Register("AreActionsVisible", typeof(bool), typeof(ThingViewModel), new PropertyMetadata(false));
+
+		
+		#endregion
+
+		#endregion
+
 		#region Properties
 
 		#region WherigoObject
 
-		public new UIObject WherigoObject
+		public new Thing WherigoObject
 		{
 			get
 			{
-				return (UIObject)base.WherigoObject;
+				return (Thing)base.WherigoObject;
 			}
 		}
 
@@ -102,8 +122,9 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region ZCommand execution
 		private void RaiseCommandTargetRequested(Command command)
-		{			
+		{
 			// Creates the event args and raises the event.
 			CommandTargetRequestedEventArgs e = new CommandTargetRequestedEventArgs(command, new List<Thing>(command.TargetObjects), ExecuteWherigoCommandOnTarget);
 			if (CommandTargetRequested == null)
@@ -136,7 +157,31 @@ namespace Geowigo.ViewModels
 		private bool CanWherigoCommandExecute(Command command)
 		{
 			return true;
+		} 
+		#endregion
+
+		#region Handling of ZThing.Commands change
+
+		protected override void OnWherigoObjectPropertyChanged(string propName)
+		{
+			if ("ActiveCommands".Equals(propName))
+			{
+				// Refreshes the visibilities.
+				RefreshVisibilities();
+			}
 		}
+
+		protected override void OnWherigoObjectChanged(Table table)
+		{
+			RefreshVisibilities();
+		}
+
+		private void RefreshVisibilities()
+		{
+			AreActionsVisible = WherigoObject.ActiveCommands.Count > 0;
+		}
+
+		#endregion
 
 	}
 }

@@ -78,7 +78,12 @@ namespace Geowigo.ViewModels
 
 		// Using a DependencyProperty as the backing store for WherigoObject.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty WherigoObjectProperty =
-			DependencyProperty.Register("WherigoObject", typeof(Table), typeof(BaseViewModel), new PropertyMetadata(null));
+			DependencyProperty.Register("WherigoObject", typeof(Table), typeof(BaseViewModel), new PropertyMetadata(null, WherigoObjectProperty_PropertyChanged));
+
+		private static void WherigoObjectProperty_PropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+		{
+			((BaseViewModel)o).OnWherigoObjectChangedInternal(e);
+		}
 
 		#endregion
 
@@ -106,7 +111,8 @@ namespace Geowigo.ViewModels
 			Model = App.Current.Model;
 			Cartridge = Model.Core.Cartridge;
 		}
-		
+
+		#region Navigation
 		/// <summary>
 		/// Called by pages when they are navigated to.
 		/// </summary>
@@ -145,8 +151,10 @@ namespace Geowigo.ViewModels
 			}
 
 			// TODO: in case of nothing found, do something special ?
-		}
+		} 
+		#endregion
 
+		#region Core' Properties Change
 		/// <summary>
 		/// Called when a property of the Wherigo Core has changed.
 		/// </summary>
@@ -182,8 +190,61 @@ namespace Geowigo.ViewModels
 
 		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
+			if (!((Engine)sender).IsReady)
+			{
+				return;
+			}
+
 			OnCorePropertyChanged(e.PropertyName);
+		} 
+		#endregion
+
+		#region WherigoObject' Properties Change
+
+		/// <summary>
+		/// Called when a property of the associated Wherigo object has changed.
+		/// </summary>
+		/// <param name="propName"></param>
+		protected virtual void OnWherigoObjectPropertyChanged(string propName)
+		{
+
+		}
+		
+		/// <summary>
+		/// Called when the associated Wherigo object has changed.
+		/// </summary>
+		/// <param name="table"></param>
+		protected virtual void OnWherigoObjectChanged(Table table)
+		{
+			
+		}
+		
+		private void OnWherigoObjectChangedInternal(DependencyPropertyChangedEventArgs e)
+		{
+			// Unregisters old event handlers.
+			UIObject oldUio = e.OldValue as UIObject;
+			if (oldUio != null)
+			{
+				oldUio.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(WherigoObject_PropertyChanged);
+			}
+
+			// Registers new event handlers.
+			UIObject newUio = e.NewValue as UIObject;
+			if (newUio != null)
+			{
+				newUio.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(WherigoObject_PropertyChanged);
+			}
+
+			// Propagates the event.
+			OnWherigoObjectChanged(e.NewValue as Table);
 		}
 
+		private void WherigoObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			// Redirects the event.
+			OnWherigoObjectPropertyChanged(e.PropertyName);
+		}
+
+		#endregion
 	}
 }

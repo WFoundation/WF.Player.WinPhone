@@ -10,28 +10,6 @@
 	x:Name="This"
 	toolkit:TiltEffect.IsTiltEnabled="True">
 	<Geowigo_Views:BasePage.Resources>
-		<DataTemplate x:Key="TaskItemTemplate">
-			<Grid>
-				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
-			</Grid>
-		</DataTemplate>
-		<DataTemplate x:Key="ZoneListItemTemplate">
-			<StackPanel>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Unnamed Zone, Mode=OneWay}"/>
-				<TextBlock TextWrapping="Wrap" Text="distance missing"/>
-			</StackPanel>
-		</DataTemplate>
-		<DataTemplate x:Key="ObjectListItemTemplate">
-			<StackPanel>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Name, Mode=OneWay}"/>
-				<TextBlock TextWrapping="Wrap" Text="distance missing"/>
-			</StackPanel>
-		</DataTemplate>
-		<DataTemplate x:Key="InventoryListItemTemplate">
-			<Grid>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width, Height"/>
-			</Grid>
-		</DataTemplate>
 
 		<CollectionViewSource x:Key="HistoryTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
 		<CollectionViewSource x:Key="CurrentTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
@@ -77,13 +55,13 @@
             <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">
                 <ScrollViewer>
             		<StackPanel>
-            			<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" Visibility="{Binding IsWorldEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="Here "/><Run Text="are displayed the various zones, items and characters that populate the world."/><Run Text=" "/><Run Text="Unfortunately, "/><Run Text="there is nothing right now. Try to follow the "/><Run Text="current tasks"/><Run Text=","/><Run Text=" you may need to do something in order for the game to progress"/><Run Text="."/></TextBlock>
+            			<TextBlock TextWrapping="Wrap" Visibility="{Binding IsWorldEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="Here "/><Run Text="are displayed the various zones, items and characters that populate the world."/><Run Text=" "/><Run Text="Unfortunately, "/><Run Text="there is nothing right now. Try to follow the "/><Run Text="current tasks"/><Run Text=","/><Run Text=" you may need to do something in order for the game to progress"/><Run Text="."/></TextBlock>
             			<StackPanel x:Name="WorldZonesPanel" Orientation="Vertical" Margin="0,0,0,25" Visibility="{Binding AreZonesVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
-            				<TextBlock TextWrapping="Wrap" Text="ZONES" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<TextBlock TextWrapping="Wrap" Text="ZONES" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
             				<Geowigo_Controls:NavigationListBox x:Name="ZoneList" ItemsSource="{Binding Model.Core.ActiveVisibleZones}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width" NavigationCommand="{Binding ShowDetailsCommand}"/>
             			</StackPanel>
             			<StackPanel x:Name="WorldObjectsPanel" Orientation="Vertical" Visibility="{Binding AreObjectsVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
-            				<TextBlock TextWrapping="Wrap" Text="CHARACTERS &amp; OBJECTS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<TextBlock TextWrapping="Wrap" Text="CHARACTERS &amp; OBJECTS" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
 							<Geowigo_Controls:NavigationListBox x:Name="ObjectList" ItemsSource="{Binding Model.Core.VisibleObjects}" ItemTemplate="{StaticResource WherigoThingWithDistanceListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width" NavigationCommand="{Binding ShowDetailsCommand}"/>
             			</StackPanel>
             		</StackPanel>
@@ -93,20 +71,20 @@
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="InventoryPivotItem" Header="inventory" Margin="22,28,12,0">
                 <StackPanel>
-            		<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" d:LayoutOverrides="Width" Text="This is your inventory. Usually, it displays the objects that you own and the characters that accompany you. Unfortunately, your inventory is empty right now. Try to check the world for items to collect and characters to interact with." Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+            		<TextBlock TextWrapping="Wrap" d:LayoutOverrides="Width" Text="This is your inventory. Usually, it displays the objects that you own and the characters that accompany you. Unfortunately, your inventory is empty right now. Try to check the world for items to collect and characters to interact with." Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"/>
             		<Geowigo_Controls:NavigationListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" NavigationCommand="{Binding ShowDetailsCommand}" />
             	</StackPanel>
             </controls:PivotItem>
             <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0" Loaded="TasksPivotItem_Loaded">
             	<ScrollViewer>
             		<StackPanel>
-            			<TextBlock TextWrapping="Wrap" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeLarge}" Visibility="{Binding IsTasksEmpty, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="Here are "/><Run Text="usually "/><Run Text="the "/><Run Text="various "/><Run Text="tasks that you have to "/><Run Text="carry out"/><Run Text=". Unfortunately, "/><Run Text="there is nothing right now"/><Run Text=". Try to explore the elements of the world or your inventory"/><Run Text=":"/><Run Text=" "/><Run Text="you may need to perform an action for the game to progress."/></TextBlock>
+            			<TextBlock TextWrapping="Wrap" Visibility="{Binding IsTasksEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="Here are "/><Run Text="usually "/><Run Text="the "/><Run Text="various "/><Run Text="tasks that you have to "/><Run Text="carry out"/><Run Text=". Unfortunately, "/><Run Text="there is nothing right now"/><Run Text=". Try to explore the elements of the world or your inventory"/><Run Text=":"/><Run Text=" "/><Run Text="you may need to perform an action for the game to progress."/></TextBlock>
             			<StackPanel x:Name="TasksCurrentPanel" Orientation="Vertical" Width="446" Margin="0,0,0,25" Visibility="{Binding AreCurrentTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
-            				<TextBlock TextWrapping="Wrap" Text="CURRENT" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<TextBlock TextWrapping="Wrap" Text="CURRENT" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
 							<Geowigo_Controls:NavigationListBox x:Name="CurrentTaskList" ItemsSource="{Binding Source={StaticResource CurrentTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width" NavigationCommand="{Binding ShowDetailsCommand}"/>
             			</StackPanel>
             			<StackPanel x:Name="TasksHistoryPanel" Orientation="Vertical" Width="446" Visibility="{Binding AreHistoryTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
-            				<TextBlock TextWrapping="Wrap" Text="COMPLETED" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
+            				<TextBlock TextWrapping="Wrap" Text="COMPLETED" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
 							<Geowigo_Controls:NavigationListBox x:Name="HistoryTaskList" ItemsSource="{Binding Source={StaticResource HistoryTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width" NavigationCommand="{Binding ShowDetailsCommand}"/>
             			</StackPanel>
             		</StackPanel>

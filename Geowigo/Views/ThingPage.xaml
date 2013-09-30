@@ -18,11 +18,6 @@
 	<Geowigo_Views:BasePage.Resources>
 		<Geowigo_Converters:LowercaseStringConverter x:Key="LowercaseStringConverter"/>
 		<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
-		<DataTemplate x:Key="CommandListItemTemplate">
-			<Grid>
-				<TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height"/>
-			</Grid>
-		</DataTemplate>
 		<sys:String x:Key="ListPickerFullModeHeader">Select a target</sys:String>
 		<DataTemplate x:Key="CommandTargetListPickerItemTemplate">
 			<Grid>
@@ -72,8 +67,11 @@
         		<StackPanel>
         			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,0" />
-        			<Geowigo_Controls:NavigationListBox x:Name="CommandList" Margin="0,40,0,0" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource CommandListItemTemplate}" NavigationCommand="{Binding ExecuteCommand}"/>
-					<toolkit:ListPicker x:Name="CommandTargetListPicker" Margin="0" Visibility="Collapsed" ExpansionMode="FullScreenOnly" FullModeHeader="{StaticResource ListPickerFullModeHeader}" PickerPageUri="/Microsoft.Phone.Controls.Toolkit;component/ListPicker/ListPickerPage.xaml" FullModeItemTemplate="{StaticResource CommandTargetListPickerItemTemplate}"/>
+        			<StackPanel x:Name="CommandsPanel" Orientation="Vertical" Margin="0,40,0,0" Visibility="{Binding AreActionsVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}">
+        				<TextBlock TextWrapping="Wrap" Text="ACTIONS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15"/>
+        				<Geowigo_Controls:NavigationListBox x:Name="CommandList" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource WherigoObjectNameOnlyListItem}" NavigationCommand="{Binding ExecuteCommand}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
+        				<toolkit:ListPicker x:Name="CommandTargetListPicker" Visibility="Collapsed" ExpansionMode="FullScreenOnly" FullModeHeader="{StaticResource ListPickerFullModeHeader}" PickerPageUri="/Microsoft.Phone.Controls.Toolkit;component/ListPicker/ListPickerPage.xaml" FullModeItemTemplate="{StaticResource CommandTargetListPickerItemTemplate}" d:LayoutOverrides="Width"/>
+        			</StackPanel>
         		</StackPanel>
         	</ScrollViewer>
         </Grid>

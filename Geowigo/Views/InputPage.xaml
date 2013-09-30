@@ -104,7 +104,7 @@
         <ScrollViewer x:Name="ContentPanel" DataContext="{Binding Input}" Margin="12,0,12,0" Grid.Row="1" >
         	<StackPanel>
         		<Image Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0"/>
-        		<TextBlock TextWrapping="Wrap" Text="{Binding Text}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,0" />
+        		<TextBlock TextWrapping="Wrap" Text="{Binding Text}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,20" />
 				<ContentPresenter x:Name="AnswerControl" Content="{Binding}">
         			<ContentPresenter.ContentTemplate>
         				<DataTemplate>
@@ -120,7 +120,7 @@
         						<Geowigo_Controls:InputTemplateSelector.MultipleChoiceTemplate>
         							<DataTemplate>
         								<StackPanel>
-        									<TextBlock TextWrapping="Wrap" Text="Choose the answer below:" Margin="0"/>
+        									<TextBlock TextWrapping="Wrap" Text="TAP AN ANSWER:" Margin="0" Style="{StaticResource ListHeaderTextBlockStyle}"/>
         									<Geowigo_Controls:NavigationListBox
 												x:Name="ChoicesList"
         										FontSize="{StaticResource PhoneFontSizeExtraLarge}" 
@@ -130,6 +130,7 @@
         										ItemsSource="{Binding Choices}" 
         										SelectedValue="{Binding DataContext.Answer, ElementName=This, Mode=TwoWay}"
 												NavigationCommand="{Binding DataContext.AcceptAnswerCommand, ElementName=This}"
+												ScrollViewer.VerticalScrollBarVisibility="Disabled"
 												/>
         								</StackPanel>
         							</DataTemplate>
