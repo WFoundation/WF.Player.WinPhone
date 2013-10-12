@@ -71,10 +71,6 @@ namespace Geowigo.Views
 			}
 			_CommandTargetListPicker.SelectedIndex = 0;
 
-			// Starts listening to the list picker selection changed event.
-			_CommandTargetListPicker.SelectionChanged -= new SelectionChangedEventHandler(CommandTargetListPicker_SelectionChanged);
-			_CommandTargetListPicker.SelectionChanged += new SelectionChangedEventHandler(CommandTargetListPicker_SelectionChanged);
-
 			// Sets event handlers and opens the picker. Cancel event handlers if opening failed.
 			// Make sure that only one event handler is registered.
 			_CommandTargetListPicker.SelectionChanged -= new SelectionChangedEventHandler(CommandTargetListPicker_SelectionChanged);
@@ -95,11 +91,10 @@ namespace Geowigo.Views
 			_CommandTargetListPicker.SelectionChanged -= new SelectionChangedEventHandler(CommandTargetListPicker_SelectionChanged);
 
 			// Gives result.
-			if (target == null)
+			if (target != null)
 			{
-				throw new InvalidOperationException("ListPicker selection changed but no Thing was selected.");
+				((ThingViewModel.CommandTargetRequestedEventArgs)_CommandTargetListPicker.Tag).GiveResult(target);
 			}
-			((ThingViewModel.CommandTargetRequestedEventArgs)_CommandTargetListPicker.Tag).GiveResult(target);
 		} 
 		#endregion
 	}

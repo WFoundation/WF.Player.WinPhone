@@ -60,8 +60,12 @@
     	</StackPanel>
         <ScrollViewer x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<StackPanel>
-        		<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None"/>
-        		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,0" />
+        		<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
+        		<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+        			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Complete}"/>
+        			<TextBlock TextWrapping="Wrap" Margin="5,0,0,0" Text="{Binding WherigoObject.CorrectState}"/>
+        		</StackPanel>
+        		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0" />
         	</StackPanel>
         </ScrollViewer>
     <!--ContentPanel - placez tout contenu supplémentaire ici-->

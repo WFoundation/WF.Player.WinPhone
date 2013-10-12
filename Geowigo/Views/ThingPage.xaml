@@ -13,15 +13,18 @@
     x:Class="Geowigo.Views.ThingPage"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
-    shell:SystemTray.IsVisible="True">
+    shell:SystemTray.IsVisible="True"
+	toolkit:TiltEffect.IsTiltEnabled="True"
+	>
  
 	<Geowigo_Views:BasePage.Resources>
+		<Geowigo_Converters:ObjectTypeToVisibilityConverter x:Key="ObjectTypeToVisibilityConverter"/>
 		<Geowigo_Converters:LowercaseStringConverter x:Key="LowercaseStringConverter"/>
 		<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
 		<sys:String x:Key="ListPickerFullModeHeader">Select a target</sys:String>
 		<DataTemplate x:Key="CommandTargetListPickerItemTemplate">
 			<Grid>
-				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name}" d:LayoutOverrides="Width, Height"/>
+				<ContentPresenter ContentTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" Content="{Binding}" Visibility="{Binding ConverterParameter=Thing, Converter={StaticResource ObjectTypeToVisibilityConverter}, Mode=OneWay}"/>
 			</Grid>
 		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>

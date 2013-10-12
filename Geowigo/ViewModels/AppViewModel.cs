@@ -14,6 +14,8 @@ using Geowigo.Models;
 using System.Collections.Generic;
 using Microsoft.Phone.Controls;
 using System.IO;
+using System.Windows.Navigation;
+using System.Linq;
 
 namespace Geowigo.ViewModels
 {	
@@ -183,10 +185,34 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
-		/// Navigates one step back.
+		/// Navigates one step back in the game activity.
 		/// </summary>
+		/// <remarks>
+		/// This method has no effect if the previous view in the stack is not a game view.
+		/// </remarks>
 		public void NavigateBack()
 		{
+			// Returns if the previous view is not a game view.
+			JournalEntry previousPage = App.Current.RootFrame.BackStack.FirstOrDefault();
+			if (previousPage == null)
+			{
+				System.Diagnostics.Debug.WriteLine("Warning: NavigateBack() cancelled because no page in the stack.");
+				
+				return;
+			}
+			string previousPageName = previousPage.Source.ToString();
+			string prefix = "/Views/";
+			if (!(previousPageName.StartsWith(prefix + "GameHomePage.xaml") ||
+				previousPageName.StartsWith(prefix + "InputPage.xaml") ||
+				previousPageName.StartsWith(prefix + "TaskPage.xaml") ||
+				previousPageName.StartsWith(prefix + "ThingPage.xaml")))
+			{
+				System.Diagnostics.Debug.WriteLine("Warning: NavigateBack() cancelled because previous page is no game!");
+				
+				return;
+			}
+
+			// Goes back.
 			App.Current.RootFrame.GoBack();
 		}
 
@@ -203,7 +229,7 @@ namespace Geowigo.ViewModels
 
 			// Temp debug
 			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
-			model.Core.SynchronizeRequested += new EventHandler<SynchronizeEventArgs>(Core_SynchronizeRequested);
+			model.Core.DispatchOnUIRequested += new EventHandler<UIDispatchEventArgs>(Core_SynchronizeRequested);
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
 		}
 
@@ -213,14 +239,15 @@ namespace Geowigo.ViewModels
 			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
 		}
 
-		void Core_SynchronizeRequested(object sender, SynchronizeEventArgs e)
+		void Core_SynchronizeRequested(object sender, UIDispatchEventArgs e)
 		{
-			
+			// Begin invoke the action on the UI thread.
+			Deployment.Current.Dispatcher.BeginInvoke(e.Action);
 		}
 
 		void Core_SaveRequested(object sender, CartridgeEventArgs e)
 		{
-			
+			System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -233,6 +260,8 @@ namespace Geowigo.ViewModels
 
 		private void PlayMediaSound(Media media)
 		{
+			System.Diagnostics.Debug.WriteLine("WARNING!!! PlayMediaSound NOT IMPLEMENTED !!!!!");
+			
 			//using (var stream = new MemoryStream(media.Data))
 			//{
 			//    var effect = SoundEffect.FromStream(stream);

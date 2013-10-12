@@ -84,6 +84,7 @@
     <Compile Include="Converters\ItemSourceToVisibilityConverter.cs" />
     <Compile Include="Converters\LowercaseStringConverter.cs" />
     <Compile Include="Converters\ObjectToVisibilityConverter.cs" />
+    <Compile Include="Converters\ObjectTypeToVisibilityConverter.cs" />
     <Compile Include="Converters\PlayerZoneStateToStringConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
     <Compile Include="MainPage.xaml.cs">
