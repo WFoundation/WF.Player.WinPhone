@@ -142,7 +142,7 @@ namespace Geowigo.ViewModels
 				if (int.TryParse(rawWidParam, out WidParam))
 				{
 					Table wObject;
-					if (this.Model.TryGetWherigoObject<Table>(WidParam, out wObject))
+					if (this.Model.Core.TryGetWherigoObject<Table>(WidParam, out wObject))
 					{
 						// The object has been found: keep it.
 						this.WherigoObject = wObject;

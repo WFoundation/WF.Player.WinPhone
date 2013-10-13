@@ -106,6 +106,46 @@ namespace Geowigo.Models
 			return cart;
 		}
 
+		/// <summary>
+		/// Gets a Wherigo object that has a certain id.
+		/// </summary>
+		/// <typeparam name="T">Type of the object to expect, subclass of Table.</typeparam>
+		/// <param name="id">Id of the object to get.</param>
+		/// <returns>A wherigo object of the expected type.</returns>
+		/// <exception cref="InvalidOperationException">No object with such Id exists, or the object is not of the
+		/// required type.</exception>
+		public T GetWherigoObject<T>(int id) where T : Table
+		{
+			Table wobj = GetObject(id);
+
+			if (wobj == null)
+			{
+				throw new InvalidOperationException("No wherigo object has id " + id);
+			}
+
+			if (!(wobj is T))
+			{
+				throw new InvalidOperationException(String.Format("The wherigo object with id {0} has type {1} but not {2}.", id, wobj.GetType().ToString(), typeof(T).ToString()));
+			}
+
+			return (T)wobj;
+		}
+
+		/// <summary>
+		/// Gets a Wherigo object that has a certain id.
+		/// </summary>
+		/// <typeparam name="T">Type of the object to expect, subclass of Table.</typeparam>
+		/// <param name="id">Id of the object to get.</param>
+		/// <param name="wObj">A wherigo object of the expected type, or null if it wasn't found or is not
+		/// of the expected type.</param>
+		/// <returns>True if the method returned, false otherwise.</returns>
+		public bool TryGetWherigoObject<T>(int id, out T wObj) where T : Table
+		{
+			wObj = GetObject(id) as T;
+
+			return wObj != null;
+		}
+
 		#region Location Service Events Handlers
 		
 		private void GeoWatcher_PositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)

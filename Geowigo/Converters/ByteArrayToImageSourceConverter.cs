@@ -26,10 +26,7 @@ namespace Geowigo.Converters
 				return null;
 			}
 
-			BitmapImage image = new BitmapImage();
-			image.SetSource(new MemoryStream(bv));
-
-			return image;
+			return Geowigo.Utils.ImageUtils.GetBitmapSource(bv);
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

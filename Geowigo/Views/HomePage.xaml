@@ -1,0 +1,54 @@
+﻿<phone:PhoneApplicationPage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit" 
+    xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" 
+	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
+    x:Class="Geowigo.Views.HomePage" 
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False"
+	toolkit:TiltEffect.IsTiltEnabled="True">
+	<phone:PhoneApplicationPage.Resources>
+		<ItemsPanelTemplate x:Key="CartridgesItemPanelTemplate">
+			<toolkit:WrapPanel/>
+		</ItemsPanelTemplate>
+		<DataTemplate x:Key="CartridgeListItemTemplate">
+			<Grid>
+				<toolkit:HubTile Title="{Binding Title, FallbackValue=Cartridge, Mode=OneWay}" Margin="0,0,12,12" Source="{Binding Thumbnail, Mode=OneWay}" Message="{Binding Cartridge.AuthorName}" Width="Auto" Height="Auto" GroupTag="cartridges"/>
+			</Grid>
+		</DataTemplate>
+	</phone:PhoneApplicationPage.Resources>
+
+    <!--Les applications basées sur des panoramas ne devraient pas afficher d'ApplicationBar-->
+
+	<phone:PhoneApplicationPage.DataContext>
+		<Geowigo_ViewModels:HomeViewModel/>
+	</phone:PhoneApplicationPage.DataContext>
+
+    <!--LayoutRoot contient la grille racine où tout le contenu des autres pages est placé-->
+    <Grid x:Name="LayoutRoot">
+        <controls:Panorama Title="geowigo">
+
+            <!--Élément un de panorama-->
+            <controls:PanoramaItem x:Name="CartridgePanoramaItem" Header="cartridges">
+            	<Geowigo_Controls:NavigationListBox ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding StartCartridgeCommand, Mode=OneWay}" Height="498" Width="420" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}"/>
+            </controls:PanoramaItem>
+
+            <!--Élément deux de panorama-->
+            <controls:PanoramaItem Header="recent">
+            	<Grid/>
+            </controls:PanoramaItem>
+
+        </controls:Panorama>
+    </Grid>
+
+</phone:PhoneApplicationPage>
