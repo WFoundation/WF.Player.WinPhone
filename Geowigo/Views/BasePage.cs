@@ -46,7 +46,8 @@ namespace Geowigo.Views
 
 			// Relays the event to the view model.
 			ViewModel.OnPageNavigatedTo(e, NavigationContext);
-		} 
+		}
+
 		#endregion
 
 	}

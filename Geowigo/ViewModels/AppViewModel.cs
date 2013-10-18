@@ -102,6 +102,7 @@ namespace Geowigo.ViewModels
 
 		#region Constructors
 
+
 		
 		#endregion
 
@@ -110,9 +111,37 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Navigates the app to the main page of the app.
 		/// </summary>
-		public void NavigateToAppHome()
+		public void NavigateToAppHome(bool stopCurrentGame = false)
 		{
-			throw new NotImplementedException();
+			// Stops the current game if needed.
+			if (stopCurrentGame && Model.Core.Cartridge != null)
+			{
+				Model.Core.Stop();
+			}
+
+			// Removes all back entries until the app home is found.
+			string prefix = "/Views/";
+			foreach (JournalEntry entry in App.Current.RootFrame.BackStack.ToList())
+			{
+				if (entry.Source.ToString().StartsWith(prefix + "HomePage.xaml"))
+				{
+					break;
+				}
+
+				// Removes the current entry.
+				App.Current.RootFrame.RemoveBackEntry();
+			}
+
+			// If there is a back entry, goes back: it is the game home.
+			// Otherwise, navigates to the game home.
+			if (App.Current.RootFrame.BackStack.Count() > 0)
+			{
+				App.Current.RootFrame.GoBack();
+			}
+			else
+			{
+				App.Current.RootFrame.Navigate(new Uri(prefix + "HomePage.xaml", UriKind.Relative));
+			}
 		}
 
 		/// <summary>
@@ -216,6 +245,18 @@ namespace Geowigo.ViewModels
 			App.Current.RootFrame.GoBack();
 		}
 
+		/// <summary>
+		/// Clears the navigation back stack, making the current view the first one.
+		/// </summary>
+		public void ClearBackStack()
+		{
+			int entriesToRemove = App.Current.RootFrame.BackStack.Count();
+			for (int i = 0; i < entriesToRemove; i++)
+			{
+				App.Current.RootFrame.RemoveBackEntry();
+			}
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -229,20 +270,27 @@ namespace Geowigo.ViewModels
 
 			// Temp debug
 			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
-			model.Core.DispatchOnUIRequested += new EventHandler<UIDispatchEventArgs>(Core_SynchronizeRequested);
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
+			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+		}
+
+		void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == "IsBusy")
+			{
+				Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
+				{
+					IsIndeterminate = true,
+					IsVisible = Model.Core.IsBusy,
+					Text = "Loading..."
+				};
+			}
 		}
 
 		void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
 		{
 			string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
 			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
-		}
-
-		void Core_SynchronizeRequested(object sender, UIDispatchEventArgs e)
-		{
-			// Begin invoke the action on the UI thread.
-			Deployment.Current.Dispatcher.BeginInvoke(e.Action);
 		}
 
 		void Core_SaveRequested(object sender, CartridgeEventArgs e)

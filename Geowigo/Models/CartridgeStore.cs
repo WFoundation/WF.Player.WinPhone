@@ -59,10 +59,18 @@ namespace Geowigo.Models
 					foreach (string filename in isf.GetFileNames(IsoStoreCartridgesPath + "/*.gwc"))
 					{
 						// Accept the GWC.
+						System.Diagnostics.Debug.WriteLine("CartridgeStore: Accepting cartridge " + filename);
 						AcceptCartridge(IsoStoreCartridgesPath + "/" + filename);
 					}
 				}
 			}
+		}
+
+		public void SyncFromIsoStoreAsync()
+		{
+			System.ComponentModel.BackgroundWorker bw = new System.ComponentModel.BackgroundWorker();
+			bw.DoWork += new System.ComponentModel.DoWorkEventHandler((o, e) => SyncFromIsoStore());
+			bw.RunWorkerAsync();
 		}
 
 		#endregion
@@ -102,7 +110,7 @@ namespace Geowigo.Models
 			CartridgeTag newCC = new CartridgeTag(cart);
 
 			// Adds the context to the store.
-			this.Items.Add(newCC);
+			System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() => this.Items.Add(newCC));
 
 			// Returns the new cartridge context.
 			return newCC;

@@ -68,6 +68,9 @@ namespace Geowigo.ViewModels
 
 		public void InitFromNavigation(System.Windows.Navigation.NavigationEventArgs e)
 		{
+			// Removes the back entries, if any.
+			App.Current.ViewModel.ClearBackStack();
+			
 			// Synchronizes the cartridge store.
 			Model.CartridgeStore.SyncFromIsoStore();
 		}

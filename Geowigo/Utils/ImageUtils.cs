@@ -25,6 +25,11 @@ namespace Geowigo.Utils
 			// Waits for the bitmap to be loaded if it needs so.
 			if (!image.IsFilled)
 			{
+				if (!image.IsLoading)
+				{
+					return null;
+				}
+
 				ManualResetEvent resetEvent = new ManualResetEvent(false);
 
 				EventHandler onLoaded = new EventHandler((o, e) =>

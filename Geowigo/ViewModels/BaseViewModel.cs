@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using WF.Player.Core;
 using Geowigo.Controls;
 using System.Windows.Navigation;
+using WF.Player.Core.Engines;
 
 namespace Geowigo.ViewModels
 {

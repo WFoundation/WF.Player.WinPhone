@@ -50,6 +50,14 @@ namespace Geowigo.Views
 			_CurrentTasksSource = (CollectionViewSource)this.Resources["CurrentTasksSource"];
 		}
 
+		protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		{
+			base.OnBackKeyPress(e);
+
+			// Relays the event to the view model.
+			ViewModel.OnBackKeyPress(e);
+		}
+
 		private void ContentPivot_Loaded(object sender, RoutedEventArgs e)
 		{
 			// Sets the initial selected index.

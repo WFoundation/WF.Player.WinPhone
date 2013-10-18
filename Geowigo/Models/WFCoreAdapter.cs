@@ -13,6 +13,7 @@ using System.IO.IsolatedStorage;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Device.Location;
+using WF.Player.Core.Engines;
 
 namespace Geowigo.Models
 {
@@ -53,10 +54,6 @@ namespace Geowigo.Models
 
 		#endregion
 
-		#region Properties
-
-		#endregion
-
 		#region Fields
 
 		private GeoCoordinateWatcher _GeoWatcher;
@@ -67,10 +64,8 @@ namespace Geowigo.Models
 
 		#region Constructors
 
-		public WFCoreAdapter() : base()
+		public WFCoreAdapter() : base(new WinPhonePlatformHelper())
 		{
-			// TODO: Base properties (device and such).
-			
 			// Creates and starts the location service.
 			_GeoWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
 			_GeoWatcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(GeoWatcher_StatusChanged);
@@ -94,7 +89,7 @@ namespace Geowigo.Models
 
 			using (IsolatedStorageFileStream fs = IsolatedStorageFile.GetUserStoreForApplication().OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
 			{
-				Init(fs, cart);
+				Init(fs, cart); 
 			}
 
 			ProcessPosition(_LastKnownPosition);

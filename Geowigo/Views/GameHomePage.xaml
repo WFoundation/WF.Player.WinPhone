@@ -39,9 +39,10 @@
 	<Geowigo_Views:BasePage.DataContext>
 		<Geowigo_ViewModels:GameHomeViewModel/>
 	</Geowigo_Views:BasePage.DataContext>
-
-    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+	
+	<!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
+        <!--Contrôle Pivot-->
         <!--Contrôle Pivot-->
 		<Image Margin="0,-31,0,0" Source="windowsphone_grid_red_transparent.png" Visibility="Collapsed"/>
 		<Image x:Name="PosterBackground" Source="{Binding Model.Core.Cartridge.Poster.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Opacity="0.3" Stretch="UniformToFill"/>

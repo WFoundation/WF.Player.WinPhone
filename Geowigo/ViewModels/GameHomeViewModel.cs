@@ -212,6 +212,19 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		public void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		{
+			// Cancels the back key event.
+			e.Cancel = true;
+			
+			// Ask if we really want to leave the game.
+			if (System.Windows.MessageBox.Show("Do you want to quit the game? (Your unsaved progress will be lost.)", "Exit to main menu?", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+			{
+				// Leaves to main menu and stops the game.
+				App.Current.ViewModel.NavigateToAppHome(true);
+			}
+		}
+
 		protected override void OnCorePropertyChanged(string propName)
 		{
 			// Refreshes all visibilities if the model is now ready. Otherwise tries our best
@@ -310,12 +323,12 @@ namespace Geowigo.ViewModels
 
 			if (refreshAll || "VisibleInventory".Equals(propName))
 			{
-				IsInventoryEmpty = Model.Core.VisibleInventory.Count <= 0; 
+				IsInventoryEmpty = Model.Core.VisibleInventory.Count <= 0;
 			}
 
 			if (refreshAll || refreshWorldEmpty)
 			{
-				IsWorldEmpty = !AreZonesVisible && !AreObjectsVisible; 
+				IsWorldEmpty = !AreZonesVisible && !AreObjectsVisible;
 			}
 		}
 	}
