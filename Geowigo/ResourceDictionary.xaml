@@ -11,6 +11,8 @@
 	</DataTemplate>
 	
 	<Geowigo_Converters:UppercaseStringConverter x:Key="UppercaseStringConverter"/>
+
+	<Geowigo_Converters:UIObjectToNameConverter x:Key="UIObjectToNameConverter"/>
 	
 	<DataTemplate x:Key="WherigoObjectGenericListItemTemplate">
 		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">

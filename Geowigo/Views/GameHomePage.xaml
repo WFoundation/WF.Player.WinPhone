@@ -11,6 +11,15 @@
 	toolkit:TiltEffect.IsTiltEnabled="True">
 	<Geowigo_Views:BasePage.Resources>
 
+		<Style x:Key="OverviewListHeaderTextBlockStyle" TargetType="TextBlock">
+			<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+			<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+		</Style>
+		<Style x:Key="OverviewListTextBlockStyle" TargetType="TextBlock">
+			<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiLight}"/>
+			<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+		</Style>
+
 		<CollectionViewSource x:Key="HistoryTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
 		<CollectionViewSource x:Key="CurrentTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
 	</Geowigo_Views:BasePage.Resources>
@@ -50,7 +59,13 @@
 		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" Loaded="ContentPivot_Loaded" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="OverviewPivotItem" Header="overview" Margin="22,28,12,0">
-            	<Grid/>
+            	<StackPanel>
+            		<Geowigo_Controls:NavigationListBox NavigationCommand="{Binding ShowSectionCommand, Mode=OneWay}">
+						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} TASK{1}" Items="{Binding Model.Core.ActiveVisibleTasks}" Width="446" Tag="tasks" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
+						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} OF INTEREST" Items="{Binding Model.Core.ActiveVisibleThings}" Width="446" Tag="world" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
+						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} IN INVENTORY" Items="{Binding Model.Core.VisibleInventory}" Width="446" Tag="inventory" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
+            		</Geowigo_Controls:NavigationListBox>
+            	</StackPanel>
             </controls:PivotItem>
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="WorldPivotItem" Header="world" Margin="22,28,12,0">

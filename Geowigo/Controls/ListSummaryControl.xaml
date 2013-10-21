@@ -1,0 +1,16 @@
+﻿<UserControl x:Name="This" x:Class="Geowigo.Controls.ListSummaryControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    d:DesignHeight="95" d:DesignWidth="265">
+    
+    <StackPanel x:Name="LayoutRoot">
+    	<TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap" Text="9 ITEMS" Style="{Binding HeaderStyle, ElementName=This}" Foreground="{StaticResource PhoneForegroundBrush}"/>
+    	<TextBlock x:Name="ListTextBlock" TextWrapping="Wrap" Text="Item 1, Item 2, Item 3" Style="{Binding ListStyle, ElementName=This}" Foreground="{StaticResource PhoneForegroundBrush}"/>
+    </StackPanel>
+</UserControl>

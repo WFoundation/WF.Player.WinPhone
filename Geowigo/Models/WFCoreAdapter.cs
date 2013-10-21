@@ -14,6 +14,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Device.Location;
 using WF.Player.Core.Engines;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Geowigo.Models
 {
@@ -59,6 +61,16 @@ namespace Geowigo.Models
 		private GeoCoordinateWatcher _GeoWatcher;
 		private GeoPosition<GeoCoordinate> _LastKnownPosition;
 		private object _SyncRoot = new Object();
+
+		#endregion
+
+		#region Properties
+
+		#region ActiveVisibleThings
+
+		public List<Thing> ActiveVisibleThings { get; private set; }
+
+		#endregion
 
 		#endregion
 
@@ -217,9 +229,22 @@ namespace Geowigo.Models
 		private void RegisterCoreEventHandlers()
 		{
 			this.LogMessageRequested += new EventHandler<LogMessageEventArgs>(WFCoreAdapter_LogMessageRequested);
+			this.PropertyChanged += new PropertyChangedEventHandler(WFCoreAdapter_PropertyChanged);
 		}
 
-		void WFCoreAdapter_LogMessageRequested(object sender, LogMessageEventArgs e)
+		private void WFCoreAdapter_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == "ActiveVisibleZones" || e.PropertyName == "VisibleObjects")
+			{
+				ActiveVisibleThings = new List<Thing>();
+				ActiveVisibleThings.AddRange(ActiveVisibleZones.OfType<Thing>());
+				ActiveVisibleThings.AddRange(VisibleObjects);
+
+				RaisePropertyChanged("ActiveVisibleThings");
+			}
+		}
+
+		private void WFCoreAdapter_LogMessageRequested(object sender, LogMessageEventArgs e)
 		{
 			LogDebug(String.Format("[{0}]: {1}", e.Level, e.Message));
 		}

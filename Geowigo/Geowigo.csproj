@@ -84,6 +84,9 @@
       <DependentUpon>DistanceControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\InputTemplateSelector.cs" />
+    <Compile Include="Controls\ListSummaryControl.xaml.cs">
+      <DependentUpon>ListSummaryControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\NavigationListBox.cs" />
     <Compile Include="Controls\RelayCommand.cs" />
     <Compile Include="Controls\WherigoMessageBoxContentControl.xaml.cs">
@@ -95,6 +98,7 @@
     <Compile Include="Converters\ObjectToVisibilityConverter.cs" />
     <Compile Include="Converters\ObjectTypeToVisibilityConverter.cs" />
     <Compile Include="Converters\PlayerZoneStateToStringConverter.cs" />
+    <Compile Include="Converters\UIObjectToNameConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
     <Compile Include="Mockups\InputMockup.cs" />
     <Compile Include="Models\CartridgeTag.cs" />
@@ -134,6 +138,10 @@
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
     <Page Include="Controls\DistanceControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ListSummaryControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

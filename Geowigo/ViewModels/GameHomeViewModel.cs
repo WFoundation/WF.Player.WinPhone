@@ -157,7 +157,7 @@ namespace Geowigo.ViewModels
 
 		
 		#endregion
-
+		
 		#endregion
 
 		#region Commands
@@ -174,6 +174,23 @@ namespace Geowigo.ViewModels
 			get
 			{
 				return _ShowDetailsCommand ?? (_ShowDetailsCommand = new RelayCommand<UIObject>(ShowDetails));
+			}
+		}
+
+		#endregion
+
+		#region ShowSectionCommand
+
+		private ICommand _ShowSectionCommand;
+
+		/// <summary>
+		/// Gets a command to show the details of a thing.
+		/// </summary>
+		public ICommand ShowSectionCommand
+		{
+			get
+			{
+				return _ShowSectionCommand ?? (_ShowSectionCommand = new RelayCommand<FrameworkElement>(ShowSectionFromTag));
 			}
 		}
 
@@ -249,18 +266,7 @@ namespace Geowigo.ViewModels
 			string section;
 			if (navCtx.QueryString.TryGetValue(SectionKey, out section))
 			{
-				if (SectionValue_World.Equals(section))
-				{
-					PivotSelectedIndex = 1;
-				}
-				else if (SectionValue_Inventory.Equals(section))
-				{
-					PivotSelectedIndex = 2;
-				}
-				else if (SectionValue_Tasks.Equals(section))
-				{
-					PivotSelectedIndex = 3;
-				}
+				ShowSection(section);
 			}
 
 			// Nothing more to do if a cartridge exists already.
@@ -288,6 +294,40 @@ namespace Geowigo.ViewModels
 		{
 			// Navigates to the appropriate view.
 			App.Current.ViewModel.NavigateToView(t);
+		}
+
+		/// <summary>
+		/// Shows a particular section of the view.
+		/// </summary>
+		/// <param name="section"></param>
+		private void ShowSection(string section)
+		{
+			if (SectionValue_World.Equals(section))
+			{
+				PivotSelectedIndex = 1;
+			}
+			else if (SectionValue_Inventory.Equals(section))
+			{
+				PivotSelectedIndex = 2;
+			}
+			else if (SectionValue_Tasks.Equals(section))
+			{
+				PivotSelectedIndex = 3;
+			}
+		}
+
+		/// <summary>
+		/// Shows a particular section of the view from the tag of a FrameworkElement.
+		/// </summary>
+		/// <param name="element"></param>
+		private void ShowSectionFromTag(FrameworkElement element)
+		{
+			if (element == null)
+			{
+				return;
+			}
+
+			ShowSection(element.Tag as string);
 		}
 
 		/// <summary>
