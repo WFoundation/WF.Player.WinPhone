@@ -257,6 +257,22 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+		public void OnAppDeactivated()
+		{
+			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Playing)
+			{
+				Model.Core.Pause();
+			}
+		}
+
+		public void OnAppActivated()
+		{
+			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Paused)
+			{
+				Model.Core.Resume();
+			}
+		}
+
 		#endregion
 
 		#region Private Methods

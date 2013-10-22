@@ -93,12 +93,14 @@ namespace Geowigo
         // Ce code ne s'exécute pas lorsque l'application est démarrée pour la première fois
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
+			ViewModel.OnAppActivated();
         }
 
         // Code à exécuter lorsque l'application est désactivée (envoyée à l'arrière-plan)
         // Ce code ne s'exécute pas lors de la fermeture de l'application
         private void Application_Deactivated(object sender, DeactivatedEventArgs e)
         {
+			ViewModel.OnAppDeactivated();
         }
 
         // Code à exécuter lors de la fermeture de l'application (par exemple, lorsque l'utilisateur clique sur Précédent)
