@@ -108,6 +108,7 @@
     <Compile Include="Models\CartridgeStore.cs" />
     <Compile Include="Utils\DebugUtils.cs" />
     <Compile Include="Utils\ImageUtils.cs" />
+    <Compile Include="Utils\ThreadingExtensions.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\GameHomeViewModel.cs" />

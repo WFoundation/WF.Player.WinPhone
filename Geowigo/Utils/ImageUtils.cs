@@ -9,6 +9,8 @@ using ImageTools;
 using ImageTools.IO;
 using ImageTools.IO.Gif;
 using System.Threading;
+using Geowigo.Utils;
+using System.Windows;
 
 namespace Geowigo.Utils
 {
@@ -39,7 +41,7 @@ namespace Geowigo.Utils
 
 				image.LoadingCompleted += onLoaded;
 
-				resetEvent.WaitOne(5000);
+				resetEvent.WaitOne(1000);
 
 				image.LoadingCompleted -= onLoaded;
 			}
@@ -89,7 +91,8 @@ namespace Geowigo.Utils
 				try
 				{
 					// Tries to load the image using Windows Phone's internals.
-					BitmapImage image = new BitmapImage();
+					BitmapImage image = null;
+					image = new BitmapImage();
 					image.SetSource(ms);
 
 					return image;
@@ -126,6 +129,15 @@ namespace Geowigo.Utils
 
 		public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1)
 		{
+			// Make sure this method runs in the UI thread.
+			if (!Deployment.Current.Dispatcher.CheckAccess())
+			{
+				return Deployment.Current.Dispatcher.Invoke<ImageSource>(() => 
+				{
+					return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth);
+				});
+			}
+			
 			// Gets the images.
 			BitmapSource preferedImage = GetBitmapSource(prefered);
 			BitmapSource fallbackImage = GetBitmapSource(fallback);

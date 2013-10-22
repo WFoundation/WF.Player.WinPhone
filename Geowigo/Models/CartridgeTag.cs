@@ -13,14 +13,21 @@ using System.IO.IsolatedStorage;
 using System.IO;
 using System.Windows.Media.Imaging;
 using Geowigo.Utils;
+using System.ComponentModel;
 
 namespace Geowigo.Models
 {
 	/// <summary>
 	/// Provides a static metadata description of a Cartridge.
 	/// </summary>
-	public class CartridgeTag
+	public class CartridgeTag : INotifyPropertyChanged
 	{
+		#region Events
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		#endregion
+		
 		#region Constants
 
 		public const string GlobalCachePath = "/Cache";
@@ -40,9 +47,47 @@ namespace Geowigo.Models
 
 		public Cartridge Cartridge { get; private set; }
 
-		public ImageSource Thumbnail { get; private set; }
+		#region Thumbnail
+		private ImageSource _thumbnail;
+		public ImageSource Thumbnail
+		{
+			get
+			{
+				return _thumbnail;
+			}
 
-		public ImageSource Poster { get; private set; }
+			private set
+			{
+				if (_thumbnail != value)
+				{
+					_thumbnail = value;
+
+					RaisePropertyChanged("Thumbnail");
+				}
+			}
+		} 
+		#endregion
+
+		#region Poster
+		private ImageSource _poster;
+		public ImageSource Poster
+		{
+			get
+			{
+				return _poster;
+			}
+
+			private set
+			{
+				if (_poster != value)
+				{
+					_poster = value;
+
+					RaisePropertyChanged("Poster");
+				}
+			}
+		} 
+		#endregion
 
 		#endregion
 		
@@ -58,12 +103,9 @@ namespace Geowigo.Models
 			Guid = cart.Guid;
 			Title = cart.Name;
 			PathToCache = GlobalCachePath + "/" + Guid;
-
-			// Cache
-			MakeCache();
 		}
 
-		private void MakeCache()
+		public void MakeCache()
 		{
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -82,5 +124,17 @@ namespace Geowigo.Models
 		{
 			return PathToCache + "/" + filename;
 		}
+
+		private void RaisePropertyChanged(string propName)
+		{
+			Deployment.Current.Dispatcher.BeginInvoke(() =>
+			{
+				if (PropertyChanged != null)
+				{
+					PropertyChanged(this, new PropertyChangedEventArgs(propName));
+				}
+			});
+		}
+		
 	}
 }

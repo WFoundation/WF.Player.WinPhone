@@ -4,6 +4,7 @@ using WF.Player.Core;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
 using System.Linq;
+using System.Windows;
 
 namespace Geowigo.Models
 {
@@ -73,6 +74,7 @@ namespace Geowigo.Models
 			bw.RunWorkerAsync();
 		}
 
+
 		#endregion
 
 		#region CartridgeContext Management
@@ -110,10 +112,22 @@ namespace Geowigo.Models
 			CartridgeTag newCC = new CartridgeTag(cart);
 
 			// Adds the context to the store.
-			System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() => this.Items.Add(newCC));
+			this.Items.Add(newCC);
+
+			// Makes the cache.
+			newCC.MakeCache();
 
 			// Returns the new cartridge context.
 			return newCC;
+		}
+
+		#endregion
+
+		#region ReadOnlyObservableCollection
+
+		protected override void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
+		{
+			Deployment.Current.Dispatcher.BeginInvoke(() => base.OnCollectionChanged(args));
 		}
 
 		#endregion
