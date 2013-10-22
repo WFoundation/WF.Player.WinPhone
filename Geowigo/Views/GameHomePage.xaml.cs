@@ -42,7 +42,7 @@ namespace Geowigo.Views
 		#endregion
 		
 		public GameHomePage()
-		{		
+		{
 			InitializeComponent();
 
 			// Gets resources.

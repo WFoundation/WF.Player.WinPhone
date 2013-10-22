@@ -127,6 +127,28 @@ namespace Geowigo.Utils
 			return GetBitmapSource(media.Data);
 		}
 
+		public static BitmapSource GetBitmapSource(string filename, IsolatedStorageFile isoStore)
+		{
+			// Make sure this method runs in the UI thread.
+			if (!Deployment.Current.Dispatcher.CheckAccess())
+			{
+				return Deployment.Current.Dispatcher.Invoke<BitmapSource>(() =>
+				{
+					return GetBitmapSource(filename, isoStore);
+				});
+			}
+			
+			BitmapImage image = null;
+
+			using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Open, FileAccess.Read))
+			{
+				image = new BitmapImage();
+				image.SetSource(stream);
+			}
+
+			return image;
+		}
+
 		public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1)
 		{
 			// Make sure this method runs in the UI thread.
@@ -176,5 +198,7 @@ namespace Geowigo.Utils
 			// Returns the image.
 			return targetImage;
 		}
+
+
 	}
 }

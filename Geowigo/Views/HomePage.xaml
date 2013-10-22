@@ -15,11 +15,10 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False"
-	toolkit:TiltEffect.IsTiltEnabled="True">
+	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False">
 	<phone:PhoneApplicationPage.Resources>
 		<ItemsPanelTemplate x:Key="CartridgesItemPanelTemplate">
-			<toolkit:WrapPanel/>
+			<toolkit:WrapPanel Orientation="Vertical" d:DesignWidth="285" d:DesignHeight="206"/>
 		</ItemsPanelTemplate>
 		<DataTemplate x:Key="CartridgeListItemTemplate">
 			<Grid>
@@ -39,8 +38,11 @@
         <controls:Panorama Title="geowigo">
 
             <!--Élément un de panorama-->
-            <controls:PanoramaItem x:Name="CartridgePanoramaItem" Header="cartridges">
-            	<Geowigo_Controls:NavigationListBox ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding StartCartridgeCommand, Mode=OneWay}" Height="498" Width="420" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}"/>
+            <controls:PanoramaItem x:Name="CartridgePanoramaItem" Header="cartridges" Orientation="Horizontal">
+            	<Grid>
+            		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Path=Model.CartridgeStore.IsBusy}"/>
+            		<Geowigo_Controls:NavigationListBox ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding StartCartridgeCommand, Mode=OneWay}" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}" Margin="0,8,0,0" Height="490" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            	</Grid>
             </controls:PanoramaItem>
 
             <!--Élément deux de panorama-->

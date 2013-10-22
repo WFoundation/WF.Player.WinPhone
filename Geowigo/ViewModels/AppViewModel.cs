@@ -16,6 +16,7 @@ using Microsoft.Phone.Controls;
 using System.IO;
 using System.Windows.Navigation;
 using System.Linq;
+using Microsoft.Phone.Shell;
 
 namespace Geowigo.ViewModels
 {	
@@ -334,7 +335,7 @@ namespace Geowigo.ViewModels
 			//}
 		}
 
-		#region Core Event Handlers
+		#region Model Event Handlers
 
 		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
 		{
@@ -382,9 +383,8 @@ namespace Geowigo.ViewModels
 		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
 		{
 			// TODO: Pass to SoundManager for uncompressing to isolated storage and playing using a MediaElement?
-			//PlayMediaSound(e.Object);
+			PlayMediaSound(e.Object);
 		}
-
 
 		#endregion
 

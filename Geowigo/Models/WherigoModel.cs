@@ -37,8 +37,10 @@ namespace Geowigo.Models
 		public WherigoModel()
 		{
 			Core = new WFCoreAdapter();
+
+			// Store
 			CartridgeStore = new CartridgeStore();
-		} 
+		}
 
 		#endregion
 
@@ -46,6 +48,5 @@ namespace Geowigo.Models
 
 
 		#endregion
-
 	}
 }

@@ -13,6 +13,33 @@ namespace Geowigo.Models
 	/// </summary>
 	public class CartridgeStore : ReadOnlyObservableCollection<CartridgeTag>
 	{
+		#region Members
+
+		private bool _isBusy = false;
+
+		#endregion
+
+		#region Events
+
+		/// <summary>
+		/// Raised when the business of this store has changed.
+		/// </summary>
+		//public event EventHandler IsBusyChanged;
+
+		public new event System.ComponentModel.PropertyChangedEventHandler PropertyChanged
+		{
+			add
+			{
+				base.PropertyChanged += value;
+			}
+
+			remove
+			{
+				base.PropertyChanged -= value;
+			}
+		}
+
+		#endregion
 		
 		#region Properties
 
@@ -24,6 +51,28 @@ namespace Geowigo.Models
 			get
 			{
 				return "/Cartridges";
+			}
+		}
+		
+		/// <summary>
+		/// Gets if this instance is busy loading cartridges.
+		/// </summary>
+		public bool IsBusy
+		{
+			get
+			{
+				return _isBusy;
+			}
+
+			private set
+			{
+				if (value != _isBusy)
+				{
+					_isBusy = value;
+
+					//OnIsBusyChanged(EventArgs.Empty);
+					OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsBusy"));
+				}
 			}
 		}
 
@@ -43,8 +92,6 @@ namespace Geowigo.Models
 
 		public void SyncFromIsoStore()
 		{
-			// TODO: Make Async.
-			
 			// Opens the isolated storage.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -54,6 +101,10 @@ namespace Geowigo.Models
 				{
 					System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStoreAsync: More than one cartridge directory: " + IsoStoreCartridgesPath);
 				}
+
+				// Business changes.
+				IsBusy = true;
+
 				foreach (string dir in dirs)
 				{
 					// Imports all GWC files from the directory.
@@ -64,6 +115,9 @@ namespace Geowigo.Models
 						AcceptCartridge(IsoStoreCartridgesPath + "/" + filename);
 					}
 				}
+
+				// Business changes.
+				IsBusy = false;
 			}
 		}
 
@@ -115,7 +169,7 @@ namespace Geowigo.Models
 			this.Items.Add(newCC);
 
 			// Makes the cache.
-			newCC.MakeCache();
+			newCC.ImportOrMakeCache();
 
 			// Returns the new cartridge context.
 			return newCC;
@@ -130,6 +184,22 @@ namespace Geowigo.Models
 			Deployment.Current.Dispatcher.BeginInvoke(() => base.OnCollectionChanged(args));
 		}
 
+		protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs args)
+		{
+			Deployment.Current.Dispatcher.BeginInvoke(() => base.OnPropertyChanged(args));
+		}
+
 		#endregion
+
+		//private void OnIsBusyChanged(EventArgs e)
+		//{
+		//    Deployment.Current.Dispatcher.BeginInvoke(() =>
+		//    {
+		//        if (IsBusyChanged != null)
+		//        {
+		//            IsBusyChanged(this, e);
+		//        }
+		//    });
+		//}
 	}
 }

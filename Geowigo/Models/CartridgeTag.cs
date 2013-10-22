@@ -35,6 +35,9 @@ namespace Geowigo.Models
 		public const int SmallThumbnailMinWidth = 173;
 		public const int BigThumbnailMinWidth = 432;
 
+		private const string ThumbCacheFilename = "thumb.jpg";
+		private const string PosterCacheFilename = "poster.jpg";
+
 		#endregion
 		
 		#region Properties
@@ -105,7 +108,10 @@ namespace Geowigo.Models
 			PathToCache = GlobalCachePath + "/" + Guid;
 		}
 
-		public void MakeCache()
+		/// <summary>
+		/// Imports or create the cache for this CartridgeTag.
+		/// </summary>
+		public void ImportOrMakeCache()
 		{
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -113,10 +119,26 @@ namespace Geowigo.Models
 				isf.CreateDirectory(PathToCache);
 
 				// Thumbnail
-				Thumbnail = ImageUtils.SaveThumbnail(isf, GetCachePath("thumb.jpg"), Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+				string thumbCachePath = GetCachePath(ThumbCacheFilename);
+				if (isf.FileExists(thumbCachePath))
+				{
+					Thumbnail = ImageUtils.GetBitmapSource(thumbCachePath, isf);
+				}
+				else
+				{
+					Thumbnail = ImageUtils.SaveThumbnail(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+				}
 
 				// Poster
-				Poster = ImageUtils.SaveThumbnail(isf, GetCachePath("poster.jpg"), Cartridge.Poster, null, BigThumbnailMinWidth);
+				string posterCachePath = GetCachePath(PosterCacheFilename);
+				if (isf.FileExists(posterCachePath))
+				{
+					Poster = ImageUtils.GetBitmapSource(posterCachePath, isf);
+				}
+				else
+				{
+					Poster = ImageUtils.SaveThumbnail(isf, GetCachePath("poster.jpg"), Cartridge.Poster, null, BigThumbnailMinWidth);
+				}
 			}
 		}
 
