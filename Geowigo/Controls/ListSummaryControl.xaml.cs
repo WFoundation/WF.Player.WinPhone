@@ -189,13 +189,12 @@ namespace Geowigo.Controls
 			ListSeparatorString = ", ";
 			HeaderFormatText = "{0} ITEM{1}";
 
-			Loaded += new RoutedEventHandler(OnLoaded);
-			
+			LayoutUpdated += new EventHandler(OnFirstLayoutUpdated);
+
 			InitializeComponent();
 
 			Refresh();
 		}
-
 
 		protected void OnItemsPropertyChanged(DependencyPropertyChangedEventArgs e)
 		{
@@ -235,11 +234,13 @@ namespace Geowigo.Controls
 			Refresh();
 		}
 
-		private void OnLoaded(object sender, RoutedEventArgs e)
+		private void OnFirstLayoutUpdated(object sender, EventArgs e)
 		{
+			LayoutUpdated -= OnFirstLayoutUpdated;
+
 			normalBrush = (Brush)Resources["PhoneForegroundBrush"];
 			emptyBrush = (Brush)Resources["PhoneDisabledBrush"];
-			
+
 			_isInitialized = true;
 
 			RefreshVisualState(false);

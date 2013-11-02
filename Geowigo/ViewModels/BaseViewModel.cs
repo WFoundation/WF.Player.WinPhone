@@ -191,7 +191,10 @@ namespace Geowigo.ViewModels
 
 		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
-			if (!((Engine)sender).IsReady)
+			Engine es = (Engine)sender;
+			
+			// Discards if the engine is not ready.
+			if (!es.IsReady)
 			{
 				return;
 			}
@@ -241,7 +244,7 @@ namespace Geowigo.ViewModels
 		}
 
 		private void WherigoObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-		{
+		{			
 			// Redirects the event.
 			OnWherigoObjectPropertyChanged(e.PropertyName);
 		}

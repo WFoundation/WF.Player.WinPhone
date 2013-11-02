@@ -38,6 +38,16 @@ namespace Geowigo.Views
 
 		#endregion
 
+		#region Constructor
+
+		public BasePage()
+			: base()
+		{
+			LayoutUpdated += new EventHandler(BasePage_LayoutUpdated);
+		}
+
+		#endregion
+
 		#region PhoneApplicationPage Event Handling
 
 		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
@@ -46,6 +56,21 @@ namespace Geowigo.Views
 
 			// Relays the event to the view model.
 			ViewModel.OnPageNavigatedTo(e, NavigationContext);
+		}
+
+		/// <summary>
+		/// Called when the page is loaded and ready.
+		/// </summary>
+		protected virtual void OnReady()
+		{
+
+		}
+
+		private void BasePage_LayoutUpdated(object sender, EventArgs e)
+		{
+			LayoutUpdated -= BasePage_LayoutUpdated;
+
+			OnReady();
 		}
 
 		#endregion

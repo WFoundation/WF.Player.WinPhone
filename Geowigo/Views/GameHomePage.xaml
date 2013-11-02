@@ -56,7 +56,7 @@
 		<Image Margin="0,-31,0,0" Source="windowsphone_grid_red_transparent.png" Visibility="Collapsed"/>
 		<Image x:Name="PosterBackground" Source="{Binding Model.Core.Cartridge.Poster.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Opacity="0.3" Stretch="UniformToFill"/>
         <!--Contrôle Pivot-->
-		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" Loaded="ContentPivot_Loaded" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
+		<controls:Pivot x:Name="ContentPivot" Title="{Binding}" TitleTemplate="{StaticResource GamePivotTitleTemplate}" SelectedIndex="{Binding PivotSelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="OverviewPivotItem" Header="overview" Margin="22,28,12,0">
             	<StackPanel>
@@ -91,7 +91,7 @@
             		<Geowigo_Controls:NavigationListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" NavigationCommand="{Binding ShowDetailsCommand}" />
             	</StackPanel>
             </controls:PivotItem>
-            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0" Loaded="TasksPivotItem_Loaded">
+            <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0">
             	<ScrollViewer>
             		<StackPanel>
             			<TextBlock TextWrapping="Wrap" Visibility="{Binding IsTasksEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="Here are "/><Run Text="usually "/><Run Text="the "/><Run Text="various "/><Run Text="tasks that you have to "/><Run Text="carry out"/><Run Text=". Unfortunately, "/><Run Text="there is nothing right now"/><Run Text=". Try to explore the elements of the world or your inventory"/><Run Text=":"/><Run Text=" "/><Run Text="you may need to perform an action for the game to progress."/></TextBlock>

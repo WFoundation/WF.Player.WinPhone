@@ -58,14 +58,11 @@ namespace Geowigo.Views
 			ViewModel.OnBackKeyPress(e);
 		}
 
-		private void ContentPivot_Loaded(object sender, RoutedEventArgs e)
+		protected override void OnReady()
 		{
 			// Sets the initial selected index.
-			((Pivot)sender).SelectedIndex = ViewModel.PivotSelectedIndex;
-		}
+			ContentPivot.SelectedIndex = ViewModel.PivotSelectedIndex;
 
-		private void TasksPivotItem_Loaded(object sender, RoutedEventArgs e)
-		{
 			// Sets the filters for the task collection views.
 			ViewModel.InitCollectionViewSourcesForTasks(_CurrentTasksSource, _HistoryTasksSource);
 		}

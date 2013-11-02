@@ -118,6 +118,7 @@ namespace Geowigo.ViewModels
 			if (stopCurrentGame && Model.Core.Cartridge != null)
 			{
 				Model.Core.Stop();
+				Model.Core.Reset();
 			}
 
 			// Removes all back entries until the app home is found.
@@ -258,7 +259,10 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		public void OnAppDeactivated()
+		/// <summary>
+		/// Called when the app is being deactivated.
+		/// </summary>
+		public void HandleAppDeactivated()
 		{
 			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Playing)
 			{
@@ -266,7 +270,10 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		public void OnAppActivated()
+		/// <summary>
+		/// Called when the app is being activated.
+		/// </summary>
+		public void HandleAppActivated()
 		{
 			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Paused)
 			{

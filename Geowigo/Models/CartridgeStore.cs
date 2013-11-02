@@ -21,11 +21,6 @@ namespace Geowigo.Models
 
 		#region Events
 
-		/// <summary>
-		/// Raised when the business of this store has changed.
-		/// </summary>
-		//public event EventHandler IsBusyChanged;
-
 		public new event System.ComponentModel.PropertyChangedEventHandler PropertyChanged
 		{
 			add
@@ -191,15 +186,5 @@ namespace Geowigo.Models
 
 		#endregion
 
-		//private void OnIsBusyChanged(EventArgs e)
-		//{
-		//    Deployment.Current.Dispatcher.BeginInvoke(() =>
-		//    {
-		//        if (IsBusyChanged != null)
-		//        {
-		//            IsBusyChanged(this, e);
-		//        }
-		//    });
-		//}
 	}
 }
