@@ -279,7 +279,13 @@ namespace Geowigo.ViewModels
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
 			{
+				App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
+				
 				Cartridge = Model.Core.InitAndStartCartridge(filename);
+				//Model.Core.InitAndStartCartridgeAsync(filename, new Action<Cartridge>(c =>
+				//    {
+				//        Dispatcher.BeginInvoke(new Action(() => Cartridge = c));
+				//    }));
 			}
 
 			// TODO: Cancel nav if no cartridge in parameter?

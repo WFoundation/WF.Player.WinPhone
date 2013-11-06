@@ -32,19 +32,57 @@ namespace Geowigo.Utils
 				string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") +"_" + ex.GetHashCode() + "_";
 
 				// Dumps the data.
-				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "rawdata.txt"))
+				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "ex_rawdata.txt"))
 				{
 					stream.Write(data, 0, data.Length);
 				}
 
 				// Dumps the stack trace.
+				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "ex_stacktrace.txt"))
+				{
+					DumpException(ex, stream);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Dumps an exception to the isolated storage.
+		/// </summary>
+		/// <param name="ex"></param>
+		public static void DumpException(Exception ex)
+		{
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				// Ensures the folder exists.
+				isf.CreateDirectory("/Debug");
+
+				// Gets the filename prefix.
+				string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_" + ex.GetHashCode() + "_";
+
+				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "stacktrace.txt"))
 				{
-					using (StreamWriter sw = new StreamWriter(stream))
-					{
-						// Writes a long version of the stacktrace.
-						sw.Write(new StackTrace(ex).ToString());
-					}
+					DumpException(ex, stream);
+				}
+			}
+		}
+
+		private static void DumpException(Exception ex, Stream stream)
+		{
+			using (StreamWriter sw = new StreamWriter(stream))
+			{
+				sw.WriteLine("Main Exception");
+				sw.WriteLine("---");
+				sw.WriteLine(ex);
+				sw.WriteLine("---");
+
+				Exception eo = ex.InnerException;
+				while (eo != null)
+				{
+					sw.WriteLine(eo);
+					sw.WriteLine("---");
+
+					eo = eo.InnerException;
 				}
 			}
 		}

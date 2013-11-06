@@ -281,6 +281,22 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+		/// <summary>
+		/// Sets the system tray progress indicator.
+		/// </summary>
+		/// <param name="status"></param>
+		/// <param name="isIndeterminate"></param>
+		/// <param name="isVisible"></param>
+		public void SetSystemTrayProgressIndicator(string status = null, bool isIndeterminate = true, bool isVisible = true)
+		{
+			Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
+			{
+				IsIndeterminate = isIndeterminate,
+				IsVisible = isVisible,
+				Text = status
+			};
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -302,12 +318,7 @@ namespace Geowigo.ViewModels
 		{
 			if (e.PropertyName == "IsBusy")
 			{
-				Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
-				{
-					IsIndeterminate = true,
-					IsVisible = Model.Core.IsBusy,
-					Text = "Loading..."
-				};
+				SetSystemTrayProgressIndicator("Loading...", true, Model.Core.IsBusy);
 			}
 		}
 

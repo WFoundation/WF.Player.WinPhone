@@ -113,6 +113,16 @@ namespace Geowigo.Models
 			return cart;
 		}
 
+		public void InitAndStartCartridgeAsync(string filename, Action<Cartridge> callback)
+		{
+			BackgroundWorker bw = new BackgroundWorker();
+			bw.DoWork += (o, e) =>
+			{
+				callback(InitAndStartCartridge(filename));
+			};
+			bw.RunWorkerAsync();
+		}
+
 		/// <summary>
 		/// Gets a Wherigo object that has a certain id.
 		/// </summary>

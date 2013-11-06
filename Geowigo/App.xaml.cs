@@ -123,10 +123,13 @@ namespace Geowigo
         private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
         {
             if (System.Diagnostics.Debugger.IsAttached)
-            {
-                // Une exception non gérée s'est produite ; arrêt dans le débogueur
+            {				
+				// Une exception non gérée s'est produite ; arrêt dans le débogueur
                 System.Diagnostics.Debugger.Break();
             }
+
+			// Dump the sith out!
+			Utils.DebugUtils.DumpException(e.ExceptionObject);
         }
 
         #region Initialisation de l'application téléphonique
