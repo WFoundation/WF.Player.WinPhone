@@ -109,12 +109,14 @@
     <Compile Include="Utils\DebugUtils.cs" />
     <Compile Include="Utils\ImageUtils.cs" />
     <Compile Include="Utils\ThreadingExtensions.cs" />
+    <Compile Include="Utils\VisualTreeExtensions.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\GameHomeViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InputViewModel.cs" />
     <Compile Include="ViewModels\MessageBoxManager.cs" />
+    <Compile Include="ViewModels\SoundManager.cs" />
     <Compile Include="ViewModels\ThingViewModel.cs" />
     <Compile Include="Views\BasePage.cs" />
     <Compile Include="Views\GameHomePage.xaml.cs">

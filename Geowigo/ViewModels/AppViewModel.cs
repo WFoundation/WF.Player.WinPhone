@@ -30,6 +30,8 @@ namespace Geowigo.ViewModels
 
 		private MessageBoxManager _MBManagerInstance;
 
+		private SoundManager _SoundManagerInstance;
+
 		#endregion
 
 		#region Properties
@@ -89,7 +91,7 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Gets the message box manager for this view model.
 		/// </summary>
-		public MessageBoxManager MessageBoxManagerInstance
+		public MessageBoxManager MessageBoxManager
 		{
 			get
 			{
@@ -99,13 +101,23 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region SoundManager
+
+		/// <summary>
+		/// Gets the sound manager for this view model.
+		/// </summary>
+		public SoundManager SoundManager
+		{
+			get
+			{
+				return _SoundManagerInstance ?? (_SoundManagerInstance = new SoundManager());
+			}
+		}
+
 		#endregion
 
-		#region Constructors
-
-
-		
 		#endregion
+
 
 		#region Public Methods
 
@@ -212,7 +224,7 @@ namespace Geowigo.ViewModels
 		public void ShowMessageBox(WF.Player.Core.MessageBox mbox)
 		{
 			// Delegates this to the message box manager.
-			MessageBoxManagerInstance.Show(mbox);
+			MessageBoxManager.Show(mbox);
 		}
 
 		/// <summary>
@@ -343,14 +355,12 @@ namespace Geowigo.ViewModels
 
 		private void PlayMediaSound(Media media)
 		{
-			System.Diagnostics.Debug.WriteLine("WARNING!!! PlayMediaSound NOT IMPLEMENTED !!!!!");
-			
-			//using (var stream = new MemoryStream(media.Data))
-			//{
-			//    var effect = SoundEffect.FromStream(stream);
-			//    FrameworkDispatcher.Update();
-			//    effect.Play();
-			//}
+			// Gets the media filename in cache.
+			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
+			string filename = tag.GetCachedFilename(media);
+
+			// Plays the file.
+			SoundManager.PlaySound(filename);
 		}
 
 		#region Model Event Handlers
@@ -400,7 +410,6 @@ namespace Geowigo.ViewModels
 
 		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
 		{
-			// TODO: Pass to SoundManager for uncompressing to isolated storage and playing using a MediaElement?
 			PlayMediaSound(e.Object);
 		}
 

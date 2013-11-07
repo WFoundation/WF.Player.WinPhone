@@ -54,4 +54,14 @@
 		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
 		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
 	</Style>
+	
+	<ControlTemplate x:Key="AudioPlayerContentTemplate">
+		<Grid x:Name="MediaElementContainer">
+			<MediaElement x:Name="CommonMediaElement" Visibility="Collapsed" />
+			<Grid x:Name="ClientArea">
+				<ContentPresenter/>
+			</Grid>
+		</Grid>
+	</ControlTemplate>
+	
 </ResourceDictionary>

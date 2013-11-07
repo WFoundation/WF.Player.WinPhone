@@ -85,6 +85,16 @@ namespace Geowigo.Models
 		
 		#region Public Methods
 
+		/// <summary>
+		/// Gets the single CartridgeTag for a Cartridge.
+		/// </summary>
+		/// <param name="cartridge">The Cartridge to get the tag for.</param>
+		/// <returns></returns>
+		public CartridgeTag GetCartridgeTag(Cartridge cartridge)
+		{
+			return this.SingleOrDefault(ct => ct.Cartridge.Guid == cartridge.Guid);
+		}
+
 		public void SyncFromIsoStore()
 		{
 			// Opens the isolated storage.
@@ -185,6 +195,8 @@ namespace Geowigo.Models
 		}
 
 		#endregion
+
+
 
 	}
 }

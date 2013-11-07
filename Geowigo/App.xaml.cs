@@ -155,15 +155,17 @@ namespace Geowigo
             phoneApplicationInitialized = true;
         }
 
-        // Ne pas ajouter de code supplémentaire à cette méthode
         private void CompleteInitializePhoneApplication(object sender, NavigationEventArgs e)
         {
-            // Définir le Visual racine pour permettre à l'application d'effectuer le rendu
+            // Set the root visual to allow the application to render.
             if (RootVisual != RootFrame)
                 RootVisual = RootFrame;
 
-            // Supprimer ce gestionnaire, puisqu'il est devenu inutile
+            // Removes the useless handler.
             RootFrame.Navigated -= CompleteInitializePhoneApplication;
+
+			// Injects the media element template into the root frame.
+			RootFrame.Template = App.Current.Resources["AudioPlayerContentTemplate"] as ControlTemplate;
         }
 
         #endregion
