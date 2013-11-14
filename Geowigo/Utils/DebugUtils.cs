@@ -15,7 +15,7 @@ using System.Diagnostics;
 namespace Geowigo.Utils
 {
 	public class DebugUtils
-	{
+	{		
 		/// <summary>
 		/// Dumps an exception and data to the isolated storage.
 		/// </summary>
@@ -71,7 +71,7 @@ namespace Geowigo.Utils
 		{
 			using (StreamWriter sw = new StreamWriter(stream))
 			{
-				sw.WriteLine("Main Exception");
+				sw.WriteLine("Main Exception: " + ex.GetType().FullName);
 				sw.WriteLine("---");
 				sw.WriteLine(ex);
 				sw.WriteLine("---");

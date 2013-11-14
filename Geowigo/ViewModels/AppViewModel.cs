@@ -118,7 +118,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-
 		#region Public Methods
 
 		/// <summary>
@@ -309,6 +308,28 @@ namespace Geowigo.ViewModels
 			};
 		}
 
+		/// <summary>
+		/// Plays a media sound.
+		/// </summary>
+		/// <param name="media">The sound to play.</param>
+		public void PlayMediaSound(Media media)
+		{
+			// Gets the media filename in cache.
+			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
+			string filename = tag.GetCachedFilename(media);
+
+			// Plays the file.
+			SoundManager.PlaySound(filename);
+		}
+
+		/// <summary>
+		/// Stops all currently played sounds.
+		/// </summary>
+		public void StopAllSounds()
+		{
+			SoundManager.StopSounds();
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -319,12 +340,23 @@ namespace Geowigo.ViewModels
 			model.Core.ShowMessageBoxRequested += new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
 			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
 			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
+			model.Core.StopSoundsRequested += new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
 
 			// Temp debug
-			model.Core.SaveRequested += new EventHandler<CartridgeEventArgs>(Core_SaveRequested);
+			model.Core.SaveRequested += new EventHandler<SavingEventArgs>(Core_SaveRequested);
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
 			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
 		}
+
+		private void UnregisterModel(WherigoModel model)
+		{
+			model.Core.InputRequested -= new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
+			model.Core.ShowMessageBoxRequested -= new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
+			model.Core.ShowScreenRequested -= new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
+			model.Core.PlayMediaRequested -= new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
+			model.Core.StopSoundsRequested -= new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
+		}
+		
 
 		void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
@@ -340,28 +372,14 @@ namespace Geowigo.ViewModels
 			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
 		}
 
-		void Core_SaveRequested(object sender, CartridgeEventArgs e)
+		void Core_SaveRequested(object sender, SavingEventArgs e)
 		{
 			System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
+
+			// 1. Save game.
+			// 2. If e.CloseAfterSave, close the game.
 		}
 
-		private void UnregisterModel(WherigoModel model)
-		{
-			model.Core.InputRequested -= new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
-			model.Core.ShowMessageBoxRequested -= new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
-			model.Core.ShowScreenRequested -= new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
-			model.Core.PlayMediaRequested -= new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
-		}
-
-		private void PlayMediaSound(Media media)
-		{
-			// Gets the media filename in cache.
-			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
-			string filename = tag.GetCachedFilename(media);
-
-			// Plays the file.
-			SoundManager.PlaySound(filename);
-		}
 
 		#region Model Event Handlers
 
@@ -412,6 +430,12 @@ namespace Geowigo.ViewModels
 		{
 			PlayMediaSound(e.Object);
 		}
+
+		private void Core_StopSoundsRequested(object sender, WherigoEventArgs e)
+		{
+			StopAllSounds();
+		}
+
 
 		#endregion
 
