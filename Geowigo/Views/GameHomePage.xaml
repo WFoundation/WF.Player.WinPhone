@@ -61,7 +61,7 @@
             <controls:PivotItem x:Name="OverviewPivotItem" Header="overview" Margin="22,28,12,0">
             	<StackPanel>
             		<Geowigo_Controls:NavigationListBox NavigationCommand="{Binding ShowSectionCommand, Mode=OneWay}">
-						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} TASK{1}" Items="{Binding Model.Core.ActiveVisibleTasks}" Width="446" Tag="tasks" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
+						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} TASK{1} TO DO" Items="{Binding Source={StaticResource CurrentTasksSource}}" Width="446" Tag="tasks" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
 						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} OF INTEREST" Items="{Binding Model.Core.ActiveVisibleThings}" Width="446" Tag="world" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
 						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} IN INVENTORY" Items="{Binding Model.Core.VisibleInventory}" Width="446" Tag="inventory" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
             		</Geowigo_Controls:NavigationListBox>
@@ -96,7 +96,7 @@
             		<StackPanel>
             			<TextBlock TextWrapping="Wrap" Visibility="{Binding IsTasksEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="Here are "/><Run Text="usually "/><Run Text="the "/><Run Text="various "/><Run Text="tasks that you have to "/><Run Text="carry out"/><Run Text=". Unfortunately, "/><Run Text="there is nothing right now"/><Run Text=". Try to explore the elements of the world or your inventory"/><Run Text=":"/><Run Text=" "/><Run Text="you may need to perform an action for the game to progress."/></TextBlock>
             			<StackPanel x:Name="TasksCurrentPanel" Orientation="Vertical" Width="446" Margin="0,0,0,25" Visibility="{Binding AreCurrentTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">
-            				<TextBlock TextWrapping="Wrap" Text="CURRENT" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="TO DO" d:LayoutOverrides="Width" Margin="0,0,0,15" Style="{StaticResource ListHeaderTextBlockStyle}"/>
 							<Geowigo_Controls:NavigationListBox x:Name="CurrentTaskList" ItemsSource="{Binding Source={StaticResource CurrentTasksSource}}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width" NavigationCommand="{Binding ShowDetailsCommand}"/>
             			</StackPanel>
             			<StackPanel x:Name="TasksHistoryPanel" Orientation="Vertical" Width="446" Visibility="{Binding AreHistoryTasksVisible, Converter={StaticResource ObjectToVisibilityConverter}}">

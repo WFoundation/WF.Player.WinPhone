@@ -60,7 +60,7 @@ namespace Geowigo.ViewModels
 		public static readonly DependencyProperty AreZonesVisibleProperty =
 			DependencyProperty.Register("AreZonesVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
 
-		
+
 		#endregion
 
 		#region AreObjectsVisible
@@ -155,9 +155,9 @@ namespace Geowigo.ViewModels
 		public static readonly DependencyProperty IsTasksEmptyProperty =
 			DependencyProperty.Register("IsTasksEmpty", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(true));
 
-		
+
 		#endregion
-		
+
 		#endregion
 
 		#region Commands
@@ -207,10 +207,10 @@ namespace Geowigo.ViewModels
 		public void InitCollectionViewSourcesForTasks(CollectionViewSource currrentTs, CollectionViewSource historyTs)
 		{
 			// Makes sure that there is one and only one event handler per source.
-			
+
 			currrentTs.Filter -= new FilterEventHandler(OnCurrentTasksSourceFilter);
 			currrentTs.Filter += new FilterEventHandler(OnCurrentTasksSourceFilter);
-			
+
 			historyTs.Filter -= new FilterEventHandler(OnHistoryTasksSourceFilter);
 			historyTs.Filter += new FilterEventHandler(OnHistoryTasksSourceFilter);
 		}
@@ -225,7 +225,7 @@ namespace Geowigo.ViewModels
 		{
 			// Only take uncompleted tasks.
 			e.Accepted = e.Item is Task && !((Task)e.Item).Complete;
-		} 
+		}
 
 		#endregion
 
@@ -233,7 +233,7 @@ namespace Geowigo.ViewModels
 		{
 			// Cancels the back key event.
 			e.Cancel = true;
-			
+
 			// Ask if we really want to leave the game.
 			if (System.Windows.MessageBox.Show("Do you want to quit the game? (Your unsaved progress will be lost.)", "Exit to main menu?", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
 			{
@@ -257,7 +257,7 @@ namespace Geowigo.ViewModels
 				RefreshVisibilities();
 			}
 		}
-		
+
 		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
 		{
 			base.InitFromNavigation(navCtx);
@@ -280,7 +280,7 @@ namespace Geowigo.ViewModels
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
 			{
 				App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
-				
+
 				Cartridge = Model.Core.InitAndStartCartridge(filename);
 				//Model.Core.InitAndStartCartridgeAsync(filename, new Action<Cartridge>(c =>
 				//    {
@@ -359,7 +359,7 @@ namespace Geowigo.ViewModels
 
 			if (refreshAll || "ActiveVisibleTasks".Equals(propName))
 			{
-				int incompleteTasksCount = Model.Core.ActiveVisibleTasks.Select(t => !t.Complete).Count();
+				int incompleteTasksCount = Model.Core.ActiveVisibleTasks.Where(t => !t.Complete).Count();
 
 				AreCurrentTasksVisible = incompleteTasksCount > 0;
 				AreHistoryTasksVisible = Model.Core.ActiveVisibleTasks.Count - incompleteTasksCount > 0;

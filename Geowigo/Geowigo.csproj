@@ -117,6 +117,7 @@
     <Compile Include="ViewModels\InputViewModel.cs" />
     <Compile Include="ViewModels\MessageBoxManager.cs" />
     <Compile Include="ViewModels\SoundManager.cs" />
+    <Compile Include="ViewModels\TaskViewModel.cs" />
     <Compile Include="ViewModels\ThingViewModel.cs" />
     <Compile Include="Views\BasePage.cs" />
     <Compile Include="Views\GameHomePage.xaml.cs">

@@ -44,7 +44,7 @@
 	</Geowigo_Views:BasePage.Foreground>
 
 	<Geowigo_Views:BasePage.DataContext>
-		<Geowigo_ViewModels:BaseViewModel/>
+		<Geowigo_ViewModels:TaskViewModel/>
 	</Geowigo_Views:BasePage.DataContext>
 <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
@@ -61,11 +61,13 @@
         <ScrollViewer x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<StackPanel>
         		<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
-        		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,20"/>
+        		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,10"/>
+        		<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}"/>
         		<TextBlock TextWrapping="Wrap"/>
         		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description, FallbackValue=Description}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0" />
         	</StackPanel>
         </ScrollViewer>
+        <Image Source="windowsphone_grid_red_transparent.png" Stretch="None" Margin="0,-31,0,0" Grid.RowSpan="2" Visibility="Collapsed"/>
     <!--ContentPanel - placez tout contenu supplémentaire ici-->
     </Grid>
 
