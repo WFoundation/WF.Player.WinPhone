@@ -16,6 +16,7 @@ namespace Geowigo.Models
 		#region Members
 
 		private bool _isBusy = false;
+		private object _syncRoot = new object();
 
 		#endregion
 
@@ -92,9 +93,16 @@ namespace Geowigo.Models
 		/// <returns></returns>
 		public CartridgeTag GetCartridgeTag(Cartridge cartridge)
 		{
-			return this.SingleOrDefault(ct => ct.Cartridge.Guid == cartridge.Guid);
+			lock (_syncRoot)
+			{
+				return this.SingleOrDefault(ct => ct.Cartridge.Guid == cartridge.Guid); 
+			}
 		}
 
+		/// <summary>
+		/// Synchronizes the store from the Isolated Storage. Each Cartridge is
+		/// processed asynchronously.
+		/// </summary>
 		public void SyncFromIsoStore()
 		{
 			// Opens the isolated storage.
@@ -104,7 +112,7 @@ namespace Geowigo.Models
 				string[] dirs = isf.GetDirectoryNames(IsoStoreCartridgesPath);
 				if (dirs.Count() > 1)
 				{
-					System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStoreAsync: More than one cartridge directory: " + IsoStoreCartridgesPath);
+					System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStore: More than one cartridge directory: " + IsoStoreCartridgesPath);
 				}
 
 				// Business changes.
@@ -117,7 +125,7 @@ namespace Geowigo.Models
 					{
 						// Accept the GWC.
 						System.Diagnostics.Debug.WriteLine("CartridgeStore: Accepting cartridge " + filename);
-						AcceptCartridge(IsoStoreCartridgesPath + "/" + filename);
+						AcceptCartridgeAsync(IsoStoreCartridgesPath + "/" + filename);
 					}
 				}
 
@@ -126,17 +134,20 @@ namespace Geowigo.Models
 			}
 		}
 
-		public void SyncFromIsoStoreAsync()
-		{
-			System.ComponentModel.BackgroundWorker bw = new System.ComponentModel.BackgroundWorker();
-			bw.DoWork += new System.ComponentModel.DoWorkEventHandler((o, e) => SyncFromIsoStore());
-			bw.RunWorkerAsync();
-		}
-
-
 		#endregion
 
 		#region CartridgeContext Management
+
+		/// <summary>
+		/// Ensures asynchronously that a cartridge is present in the store.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge to consider.</param>
+		private void AcceptCartridgeAsync(string filename)
+		{
+			System.ComponentModel.BackgroundWorker bw = new System.ComponentModel.BackgroundWorker();
+			bw.DoWork += new System.ComponentModel.DoWorkEventHandler((o, e) => AcceptCartridge(filename));
+			bw.RunWorkerAsync();
+		}
 
 		/// <summary>
 		/// Ensures that a cartridge is present in the store.
@@ -161,7 +172,10 @@ namespace Geowigo.Models
 			}
 			
 			// Returns the existing cartridge if it was found.
-			existingCC = this.Items.SingleOrDefault(cc => cc.Guid == cart.Guid);
+			lock (_syncRoot)
+			{
+				existingCC = this.Items.SingleOrDefault(cc => cc.Guid == cart.Guid); 
+			}
 			if (existingCC != null)
 			{
 				return existingCC;
@@ -171,7 +185,10 @@ namespace Geowigo.Models
 			CartridgeTag newCC = new CartridgeTag(cart);
 
 			// Adds the context to the store.
-			this.Items.Add(newCC);
+			lock (_syncRoot)
+			{
+				this.Items.Add(newCC);
+			}
 
 			// Makes the cache.
 			newCC.ImportOrMakeCache();

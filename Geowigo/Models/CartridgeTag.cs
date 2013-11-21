@@ -181,7 +181,7 @@ namespace Geowigo.Models
 				}
 
 				// Sounds
-				MakeSoundsCache();
+				ImportOrMakeSoundsCache();
 			}
 		}
 
@@ -214,7 +214,7 @@ namespace Geowigo.Models
 			return GetCachePath(String.Format("{0}.{1}", media.MediaId, media.Type.ToString()));
 		}
 
-		private void MakeSoundsCache()
+		private void ImportOrMakeSoundsCache()
 		{
 			_soundFiles = new Dictionary<int, string>();
 

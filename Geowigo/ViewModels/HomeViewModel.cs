@@ -72,7 +72,7 @@ namespace Geowigo.ViewModels
 			App.Current.ViewModel.ClearBackStack();
 			
 			// Synchronizes the cartridge store.
-			Model.CartridgeStore.SyncFromIsoStoreAsync();
+			Model.CartridgeStore.SyncFromIsoStore();
 		}
 
 		private void StartCartridge(CartridgeTag cartTag)
