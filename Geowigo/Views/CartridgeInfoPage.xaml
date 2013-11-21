@@ -1,0 +1,69 @@
+﻿<Geowigo_Views:BasePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
+    xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
+    x:Class="Geowigo.Views.CartridgeInfoPage"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}">
+	<!--Exemple de code illustrant l'utilisation d'ApplicationBar--><!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton x:Name="appbar_button1" IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
+            <shell:ApplicationBarIconButton x:Name="appbar_button2" IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="menuItem1" Text="ÉlémentMenu 1"/>
+                <shell:ApplicationBarMenuItem x:Name="menuItem2" Text="ÉlémentMenu 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+	<Geowigo_Views:BasePage.FontFamily>
+		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
+	</Geowigo_Views:BasePage.FontFamily>
+	<Geowigo_Views:BasePage.FontSize>
+		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
+	</Geowigo_Views:BasePage.FontSize>
+	<Geowigo_Views:BasePage.Foreground>
+		<StaticResource ResourceKey="PhoneForegroundBrush"/>
+	</Geowigo_Views:BasePage.Foreground>
+    
+	<Geowigo_Views:BasePage.DataContext>
+		<Geowigo_ViewModels:CartridgeInfoViewModel/>
+	</Geowigo_Views:BasePage.DataContext>
+
+    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Image x:Name="PosterBackground" Source="{Binding CartridgeTag.Poster, Mode=OneWay}" Opacity="0.3" Stretch="UniformToFill"/>
+    <!--Contrôle Pivot-->
+        <controls:Pivot TitleTemplate="{StaticResource GamePivotTitleTemplate}" Title="{Binding}" SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}">
+            <!--Élément un de tableau croisé dynamique-->
+            <controls:PivotItem x:Name="InfoItem" Header="info">
+                <ScrollViewer>
+            		<StackPanel Height="580" Width="442">
+            			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            			<StackPanel Orientation="Horizontal" Margin="0">
+            				<TextBlock TextWrapping="Wrap" Text="by " Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.AuthorName, FallbackValue=author, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            			</StackPanel>
+            			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0"/>
+            		</StackPanel>
+            	</ScrollViewer>
+            </controls:PivotItem>
+
+            <!--Élément deux de tableau croisé dynamique-->
+            <controls:PivotItem x:Name="NavigateItem" Header="navigate">
+                <Grid/>
+            </controls:PivotItem>
+            <controls:PivotItem x:Name="SavegamesItem" Header="savegames">
+            	<Grid/>
+            </controls:PivotItem>
+        </controls:Pivot>
+        <Image Source="windowsphone_grid_red_transparent.png" Margin="0,-32,0,0" Stretch="None" Visibility="Collapsed"/>
+    </Grid>
+    
+</Geowigo_Views:BasePage>

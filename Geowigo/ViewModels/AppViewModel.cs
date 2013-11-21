@@ -174,6 +174,14 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Navigates the app to the info page of a cartridge.
+		/// </summary>
+		public void NavigateToCartridgeInfo(CartridgeTag tag)
+		{
+			App.Current.RootFrame.Navigate(new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}&{2}={3}", CartridgeInfoViewModel.CartridgeFilenameKey, tag.Cartridge.Filename, CartridgeInfoViewModel.CartridgeIdKey, tag.Guid), UriKind.Relative));
+		}
+
+		/// <summary>
 		/// Navigates the app to the view that best fits an Input object.
 		/// </summary>
 		/// <param name="wherigoObj"></param>

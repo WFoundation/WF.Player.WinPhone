@@ -187,7 +187,7 @@ namespace Geowigo.Utils
 			// Gets the dimensions of the target image.
 			int targetWidth = (int) Math.Max(minWidth, targetImage.PixelWidth);
 			double sourcePixelRatio = targetImage.PixelWidth / (double) targetImage.PixelHeight;
-			int targetHeight = (int) Math.Floor(targetImage.PixelHeight / sourcePixelRatio);
+			int targetHeight = (int) Math.Floor(targetWidth / sourcePixelRatio);
 			
 			// Saves the image.
 			using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Create))

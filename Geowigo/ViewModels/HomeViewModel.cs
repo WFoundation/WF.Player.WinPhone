@@ -59,6 +59,25 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region ShowCartridgeInfoCommand
+
+		private ICommand _ShowCartridgeInfoCommand;
+
+		public ICommand ShowCartridgeInfoCommand
+		{
+			get
+			{
+				if (_ShowCartridgeInfoCommand == null)
+				{
+					_ShowCartridgeInfoCommand = new RelayCommand<CartridgeTag>(ShowCartridgeInfo);
+				}
+
+				return _ShowCartridgeInfoCommand;
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		public HomeViewModel()
@@ -79,6 +98,12 @@ namespace Geowigo.ViewModels
 		{
 			// Starts the cartridge!
 			App.Current.ViewModel.NavigateToGameHome(cartTag.Cartridge.Filename);
+		}
+
+		private void ShowCartridgeInfo(CartridgeTag cartTag)
+		{
+			// Show the cartridge info!
+			App.Current.ViewModel.NavigateToCartridgeInfo(cartTag);
 		}
 	}
 }

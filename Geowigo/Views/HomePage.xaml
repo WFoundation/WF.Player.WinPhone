@@ -41,7 +41,7 @@
             <controls:PanoramaItem x:Name="CartridgePanoramaItem" Header="cartridges" Orientation="Horizontal">
             	<Grid>
             		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Path=Model.CartridgeStore.IsBusy}"/>
-            		<Geowigo_Controls:NavigationListBox ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding StartCartridgeCommand, Mode=OneWay}" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}" Margin="0,8,0,0" Height="490" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+            		<Geowigo_Controls:NavigationListBox ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}" Margin="0,8,0,0" Height="490" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             	</Grid>
             </controls:PanoramaItem>
 

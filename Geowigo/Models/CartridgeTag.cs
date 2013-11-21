@@ -177,7 +177,7 @@ namespace Geowigo.Models
 				}
 				else
 				{
-					Poster = ImageUtils.SaveThumbnail(isf, GetCachePath("poster.jpg"), Cartridge.Poster, null, BigThumbnailMinWidth);
+					Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, BigThumbnailMinWidth);
 				}
 
 				// Sounds

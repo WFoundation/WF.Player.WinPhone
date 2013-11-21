@@ -1,0 +1,178 @@
+﻿using System;
+using Geowigo.Models;
+using System.Windows;
+using System.Collections;
+using Microsoft.Phone.Shell;
+using System.Collections.Generic;
+using System.Windows.Input;
+using Geowigo.Controls;
+
+namespace Geowigo.ViewModels
+{
+	public class CartridgeInfoViewModel : BaseViewModel
+	{
+		public static readonly string CartridgeFilenameKey = "filename";
+		public static readonly string CartridgeIdKey = "cid";
+		
+		#region Dependency Properties
+
+		#region CartridgeTag
+
+
+		public CartridgeTag CartridgeTag
+		{
+			get { return (CartridgeTag)GetValue(CartridgeTagProperty); }
+			set { SetValue(CartridgeTagProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for CartridgeTag.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty CartridgeTagProperty =
+			DependencyProperty.Register("CartridgeTag", typeof(CartridgeTag), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+		
+		#endregion
+
+		#region SelectedIndex
+
+
+		public int SelectedIndex
+		{
+			get { return (int)GetValue(SelectedIndexProperty); }
+			set { SetValue(SelectedIndexProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for SelectedIndex.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty SelectedIndexProperty =
+			DependencyProperty.Register("SelectedIndex", typeof(int), typeof(CartridgeInfoViewModel), new PropertyMetadata(0));
+
+
+		#endregion
+
+		#region ApplicationBar
+
+
+		public IApplicationBar ApplicationBar
+		{
+			get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
+			set { SetValue(ApplicationBarProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty ApplicationBarProperty =
+			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+
+		#endregion
+
+		#endregion
+
+		#region Commands
+
+		#region StartNewGameCommand
+
+		private ICommand _startNewGameCommand;
+
+		/// <summary>
+		/// Gets a command to start a new game.
+		/// </summary>
+		public ICommand StartNewGameCommand
+		{
+			get
+			{
+				return _startNewGameCommand ?? (_startNewGameCommand = new RelayCommand(StartNewGame));
+			}
+		}
+
+		#endregion
+
+		#endregion
+
+		#region Members
+
+		private IApplicationBar _appBarInfo;
+
+		#endregion
+		
+		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
+		{
+			// Parses the cartridge guid parameter and tries to get its tag.
+			string filenameParam;
+			string cidParam;
+			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filenameParam) && 
+				navCtx.QueryString.TryGetValue(CartridgeIdKey, out cidParam))
+			{
+				CartridgeTag = Model.CartridgeStore.GetCartridgeTag(filenameParam, cidParam);
+
+				if (CartridgeTag != null)
+				{
+					Cartridge = CartridgeTag.Cartridge;
+					WherigoObject = CartridgeTag.Cartridge;
+				}
+
+				// TODO: Handle case where CartridgeTag == null
+
+				// Refreshes the application bar.
+				RefreshAppBar();
+			}
+		}
+
+		#region Menu Actions
+
+		private void StartNewGame()
+		{
+			// Starts a new game!
+			App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename);
+		}
+
+		#endregion
+
+		#region Application Bar
+		private void RefreshAppBar()
+		{
+			switch (SelectedIndex)
+			{
+				case 0:
+					if (_appBarInfo == null)
+					{
+						MakeAppBarForInfo();
+					}
+					ApplicationBar = _appBarInfo;
+					
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		private void MakeAppBarForInfo()
+		{
+			_appBarInfo = new Microsoft.Phone.Shell.ApplicationBar();
+			
+			// Creates and adds the buttons.
+			ApplicationBarIconButton btnPlay = CreateButton("appbar.transport.play.rest.png", StartNewGameCommand, "start");
+			_appBarInfo.Buttons.Add(btnPlay);
+		}
+
+		private ApplicationBarIconButton CreateButton(string iconFilenameRelative, ICommand command, string	text)
+		{
+			ApplicationBarIconButton btn = new ApplicationBarIconButton(new Uri("/icons/" + iconFilenameRelative, UriKind.Relative));
+
+			// First-time values.
+			btn.IsEnabled = command.CanExecute(btn);
+			btn.Text = text;
+
+			// Adds click handler to execute the command upon click.
+			btn.Click += (o, e) =>
+			{
+				if (command.CanExecute(btn))
+				{
+					command.Execute(btn);
+				}
+			};
+
+			return btn;
+		}
+		#endregion
+	}
+}

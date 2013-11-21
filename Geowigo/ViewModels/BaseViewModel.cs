@@ -48,6 +48,7 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region AppTitle
 		/// <summary>
 		/// Gets the application title.
 		/// </summary>
@@ -57,7 +58,8 @@ namespace Geowigo.ViewModels
 			{
 				return App.Current.ViewModel.AppTitle;
 			}
-		}
+		} 
+		#endregion
 
 		#endregion
 		

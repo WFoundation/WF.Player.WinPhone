@@ -100,6 +100,37 @@ namespace Geowigo.Models
 		}
 
 		/// <summary>
+		/// Gets the single CartridgeTag for a cartridge filename and a GUID.
+		/// </summary>
+		/// <remarks>This method looks for a tag with similar GUID. If not found,
+		/// it tries to load the cartridge at the specified filename and returns
+		/// its tag if the GUIDs match.</remarks>
+		/// <param name="filename">Filename of the cartridge.</param>
+		/// <param name="guid">Guid of the Cartridge to get.</param>
+		/// <returns>Null if the tag was not found.</returns>
+		public CartridgeTag GetCartridgeTag(string filename, string guid)
+		{
+			CartridgeTag tag = null;
+			lock (_syncRoot)
+			{
+				// Tries to get the tag if it is registered already.
+				tag = this.SingleOrDefault(ct => ct.Cartridge.Guid == guid);
+			}
+
+			// If the tag is found, returns it.
+			if (tag != null)
+			{
+				return tag;
+			}
+
+			// Tries to accept the tag from filename.
+			tag = AcceptCartridge(filename);
+
+			// Only returns the tag if both GUIDs match.
+			return tag.Guid == guid ? tag : null;
+		}
+
+		/// <summary>
 		/// Synchronizes the store from the Isolated Storage. Each Cartridge is
 		/// processed asynchronously.
 		/// </summary>
