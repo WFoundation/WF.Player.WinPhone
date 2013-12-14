@@ -73,15 +73,15 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Gets the underlying WherigoObject that this ViewModel is bound to, if any.
 		/// </summary>
-		public Table WherigoObject
+        public WherigoObject WherigoObject
 		{
-			get { return (Table)GetValue(WherigoObjectProperty); }
+            get { return (WherigoObject)GetValue(WherigoObjectProperty); }
 			protected set { SetValue(WherigoObjectProperty, value); }
 		}
 
 		// Using a DependencyProperty as the backing store for WherigoObject.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty WherigoObjectProperty =
-			DependencyProperty.Register("WherigoObject", typeof(Table), typeof(BaseViewModel), new PropertyMetadata(null, WherigoObjectProperty_PropertyChanged));
+            DependencyProperty.Register("WherigoObject", typeof(WherigoObject), typeof(BaseViewModel), new PropertyMetadata(null, WherigoObjectProperty_PropertyChanged));
 
 		private static void WherigoObjectProperty_PropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
 		{
@@ -144,8 +144,8 @@ namespace Geowigo.ViewModels
 				int WidParam;
 				if (int.TryParse(rawWidParam, out WidParam))
 				{
-					Table wObject;
-					if (this.Model.Core.TryGetWherigoObject<Table>(WidParam, out wObject))
+                    WherigoObject wObject;
+                    if (this.Model.Core.TryGetWherigoObject<WherigoObject>(WidParam, out wObject))
 					{
 						// The object has been found: keep it.
 						this.WherigoObject = wObject;
@@ -219,8 +219,8 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Called when the associated Wherigo object has changed.
 		/// </summary>
-		/// <param name="table"></param>
-		protected virtual void OnWherigoObjectChanged(Table table)
+		/// <param name="obj"></param>
+        protected virtual void OnWherigoObjectChanged(WherigoObject obj)
 		{
 			
 		}
@@ -242,7 +242,7 @@ namespace Geowigo.ViewModels
 			}
 
 			// Propagates the event.
-			OnWherigoObjectChanged(e.NewValue as Table);
+            OnWherigoObjectChanged(e.NewValue as WherigoObject);
 		}
 
 		private void WherigoObject_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

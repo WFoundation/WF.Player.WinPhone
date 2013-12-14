@@ -173,6 +173,20 @@ namespace Geowigo.ViewModels
 			App.Current.RootFrame.Navigate(new Uri(String.Format("/Views/GameHomePage.xaml?{0}={1}&{2}={3}", GameHomeViewModel.CartridgeFilenameKey, filename, GameHomeViewModel.SectionKey, section), UriKind.Relative));
 		}
 
+        /// <summary>
+        /// Navigates the app to the game main page of a cartridge and restores a
+        /// savegame.
+        /// </summary>
+        public void NavigateToGameHome(string filename, CartridgeSavegame savegame)
+        {
+            App.Current.RootFrame.Navigate(new Uri(String.Format(
+                "/Views/GameHomePage.xaml?{0}={1}&{2}={3}", 
+                GameHomeViewModel.CartridgeFilenameKey, 
+                filename,
+                GameHomeViewModel.SavegameFilenameKey,
+                savegame.SavegameFile), UriKind.Relative));
+        }
+
 		/// <summary>
 		/// Navigates the app to the info page of a cartridge.
 		/// </summary>
@@ -324,7 +338,7 @@ namespace Geowigo.ViewModels
 		{
 			// Gets the media filename in cache.
 			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
-			string filename = tag.GetCachedFilename(media);
+			string filename = tag.GetCachePath(media);
 
 			// Plays the file.
 			SoundManager.PlaySound(filename);
@@ -337,6 +351,31 @@ namespace Geowigo.ViewModels
 		{
 			SoundManager.StopSounds();
 		}
+
+        /// <summary>
+        /// Starts the protocol of saving the current game.
+        /// </summary>
+        public void SaveGame()
+        {
+            // Gets a new random CartridgeSavegame.
+            CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
+            CartridgeSavegame cs = new CartridgeSavegame(tag);
+
+            // Displays a message box.
+            System.Windows.MessageBox.Show("The savegame " + cs.Name + "will be now saved.");
+
+            // Shows progress to the user.
+            App.Current.ViewModel.SetSystemTrayProgressIndicator("Saving game...");
+
+            // Performs the savegame.
+            Model.Core.Save(cs);
+
+            // Adds the savegame to the tag.
+            tag.AddSavegame(cs);
+
+            // Shows progress to the user.
+            App.Current.ViewModel.SetSystemTrayProgressIndicator(isVisible: false);
+        }
 
 		#endregion
 

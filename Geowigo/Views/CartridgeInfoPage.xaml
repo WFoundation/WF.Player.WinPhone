@@ -44,11 +44,11 @@
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="InfoItem" Header="info">
                 <ScrollViewer>
-            		<StackPanel Height="580" Width="442">
+            		<StackPanel>
             			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
             			<StackPanel Orientation="Horizontal" Margin="0">
             				<TextBlock TextWrapping="Wrap" Text="by " Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.AuthorName, FallbackValue=author, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.AuthorName, FallbackValue=unknown author, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
             			</StackPanel>
             			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0"/>
             		</StackPanel>
@@ -60,7 +60,9 @@
                 <Grid/>
             </controls:PivotItem>
             <controls:PivotItem x:Name="SavegamesItem" Header="savegames">
-            	<Grid/>
+            	<Grid>
+            		<Geowigo_Controls:NavigationListBox ItemsSource="{Binding CartridgeTag.Savegames, Mode=OneWay}" NavigationCommand="{Binding ResumeGameCommand, Mode=OneWay}"/>
+            	</Grid>
             </controls:PivotItem>
         </controls:Pivot>
         <Image Source="windowsphone_grid_red_transparent.png" Margin="0,-32,0,0" Stretch="None" Visibility="Collapsed"/>

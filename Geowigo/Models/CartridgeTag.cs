@@ -47,6 +47,7 @@ namespace Geowigo.Models
 		private ImageSource _thumbnail;
 		private ImageSource _poster;
 		private Dictionary<int, string> _soundFiles;
+        private List<CartridgeSavegame> _savegames;
 
 		#endregion
 		
@@ -125,6 +126,17 @@ namespace Geowigo.Models
 			}
 		}
 
+        /// <summary>
+        /// Gets the available savegames for the cartridge.
+        /// </summary>
+        public IEnumerable<CartridgeSavegame> Savegames
+        {
+            get
+            {
+                return _savegames;
+            }
+        }
+
 		#endregion
 
 		#region Constructors
@@ -159,7 +171,7 @@ namespace Geowigo.Models
 				isf.CreateDirectory(PathToCache);
 
 				// Thumbnail
-				string thumbCachePath = GetCachePath(ThumbCacheFilename);
+				string thumbCachePath = GetCachePathCore(ThumbCacheFilename);
 				if (isf.FileExists(thumbCachePath))
 				{
 					Thumbnail = ImageUtils.GetBitmapSource(thumbCachePath, isf);
@@ -170,7 +182,7 @@ namespace Geowigo.Models
 				}
 
 				// Poster
-				string posterCachePath = GetCachePath(PosterCacheFilename);
+				string posterCachePath = GetCachePathCore(PosterCacheFilename);
 				if (isf.FileExists(posterCachePath))
 				{
 					Poster = ImageUtils.GetBitmapSource(posterCachePath, isf);
@@ -181,7 +193,10 @@ namespace Geowigo.Models
 				}
 
 				// Sounds
-				ImportOrMakeSoundsCache();
+				ImportOrMakeSoundsCache(isf);
+
+                // Savegames
+                ImportSavegamesCache(isf);
 			}
 		}
 
@@ -190,9 +205,9 @@ namespace Geowigo.Models
 		/// </summary>
 		/// <param name="media"></param>
 		/// <returns>The isostore path of the media if it is cached, null otherwise.</returns>
-		public string GetCachedFilename(Media media)
+		public string GetCachePath(Media media)
 		{
-			string filename = GetCachePath(media);
+			string filename = GetCachePathCore(media);
 
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -200,45 +215,87 @@ namespace Geowigo.Models
 			}
 		}
 
+        /// <summary>
+        /// Adds a savegame to this tag.
+        /// </summary>
+        /// <param name="cs">The savegame to add.</param>
+        public void AddSavegame(CartridgeSavegame cs)
+        {
+            // Makes sure the savegame is exported to the cache.
+            cs.ExportToCache();
+            
+            // Adds the savegame.
+            _savegames.Add(cs);
+
+            // Notifies of a change.
+            RaisePropertyChanged("Savegames");
+        }
+
 		#endregion
 
 		#region Private Methods
 
-		private string GetCachePath(string filename)
+		private string GetCachePathCore(string filename)
 		{
 			return PathToCache + "/" + filename;
 		}
 
-		private string GetCachePath(Media media)
+		private string GetCachePathCore(Media media)
 		{
-			return GetCachePath(String.Format("{0}.{1}", media.MediaId, media.Type.ToString()));
+			return GetCachePathCore(String.Format("{0}.{1}", media.MediaId, media.Type.ToString()));
 		}
 
-		private void ImportOrMakeSoundsCache()
+		private void ImportOrMakeSoundsCache(IsolatedStorageFile isf)
 		{
 			_soundFiles = new Dictionary<int, string>();
 
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			foreach (var sound in Cartridge.Resources.Where(m => m.Type == MediaType.MP3 || m.Type == MediaType.WAV))
 			{
-				foreach (var sound in Cartridge.Resources.Where(m => m.Type == MediaType.MP3 || m.Type == MediaType.WAV))
+				// Copies the sound file to the cache if it doesn't exist already.
+				string cacheFilename = GetCachePathCore(sound);
+				if (!isf.FileExists(cacheFilename))
 				{
-					// Copies the sound file to the cache if it doesn't exist already.
-					string cacheFilename = GetCachePath(sound);
-					if (!isf.FileExists(cacheFilename))
+					using (IsolatedStorageFileStream fs = isf.CreateFile(cacheFilename))
 					{
-						using (IsolatedStorageFileStream fs = isf.CreateFile(cacheFilename))
-						{
-							fs.Write(sound.Data, 0, sound.Data.Length);
-						}
+						fs.Write(sound.Data, 0, sound.Data.Length);
 					}
-
-					// Adds the sound filename to the dictionary.
-					_soundFiles.Add(sound.MediaId, cacheFilename);
 				}
+
+				// Adds the sound filename to the dictionary.
+				_soundFiles.Add(sound.MediaId, cacheFilename);
 			}
 
 			RaisePropertyChanged("Sounds");
-		} 
+		}
+
+        private void ImportSavegamesCache(IsolatedStorageFile isf)
+        {
+            string[] gwsFiles = isf.GetFileNames(GetCachePathCore("*.gws"));
+            if (gwsFiles == null)
+            {
+                return;
+            }
+
+            // For each file, imports its metadata.
+            List<CartridgeSavegame> cSavegames = new List<CartridgeSavegame>();
+            foreach (string file in gwsFiles)
+            {
+                try
+                {
+                    cSavegames.Add(CartridgeSavegame.FromCache(GetCachePathCore(file), isf));
+                }
+                catch (Exception ex)
+                {
+                    // Outputs the exception.
+                    System.Diagnostics.Debug.WriteLine("CartridgeTag: WARNING: Exception during savegame import.");
+                    DebugUtils.DumpException(ex);
+                }
+            }
+
+            // Sets the savegame list.
+            _savegames = cSavegames;
+            RaisePropertyChanged("Savegames");
+        }
 
 		private void RaisePropertyChanged(string propName)
 		{
@@ -253,5 +310,7 @@ namespace Geowigo.Models
 
 		#endregion
 
-	}
+
+
+    }
 }

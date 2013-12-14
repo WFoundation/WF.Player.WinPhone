@@ -53,9 +53,9 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		protected override void OnWherigoObjectChanged(Table table)
+		protected override void OnWherigoObjectChanged(WherigoObject obj)
 		{
-			if (table != null)
+			if (obj != null)
 			{
 				RefreshStatusText();
 			}

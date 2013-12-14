@@ -15,17 +15,26 @@ using System.Linq;
 using Geowigo.Controls;
 using Microsoft.Phone.Controls;
 using System.Windows.Data;
+using Microsoft.Phone.Shell;
+using Geowigo.Utils;
+using Geowigo.Models;
+using System.IO.IsolatedStorage;
 
 namespace Geowigo.ViewModels
 {
 	public class GameHomeViewModel : BaseViewModel
 	{
-		public static readonly string CartridgeFilenameKey = "cartFilename";
-		public static readonly string SectionKey = "section";
-		public static readonly string SectionValue_Overview = "overview";
-		public static readonly string SectionValue_World = "world";
-		public static readonly string SectionValue_Inventory = "inventory";
-		public static readonly string SectionValue_Tasks = "tasks";
+        #region Constants
+        public static readonly string CartridgeFilenameKey = "cartFilename";
+
+        public static readonly string SectionKey = "section";
+        public static readonly string SectionValue_Overview = "overview";
+        public static readonly string SectionValue_World = "world";
+        public static readonly string SectionValue_Inventory = "inventory";
+        public static readonly string SectionValue_Tasks = "tasks";
+
+        public static readonly string SavegameFilenameKey = "gwsFilename";
+        #endregion
 
 		#region Dependency Properties
 
@@ -158,6 +167,22 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region ApplicationBar
+
+
+        public IApplicationBar ApplicationBar
+        {
+            get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
+            set { SetValue(ApplicationBarProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ApplicationBarProperty =
+            DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(GameHomeViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
 		#endregion
 
 		#region Commands
@@ -195,6 +220,23 @@ namespace Geowigo.ViewModels
 		}
 
 		#endregion
+
+        #region SaveGameCommand
+
+        private ICommand _SaveGameCommand;
+
+        /// <summary>
+        /// Gets a command to save the game.
+        /// </summary>
+        public ICommand SaveGameCommand
+        {
+            get
+            {
+                return _SaveGameCommand ?? (_SaveGameCommand = new RelayCommand(StartSaveGame));
+            }
+        }
+
+        #endregion
 
 		#endregion
 
@@ -269,6 +311,9 @@ namespace Geowigo.ViewModels
 				ShowSection(section);
 			}
 
+            // Refreshes the application bar.
+            RefreshAppBar();
+
 			// Nothing more to do if a cartridge exists already.
 			if (Cartridge != null)
 			{
@@ -279,13 +324,21 @@ namespace Geowigo.ViewModels
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
 			{
-				App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
+                string gwsFilename;
 
-				Cartridge = Model.Core.InitAndStartCartridge(filename);
-				//Model.Core.InitAndStartCartridgeAsync(filename, new Action<Cartridge>(c =>
-				//    {
-				//        Dispatcher.BeginInvoke(new Action(() => Cartridge = c));
-				//    }));
+                // Restores the cartridge or starts a new game?
+                if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))
+                {
+                    App.Current.ViewModel.SetSystemTrayProgressIndicator("Loading savegame...");
+
+                    Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
+                }
+                else
+                {
+                    App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
+
+                    Cartridge = Model.Core.InitAndStartCartridge(filename);
+                }
 			}
 
 			// TODO: Cancel nav if no cartridge in parameter?
@@ -377,5 +430,31 @@ namespace Geowigo.ViewModels
 				IsWorldEmpty = !AreZonesVisible && !AreObjectsVisible;
 			}
 		}
+
+        /// <summary>
+        /// Refreshes the application bar.
+        /// </summary>
+        private void RefreshAppBar()
+        {
+            if (ApplicationBar != null)
+            {
+                return;
+            }
+
+            // Creates the app bar.
+            ApplicationBar = new ApplicationBar();
+
+            // Adds the savegame menu item.
+            ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
+        }
+
+        /// <summary>
+        /// Starts the process of saving a game.
+        /// </summary>
+        private void StartSaveGame()
+        {
+            // Saves the game!
+            App.Current.ViewModel.SaveGame();
+        }
 	}
 }

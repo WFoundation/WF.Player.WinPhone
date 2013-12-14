@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Windows;
+using System.ComponentModel;
 
 namespace Geowigo.Models
 {
@@ -131,43 +132,60 @@ namespace Geowigo.Models
 		}
 
 		/// <summary>
-		/// Synchronizes the store from the Isolated Storage. Each Cartridge is
-		/// processed asynchronously.
+		/// Synchronizes the store from the Isolated Storage.
 		/// </summary>
 		public void SyncFromIsoStore()
 		{
-			// Opens the isolated storage.
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-			{
-				// Checks if the Cartridge folder exists.
-				string[] dirs = isf.GetDirectoryNames(IsoStoreCartridgesPath);
-				if (dirs.Count() > 1)
-				{
-					System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStore: More than one cartridge directory: " + IsoStoreCartridgesPath);
-				}
-
-				// Business changes.
-				IsBusy = true;
-
-				foreach (string dir in dirs)
-				{
-					// Imports all GWC files from the directory.
-					foreach (string filename in isf.GetFileNames(IsoStoreCartridgesPath + "/*.gwc"))
-					{
-						// Accept the GWC.
-						System.Diagnostics.Debug.WriteLine("CartridgeStore: Accepting cartridge " + filename);
-						AcceptCartridgeAsync(IsoStoreCartridgesPath + "/" + filename);
-					}
-				}
-
-				// Business changes.
-				IsBusy = false;
-			}
+            BackgroundWorker bw = new BackgroundWorker();
+            
+            bw.DoWork += (o, e) => { 
+                SyncFromIsoStoreCore(false); 
+            };
+            
+            bw.RunWorkerAsync();
 		}
+
+        private void SyncFromIsoStoreCore(bool asyncEachCartridge)
+        {
+            // Opens the isolated storage.
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Checks if the Cartridge folder exists.
+                string[] dirs = isf.GetDirectoryNames(IsoStoreCartridgesPath);
+                if (dirs.Count() > 1)
+                {
+                    System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStore: More than one cartridge directory: " + IsoStoreCartridgesPath);
+                }
+
+                // Business changes.
+                IsBusy = true;
+
+                foreach (string dir in dirs)
+                {
+                    // Imports all GWC files from the directory.
+                    foreach (string filename in isf.GetFileNames(IsoStoreCartridgesPath + "/*.gwc"))
+                    {
+                        // Accept the GWC.
+                        if (asyncEachCartridge)
+                        {
+                            AcceptCartridgeAsync(IsoStoreCartridgesPath + "/" + filename);
+                        }
+                        else
+                        {
+                            AcceptCartridge(IsoStoreCartridgesPath + "/" + filename);
+                        }
+                        
+                    }
+                }
+
+                // Business changes.
+                IsBusy = false;
+            }
+        }
 
 		#endregion
 
-		#region CartridgeContext Management
+		#region Cartridge Tags Management
 
 		/// <summary>
 		/// Ensures asynchronously that a cartridge is present in the store.
@@ -175,7 +193,7 @@ namespace Geowigo.Models
 		/// <param name="filename">Filename of the cartridge to consider.</param>
 		private void AcceptCartridgeAsync(string filename)
 		{
-			System.ComponentModel.BackgroundWorker bw = new System.ComponentModel.BackgroundWorker();
+			BackgroundWorker bw = new BackgroundWorker();
 			bw.DoWork += new System.ComponentModel.DoWorkEventHandler((o, e) => AcceptCartridge(filename));
 			bw.RunWorkerAsync();
 		}
@@ -188,7 +206,9 @@ namespace Geowigo.Models
 		/// if there was none in store for this cartridge.</returns>
 		private CartridgeTag AcceptCartridge(string filename)
 		{
-			// Creates a cartridge object.
+            System.Diagnostics.Debug.WriteLine("CartridgeStore: Accepting cartridge " + filename);
+            
+            // Creates a cartridge object.
 			Cartridge cart = new Cartridge(filename);
 
 			// Loads the cartridge.

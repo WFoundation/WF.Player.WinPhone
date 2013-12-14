@@ -8,7 +8,7 @@
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="True"
 	x:Name="This"
-	toolkit:TiltEffect.IsTiltEnabled="True">
+	toolkit:TiltEffect.IsTiltEnabled="True" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
 
 		<Style x:Key="OverviewListHeaderTextBlockStyle" TargetType="TextBlock">

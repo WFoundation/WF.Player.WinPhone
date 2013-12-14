@@ -68,6 +68,7 @@
       <HintPath>..\libs\PhoneCodeContractsAssemblies.dll</HintPath>
     </Reference>
     <Reference Include="System.Device" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows" />
     <Reference Include="system" />
     <Reference Include="System.Core" />
@@ -101,6 +102,7 @@
     <Compile Include="Converters\UIObjectToNameConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
     <Compile Include="Mockups\InputMockup.cs" />
+    <Compile Include="Models\CartridgeSavegame.cs" />
     <Compile Include="Models\CartridgeTag.cs" />
     <Compile Include="Models\WFCoreAdapter.cs" />
     <Compile Include="Models\WherigoModel.cs" />
@@ -108,6 +110,7 @@
     <Compile Include="Models\CartridgeStore.cs" />
     <Compile Include="Utils\DebugUtils.cs" />
     <Compile Include="Utils\ImageUtils.cs" />
+    <Compile Include="Utils\ShellExtensions.cs" />
     <Compile Include="Utils\ThreadingExtensions.cs" />
     <Compile Include="Utils\VisualTreeExtensions.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />

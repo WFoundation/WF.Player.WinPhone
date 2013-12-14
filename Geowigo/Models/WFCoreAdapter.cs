@@ -113,55 +113,60 @@ namespace Geowigo.Models
 			return cart;
 		}
 
-		public void InitAndStartCartridgeAsync(string filename, Action<Cartridge> callback)
-		{
-			BackgroundWorker bw = new BackgroundWorker();
-			bw.DoWork += (o, e) =>
-			{
-				callback(InitAndStartCartridge(filename));
-			};
-			bw.RunWorkerAsync();
-		}
+        /// <summary>
+        /// Starts to play a Wherigo cartridge game.
+        /// </summary>
+        /// <param name="filename">Filename of the cartridge in the isolated storage.</param>
+        /// <param name="gwsFilename">Filename of the savegame to restore.</param>
+        public Cartridge InitAndRestoreCartridge(string filename, string gwsFilename)
+        {
+            // Boot Time: inits the cartridge and process position.
+            Cartridge cart = new Cartridge(filename);
 
-		/// <summary>
-		/// Gets a Wherigo object that has a certain id.
-		/// </summary>
-		/// <typeparam name="T">Type of the object to expect, subclass of Table.</typeparam>
-		/// <param name="id">Id of the object to get.</param>
-		/// <returns>A wherigo object of the expected type.</returns>
-		/// <exception cref="InvalidOperationException">No object with such Id exists, or the object is not of the
-		/// required type.</exception>
-		public T GetWherigoObject<T>(int id) where T : Table
-		{
-			Table wobj = GetObject(id);
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream fs = isf.OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                {
+                    Init(fs, cart);
+                } 
+            
+                ProcessPosition(_LastKnownPosition);
 
-			if (wobj == null)
-			{
-				throw new InvalidOperationException("No wherigo object has id " + id);
-			}
+                // Run Time: the game starts.
 
-			if (!(wobj is T))
-			{
-				throw new InvalidOperationException(String.Format("The wherigo object with id {0} has type {1} but not {2}.", id, wobj.GetType().ToString(), typeof(T).ToString()));
-			}
+                using (IsolatedStorageFileStream fs = isf.OpenFile(gwsFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                {
+                    Restore(fs);
+                } 
+            }
 
-			return (T)wobj;
-		}
+            return cart;
+        }
 
-		/// <summary>
-		/// Gets a Wherigo object that has a certain id.
-		/// </summary>
-		/// <typeparam name="T">Type of the object to expect, subclass of Table.</typeparam>
-		/// <param name="id">Id of the object to get.</param>
-		/// <param name="wObj">A wherigo object of the expected type, or null if it wasn't found or is not
-		/// of the expected type.</param>
-		/// <returns>True if the method returned, false otherwise.</returns>
-		public bool TryGetWherigoObject<T>(int id, out T wObj) where T : Table
-		{
-			wObj = GetObject(id) as T;
+        //public void InitAndStartCartridgeAsync(string filename, Action<Cartridge> callback)
+        //{
+        //    BackgroundWorker bw = new BackgroundWorker();
+        //    bw.DoWork += (o, e) =>
+        //    {
+        //        callback(InitAndStartCartridge(filename));
+        //    };
+        //    bw.RunWorkerAsync();
+        //}
 
-			return wObj != null;
-		}
+        /// <summary>
+        /// Saves the game to a CartridgeSavegame object.
+        /// </summary>
+        /// <param name="cs">The CartridgeSavegame representing the savegame.</param>
+        public void Save(CartridgeSavegame cs)
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (System.IO.Stream fs = cs.CreateOrReplace(isf))
+                {
+                    Save(fs);
+                }
+            }
+        }
 
 		#region Location Service Events Handlers
 		
@@ -265,6 +270,5 @@ namespace Geowigo.Models
 		{
 			Debug.WriteLine("[DEBUG] " + message);
 		}
-
-	}
+    }
 }

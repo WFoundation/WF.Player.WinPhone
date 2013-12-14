@@ -6,6 +6,7 @@ using Microsoft.Phone.Shell;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Geowigo.Controls;
+using Geowigo.Utils;
 
 namespace Geowigo.ViewModels
 {
@@ -85,6 +86,21 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region ResumeGameCommand
+        private ICommand _resumeGameCommand;
+
+        /// <summary>
+        /// Gets a command to resume a saved game.
+        /// </summary>
+        public ICommand ResumeGameCommand
+        {
+            get
+            {
+                return _resumeGameCommand ?? (_resumeGameCommand = new RelayCommand<CartridgeSavegame>(ResumeGame));
+            }
+        }
+        #endregion
+
 		#endregion
 
 		#region Members
@@ -124,6 +140,12 @@ namespace Geowigo.ViewModels
 			App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename);
 		}
 
+        private void ResumeGame(CartridgeSavegame savegame)
+        {
+            // Resumes the game!
+            App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename, savegame);
+        }
+
 		#endregion
 
 		#region Application Bar
@@ -150,28 +172,7 @@ namespace Geowigo.ViewModels
 			_appBarInfo = new Microsoft.Phone.Shell.ApplicationBar();
 			
 			// Creates and adds the buttons.
-			ApplicationBarIconButton btnPlay = CreateButton("appbar.transport.play.rest.png", StartNewGameCommand, "start");
-			_appBarInfo.Buttons.Add(btnPlay);
-		}
-
-		private ApplicationBarIconButton CreateButton(string iconFilenameRelative, ICommand command, string	text)
-		{
-			ApplicationBarIconButton btn = new ApplicationBarIconButton(new Uri("/icons/" + iconFilenameRelative, UriKind.Relative));
-
-			// First-time values.
-			btn.IsEnabled = command.CanExecute(btn);
-			btn.Text = text;
-
-			// Adds click handler to execute the command upon click.
-			btn.Click += (o, e) =>
-			{
-				if (command.CanExecute(btn))
-				{
-					command.Execute(btn);
-				}
-			};
-
-			return btn;
+			_appBarInfo.CreateAndAddButton("appbar.transport.play.rest.png", StartNewGameCommand, "start");
 		}
 		#endregion
 	}

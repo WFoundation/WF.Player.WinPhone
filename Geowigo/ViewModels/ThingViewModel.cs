@@ -179,7 +179,7 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		protected override void OnWherigoObjectChanged(Table table)
+        protected override void OnWherigoObjectChanged(WherigoObject obj)
 		{
 			RefreshVisibilities();
 		}
