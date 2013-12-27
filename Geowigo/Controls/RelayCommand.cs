@@ -79,7 +79,7 @@ namespace Geowigo.Controls
 	/// </summary>
 	public class RelayCommand : ICommand
 	{
-		private bool _CanExecute = true;
+		private Func<bool> _CanExecute;
 		private Action _Execute;
 
 		public event EventHandler CanExecuteChanged;
@@ -87,11 +87,18 @@ namespace Geowigo.Controls
 		public RelayCommand(Action execute)
 		{
 			_Execute = execute;
+            _CanExecute = () => { return true; };
 		}
+
+        public RelayCommand(Action execute, Func<bool> canExecute)
+        {
+            _Execute = execute;
+            _CanExecute = canExecute;
+        }
 
 		public bool CanExecute(object parameter)
 		{
-			return _CanExecute;
+			return _CanExecute();
 		}
 
 		public void Execute(object parameter)

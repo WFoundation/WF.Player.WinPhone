@@ -355,11 +355,14 @@ namespace Geowigo.ViewModels
         /// <summary>
         /// Starts the protocol of saving the current game.
         /// </summary>
-        public void SaveGame()
+        public void SaveGame(bool isAutoSave)
         {
             // Gets a new random CartridgeSavegame.
             CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
-            CartridgeSavegame cs = new CartridgeSavegame(tag);
+            CartridgeSavegame cs = new CartridgeSavegame(tag)
+            {
+                IsAutosave = isAutoSave
+            };
 
             // Displays a message box.
             System.Windows.MessageBox.Show("The savegame " + cs.Name + "will be now saved.");
@@ -388,9 +391,9 @@ namespace Geowigo.ViewModels
 			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
 			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 			model.Core.StopSoundsRequested += new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
+            model.Core.SaveRequested += new EventHandler<SavingEventArgs>(Core_SaveRequested);
 
 			// Temp debug
-			model.Core.SaveRequested += new EventHandler<SavingEventArgs>(Core_SaveRequested);
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
 			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
 		}
@@ -402,6 +405,7 @@ namespace Geowigo.ViewModels
 			model.Core.ShowScreenRequested -= new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
 			model.Core.PlayMediaRequested -= new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 			model.Core.StopSoundsRequested -= new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
+            model.Core.SaveRequested -= new EventHandler<SavingEventArgs>(Core_SaveRequested);
 		}
 		
 
@@ -419,16 +423,21 @@ namespace Geowigo.ViewModels
 			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
 		}
 
-		void Core_SaveRequested(object sender, SavingEventArgs e)
-		{
-			System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
-
-			// 1. Save game.
-			// 2. If e.CloseAfterSave, close the game.
-		}
-
-
 		#region Model Event Handlers
+
+        void Core_SaveRequested(object sender, SavingEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
+
+            // Saves game.
+            SaveGame(true);
+
+            // If e.CloseAfterSave, close the game.
+            if (e.CloseAfterSave)
+            {
+                NavigateToAppHome(true);
+            }
+        }
 
 		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
 		{

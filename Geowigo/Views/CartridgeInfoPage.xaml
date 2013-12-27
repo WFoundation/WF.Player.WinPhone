@@ -4,33 +4,30 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
+    xmlns:JeffWilcox_Controls="clr-namespace:JeffWilcox.Controls;assembly=JeffWilcox.Maps" 
     x:Class="Geowigo.Views.CartridgeInfoPage"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}">
-	<!--Exemple de code illustrant l'utilisation d'ApplicationBar--><!--<phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton x:Name="appbar_button1" IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
-            <shell:ApplicationBarIconButton x:Name="appbar_button2" IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
-            <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem x:Name="menuItem1" Text="ÉlémentMenu 1"/>
-                <shell:ApplicationBarMenuItem x:Name="menuItem2" Text="ÉlémentMenu 2"/>
-            </shell:ApplicationBar.MenuItems>
-        </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
-	<Geowigo_Views:BasePage.FontFamily>
-		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
-	</Geowigo_Views:BasePage.FontFamily>
-	<Geowigo_Views:BasePage.FontSize>
-		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
-	</Geowigo_Views:BasePage.FontSize>
-	<Geowigo_Views:BasePage.Foreground>
-		<StaticResource ResourceKey="PhoneForegroundBrush"/>
-	</Geowigo_Views:BasePage.Foreground>
+    toolkit:TiltEffect.IsTiltEnabled="True"
+    shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeNormal}" Foreground="{StaticResource PhoneForegroundBrush}">
+	<Geowigo_Views:BasePage.Resources>
+		<DataTemplate x:Key="SavegameListItemTemplate">
+			<Grid>
+				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name}" d:LayoutOverrides="Width, Height"/>
+			</Grid>
+		</DataTemplate>
+		<ControlTemplate x:Key="StaticMapsButtonTemplate" TargetType="Button">
+			<Grid>
+				<ContentPresenter/>
+			</Grid>
+		</ControlTemplate>
+	</Geowigo_Views:BasePage.Resources>
+	<!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
     
 	<Geowigo_Views:BasePage.DataContext>
 		<Geowigo_ViewModels:CartridgeInfoViewModel/>
@@ -57,11 +54,18 @@
 
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="NavigateItem" Header="navigate">
-                <Grid/>
+                <StackPanel Orientation="Vertical" d:LayoutOverrides="Height">
+            		<Button Template="{StaticResource StaticMapsButtonTemplate}" Margin="-12,0,-12,30" Height="150" d:LayoutOverrides="Width, HorizontalMargin" Command="{Binding NavigateToStartCommand, Mode=OneWay}">
+                		<JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                	</Button>
+            		<ScrollViewer Margin="0,0,0,-400">
+            			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}"/>
+            		</ScrollViewer>
+            	</StackPanel>
             </controls:PivotItem>
             <controls:PivotItem x:Name="SavegamesItem" Header="savegames">
             	<Grid>
-            		<Geowigo_Controls:NavigationListBox ItemsSource="{Binding CartridgeTag.Savegames, Mode=OneWay}" NavigationCommand="{Binding ResumeGameCommand, Mode=OneWay}"/>
+            		<Geowigo_Controls:NavigationListBox ItemsSource="{Binding CartridgeTag.Savegames, Mode=OneWay}" NavigationCommand="{Binding ResumeGameCommand, Mode=OneWay}" ItemTemplate="{StaticResource SavegameListItemTemplate}"/>
             	</Grid>
             </controls:PivotItem>
         </controls:Pivot>

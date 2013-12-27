@@ -117,6 +117,9 @@ namespace Geowigo
                 // Échec d'une navigation ; arrêt dans le débogueur
                 System.Diagnostics.Debugger.Break();
             }
+
+            // Dump the sith out!
+            Utils.DebugUtils.DumpException(e.Exception);
         }
 
         // Code à exécuter sur les exceptions non gérées

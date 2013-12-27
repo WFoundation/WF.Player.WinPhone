@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using Geowigo.Controls;
 using Geowigo.Utils;
+using System.Device.Location;
+using Microsoft.Phone.Tasks;
 
 namespace Geowigo.ViewModels
 {
@@ -65,6 +67,22 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region StartingCoordinate
+
+
+        public GeoCoordinate StartingCoordinate
+        {
+            get { return (GeoCoordinate)GetValue(StartingCoordinateProperty); }
+            set { SetValue(StartingCoordinateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for StartingCoordinate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty StartingCoordinateProperty =
+            DependencyProperty.Register("StartingCoordinate", typeof(GeoCoordinate), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+        
+        #endregion
+
 		#endregion
 
 		#region Commands
@@ -101,6 +119,23 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+        #region NavigateToStartCommand
+
+        private ICommand _navigateToStartCommand;
+
+        /// <summary>
+        /// Gets a command to navigate to the starting location.
+        /// </summary>
+        public ICommand NavigateToStartCommand
+        {
+            get
+            {
+                return _navigateToStartCommand ?? (_navigateToStartCommand = new RelayCommand(NavigateToStart, CanNavigateToStartExecute));
+            }
+        }
+
+        #endregion
+
 		#endregion
 
 		#region Members
@@ -127,8 +162,9 @@ namespace Geowigo.ViewModels
 
 				// TODO: Handle case where CartridgeTag == null
 
-				// Refreshes the application bar.
+				// Refreshes content.
 				RefreshAppBar();
+                RefreshStaticContent();
 			}
 		}
 
@@ -144,6 +180,23 @@ namespace Geowigo.ViewModels
         {
             // Resumes the game!
             App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename, savegame);
+        }
+
+        private void NavigateToStart()
+        {
+            // Creates a new Bing Maps task.
+            BingMapsDirectionsTask task = new BingMapsDirectionsTask();
+            task.End = new LabeledMapLocation(
+                String.Format("Starting Location for {0}", Cartridge.Name),
+                StartingCoordinate);
+
+            // Starts the task.
+            task.Show();
+        }
+
+        private bool CanNavigateToStartExecute()
+        {
+            return !Cartridge.IsPlayAnywhere;
         }
 
 		#endregion
@@ -175,5 +228,14 @@ namespace Geowigo.ViewModels
 			_appBarInfo.CreateAndAddButton("appbar.transport.play.rest.png", StartNewGameCommand, "start");
 		}
 		#endregion
+
+        private void RefreshStaticContent()
+        {
+            // Starting point.
+            StartingCoordinate = Cartridge.IsPlayAnywhere ? null : new GeoCoordinate(
+                Cartridge.StartingLocationLatitude,
+                Cartridge.StartingLocationLongitude,
+                Cartridge.StartingLocationAltitude);
+        }
 	}
 }

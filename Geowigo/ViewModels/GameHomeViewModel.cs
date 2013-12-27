@@ -454,7 +454,7 @@ namespace Geowigo.ViewModels
         private void StartSaveGame()
         {
             // Saves the game!
-            App.Current.ViewModel.SaveGame();
+            App.Current.ViewModel.SaveGame(false);
         }
 	}
 }

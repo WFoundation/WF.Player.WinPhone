@@ -56,6 +56,9 @@
     <Reference Include="ImageTools.IO.Gif">
       <HintPath>..\libs\ImageTools.IO.Gif.dll</HintPath>
     </Reference>
+    <Reference Include="JeffWilcox.Maps">
+      <HintPath>..\packages\JeffWilcox.Maps.1.1\lib\sl4-windowsphone71\JeffWilcox.Maps.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />

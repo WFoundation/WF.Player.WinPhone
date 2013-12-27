@@ -1,5 +1,16 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" mc:Ignorable="d">
-	<Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" 
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:Core="clr-namespace:System;assembly=mscorlib"
+    xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
+    mc:Ignorable="d">
+
+    <Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
+
+    <Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
 	<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
 	<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 	
