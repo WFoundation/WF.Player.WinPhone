@@ -1,13 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using WF.Player.Core;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization;
@@ -64,11 +55,12 @@ namespace Geowigo.Models
 
         private void SetFileProperties(string cartFilename, string cartGuid)
         {
+            string fname = System.IO.Path.GetFileNameWithoutExtension(cartFilename);
             SavegameFile = String.Format("/Savegames/{0}_{1}/{2}_{3}.gws",
                 cartGuid.Substring(0, 4),
-                cartFilename,
+                fname,
                 Name,
-                System.IO.Path.GetFileNameWithoutExtension(cartFilename)
+                fname
             );
             MetadataFile = SavegameFile + ".mf";
         }
@@ -122,8 +114,11 @@ namespace Geowigo.Models
         /// <returns>The stream to write the savegame on.</returns>
         public System.IO.Stream CreateOrReplace(IsolatedStorageFile isf)
         {
+            // Makes sure the containing directory exists.
+            isf.CreateDirectory(System.IO.Path.GetDirectoryName(SavegameFile));
+            
             // Returns the stream to SavegameFile.
-            return isf.OpenFile(SavegameFile, System.IO.FileMode.Create, System.IO.FileAccess.ReadWrite);
+            return isf.OpenFile(SavegameFile, System.IO.FileMode.Create, System.IO.FileAccess.Write);
         }
 
         /// <summary>

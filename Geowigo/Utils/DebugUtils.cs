@@ -15,8 +15,42 @@ using System.Diagnostics;
 namespace Geowigo.Utils
 {
 	public class DebugUtils
-	{		
-		/// <summary>
+	{
+        /// <summary>
+        /// Dumps a message and data to the isolated storage.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="message"></param>
+        public static void DumpData(byte[] data, string message)
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Ensures the folder exists.
+                isf.CreateDirectory("/Debug");
+
+                // Gets the filename prefix.
+                string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_msg_";
+
+                // Dumps the data.
+                using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "rawdata.txt"))
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                // Dumps the stack trace.
+                using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "msg_st.txt"))
+                {
+                    using (StreamWriter sw = new StreamWriter(stream))
+                    {
+                        sw.Write(message);
+                        sw.WriteLine("----");
+                        DumpStack(sw);
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
 		/// Dumps an exception and data to the isolated storage.
 		/// </summary>
 		/// <param name="data"></param>
@@ -86,5 +120,15 @@ namespace Geowigo.Utils
 				}
 			}
 		}
+
+        private static void DumpStack(StreamWriter sw)
+        {
+            sw.WriteLine("Stack trace:");
+            sw.WriteLine();
+            
+            StackTrace st = new StackTrace();
+
+            sw.WriteLine(st.ToString());
+        }
 	}
 }

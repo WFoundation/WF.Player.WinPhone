@@ -29,7 +29,7 @@ namespace Geowigo.Utils
 			{
 				if (!image.IsLoading)
 				{
-					return null;
+                    return null;
 				}
 
 				ManualResetEvent resetEvent = new ManualResetEvent(false);
@@ -101,11 +101,21 @@ namespace Geowigo.Utils
 				{
 					try
 					{
-						// It didn't work. Now try with ImageTools.
+						// Resets the memory stream's position.
+                        ms.Position = 0;
+
+                        // It didn't work. Now try with ImageTools.
 						ExtendedImage eim = new ExtendedImage();
 						eim.SetSource(ms);
 
-						return GetBitmapSource(eim);
+                        // Gets the image source for the image.
+						BitmapSource bs = GetBitmapSource(eim);
+                        if (bs == null)
+                        {
+                            // Something went wrong.
+                            DebugUtils.DumpData(data, "ImageTools failed to generate an image source.");
+                        }
+                        return bs;
 					}
 					catch (Exception e)
 					{
