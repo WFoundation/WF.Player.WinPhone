@@ -59,7 +59,10 @@
                 		<JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
                 	</Button>
             		<ScrollViewer Margin="0,0,0,-400">
-            			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}"/>
+            			<StackPanel Orientation="Vertical">
+            				<TextBlock x:Name="CoordinatesText" TextWrapping="Wrap" Text="{Binding StartingCoordinate}"/>
+            				<TextBlock x:Name="DescriptionText" TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}" d:LayoutOverrides="Width"/>
+            			</StackPanel>
             		</ScrollViewer>
             	</StackPanel>
             </controls:PivotItem>

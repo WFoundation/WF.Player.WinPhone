@@ -88,7 +88,7 @@ namespace Geowigo.Models
 		#region Public Methods
 
 		/// <summary>
-		/// Gets the single CartridgeTag for a Cartridge.
+		/// Gets the single tag for a Cartridge.
 		/// </summary>
 		/// <param name="cartridge">The Cartridge to get the tag for.</param>
 		/// <returns></returns>
@@ -101,7 +101,7 @@ namespace Geowigo.Models
 		}
 
 		/// <summary>
-		/// Gets the single CartridgeTag for a cartridge filename and a GUID.
+		/// Gets the single tag for a cartridge filename and a GUID.
 		/// </summary>
 		/// <remarks>This method looks for a tag with similar GUID. If not found,
 		/// it tries to load the cartridge at the specified filename and returns

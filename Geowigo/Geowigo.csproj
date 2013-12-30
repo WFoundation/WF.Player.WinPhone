@@ -93,6 +93,9 @@
     </Compile>
     <Compile Include="Controls\NavigationListBox.cs" />
     <Compile Include="Controls\RelayCommand.cs" />
+    <Compile Include="Controls\SavegameMessageBoxContentControl.xaml.cs">
+      <DependentUpon>SavegameMessageBoxContentControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\WherigoMessageBoxContentControl.xaml.cs">
       <DependentUpon>WherigoMessageBoxContentControl.xaml</DependentUpon>
     </Compile>
@@ -107,6 +110,8 @@
     <Compile Include="Mockups\InputMockup.cs" />
     <Compile Include="Models\CartridgeSavegame.cs" />
     <Compile Include="Models\CartridgeTag.cs" />
+    <Compile Include="Models\History.cs" />
+    <Compile Include="Models\HistoryEntry.cs" />
     <Compile Include="Models\WFCoreAdapter.cs" />
     <Compile Include="Models\WherigoModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -156,6 +161,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ListSummaryControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\SavegameMessageBoxContentControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

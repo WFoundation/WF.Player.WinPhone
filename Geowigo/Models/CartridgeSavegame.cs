@@ -13,7 +13,7 @@ namespace Geowigo.Models
     {
         #region Constants
 
-        private const int GeneratedModelVersion = 1;
+        private const int GeneratedModelVersion = 2;
 
         #endregion
         
@@ -24,6 +24,9 @@ namespace Geowigo.Models
 
         [DataMember]
         public DateTime Timestamp { get; set; }
+
+        [DataMember]
+        public bool IsAutosave { get; set; }
 
         public string SavegameFile { get; private set; }
 
@@ -49,8 +52,13 @@ namespace Geowigo.Models
         {
             ModelVersion = GeneratedModelVersion;
             Timestamp = DateTime.Now;
-            Name = Timestamp.Ticks.ToString();
+            Name = GetDefaultName(tag);
             SetFileProperties(tag.Cartridge.Filename, tag.Guid);
+        }
+
+        private string GetDefaultName(CartridgeTag tag)
+        {
+            return Timestamp.Ticks.ToString();
         }
 
         private void SetFileProperties(string cartFilename, string cartGuid)

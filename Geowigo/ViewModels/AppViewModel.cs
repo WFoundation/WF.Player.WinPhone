@@ -364,9 +364,6 @@ namespace Geowigo.ViewModels
                 IsAutosave = isAutoSave
             };
 
-            // Displays a message box.
-            System.Windows.MessageBox.Show("The savegame " + cs.Name + "will be now saved.");
-
             // Shows progress to the user.
             App.Current.ViewModel.SetSystemTrayProgressIndicator("Saving game...");
 
@@ -378,6 +375,12 @@ namespace Geowigo.ViewModels
 
             // Shows progress to the user.
             App.Current.ViewModel.SetSystemTrayProgressIndicator(isVisible: false);
+
+            // If this is a manual save, shows a message box.
+            if (!isAutoSave)
+            {
+                MessageBoxManager.Show(cs);
+            }
         }
 
 		#endregion

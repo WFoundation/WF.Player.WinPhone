@@ -70,6 +70,8 @@ namespace Geowigo.Models
 
 		public List<Thing> ActiveVisibleThings { get; private set; }
 
+        public GeoCoordinate DeviceLocation { get; private set; }
+
 		#endregion
 
 		#endregion
@@ -220,6 +222,10 @@ namespace Geowigo.Models
 			{
 				this.RefreshLocation(gc.Latitude, gc.Longitude, gc.Altitude, gc.HorizontalAccuracy);
 				this.RefreshHeading(gc.Course);
+
+                this.DeviceLocation = gc;
+
+                RaisePropertyChanged("DeviceLocation");
 
 				RaisePlayerLocationChanged(new GeoCoordinate(Latitude, Longitude, Altitude, Accuracy, 0, 0, Heading));
 			}

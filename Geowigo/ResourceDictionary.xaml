@@ -74,5 +74,9 @@
 			</Grid>
 		</Grid>
 	</ControlTemplate>
+	<Style x:Key="MessageBoxDefaultTextStyle" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiLight}"/>
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
+	</Style>
 	
 </ResourceDictionary>

@@ -232,10 +232,12 @@ namespace Geowigo.ViewModels
         private void RefreshStaticContent()
         {
             // Starting point.
-            StartingCoordinate = Cartridge.IsPlayAnywhere ? null : new GeoCoordinate(
-                Cartridge.StartingLocationLatitude,
-                Cartridge.StartingLocationLongitude,
-                Cartridge.StartingLocationAltitude);
+            StartingCoordinate = Cartridge.IsPlayAnywhere 
+                ? (Model.Core.DeviceLocation ?? new GeoCoordinate(0, 0, 0))
+                : new GeoCoordinate(
+                    Cartridge.StartingLocationLatitude,
+                    Cartridge.StartingLocationLongitude,
+                    Cartridge.StartingLocationAltitude);
         }
 	}
 }
