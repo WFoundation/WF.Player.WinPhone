@@ -46,8 +46,10 @@
             </controls:PanoramaItem>
 
             <!--Élément deux de panorama-->
-            <controls:PanoramaItem Header="recent">
-            	<Grid/>
+            <controls:PanoramaItem x:Name="HistoryPanoramaItem" Header="recent">
+                <Grid>
+                    <Geowigo_Controls:NavigationListBox ItemsSource="{Binding Path=Model.History}" />
+                </Grid>
             </controls:PanoramaItem>
 
         </controls:Panorama>

@@ -21,14 +21,19 @@ namespace Geowigo.Models
 		#region Properties
 
 		/// <summary>
-		/// Gets or sets the Wherigo core responsible for wherigo work and feedback.
+		/// Gets the Wherigo core responsible for gameplay and feedback.
 		/// </summary>
-		public WFCoreAdapter Core { get; set; }
+		public WFCoreAdapter Core { get; private set; }
 
 		/// <summary>
 		/// Gets the cartridge store that registers cartridges.
 		/// </summary>
 		public CartridgeStore CartridgeStore { get; private set; }
+
+        /// <summary>
+        /// Gets the history of user operations.
+        /// </summary>
+        public History History { get; private set; }
 
 		#endregion
 
@@ -38,8 +43,9 @@ namespace Geowigo.Models
 		{
 			Core = new WFCoreAdapter();
 
-			// Store
 			CartridgeStore = new CartridgeStore();
+
+            History = Models.History.FromCacheOrCreate();
 		}
 
 		#endregion
