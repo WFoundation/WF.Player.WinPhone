@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mcs-wp7", "..\..\Mangatome\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KopiLua-wp7", "..\..\NLua\NLua\Core\KopiLua\KopiLua\KopiLua-wp7.csproj", "{330E0C63-4160-46E0-BBDA-325185A4AB7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geowigo.Beta", "Geowigo.Beta\Geowigo.Beta.csproj", "{86644A2C-6452-441D-AAA8-A1F693B6F1AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86644A2C-6452-441D-AAA8-A1F693B6F1AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86644A2C-6452-441D-AAA8-A1F693B6F1AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86644A2C-6452-441D-AAA8-A1F693B6F1AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86644A2C-6452-441D-AAA8-A1F693B6F1AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,12 +6,12 @@ using System.Resources;
 // Les informations générales relatives à un assembly dépendent de 
 // l'ensemble d'attributs suivant. Changez les valeurs de ces attributs pour modifier les informations
 // associées à un assembly.
-[assembly: AssemblyTitle("Geowigo")]
-[assembly: AssemblyDescription("Wherigo Player for Windows Phone")]
+[assembly: AssemblyTitle("Geowigo.Beta")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wherigo Foundation")]
-[assembly: AssemblyProduct("Geowigo")]
-[assembly: AssemblyCopyright("Copyright Brice Clocher ©  2013")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Geowigo.Beta")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -21,7 +21,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // Le GUID suivant est pour l'ID de la typelib si ce projet est exposé à COM
-[assembly: Guid("7a4a42a7-f2e2-40fb-87eb-452b3b455a05")]
+[assembly: Guid("3fa67dab-79dc-4021-8472-3eeb4dd612ca")]
 
 // Les informations de version pour un assembly se composent des quatre valeurs suivantes :
 //
@@ -34,4 +34,4 @@ using System.Resources;
 // en utilisant '*', comme indiqué ci-dessous :
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: NeutralResourcesLanguageAttribute("en")]
+[assembly: NeutralResourcesLanguageAttribute("fr-FR")]

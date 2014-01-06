@@ -87,6 +87,9 @@ namespace Geowigo
 			// Initializes the application life-long resources.
 			this.Model = new Models.WherigoModel();
 			this.ViewModel = new ViewModels.AppViewModel() { Model = this.Model };
+
+            // Starts the Beta-specific features.
+            this.ViewModel.GoBeta();
         }
 
         // Code à exécuter lorsque l'application est activée (affichée au premier plan)

@@ -229,6 +229,10 @@
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Geowigo.Beta\Geowigo.Beta.csproj">
+      <Project>{86644A2C-6452-441D-AAA8-A1F693B6F1AB}</Project>
+      <Name>Geowigo.Beta</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

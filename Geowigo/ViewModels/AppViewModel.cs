@@ -499,5 +499,43 @@ namespace Geowigo.ViewModels
 		#endregion
 
 		#endregion
-	}
+
+        #region Beta-Specific Features
+
+        /// <summary>
+        /// Starts the Beta-specific features.
+        /// </summary>
+        internal void GoBeta()
+        {
+            // Registers events for update checks.
+            Beta.UpdateManager updateMan = new Beta.UpdateManager();
+            updateMan.UpdateFound += new EventHandler(Beta_UpdateFound);
+            updateMan.BeginCheckForUpdate();
+        }
+
+        private void Beta_UpdateFound(object sender, EventArgs e)
+        {
+            Beta.UpdateManager updateMan = (Beta.UpdateManager) sender;
+
+            if (updateMan != null && updateMan.HasNewerVersion)
+            {
+                // Pauses the game if possible.
+                if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Playing)
+                {
+                    Model.Core.Pause();
+                }
+
+                // Shows the box.
+                updateMan.ShowMessageBox();
+
+                // Resumes the game if possible.
+                if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Paused)
+                {
+                    Model.Core.Resume();
+                }
+            }
+        }
+
+        #endregion
+    }
 }
