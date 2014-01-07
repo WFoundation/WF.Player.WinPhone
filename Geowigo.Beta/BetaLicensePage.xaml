@@ -1,0 +1,163 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="Geowigo.Beta.BetaLicensePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
+    shell:SystemTray.IsVisible="True">
+
+    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--TitlePanel contient le nom de l'application et le titre de la page-->
+        <ScrollViewer x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
+        	<StackPanel>
+        		<TextBlock x:Name="ApplicationTitle" Text="GEOWIGO WHERIGO PLAYER" Style="{StaticResource PhoneTextNormalStyle}" Margin="0" Width="444"/>
+        		<TextBlock x:Name="PageTitle" Text="important information" Margin="0,-7,0,19" Style="{StaticResource PhoneTextTitle1Style}" Width="459" FontSize="48"/>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="This app is a "/><Run Text="preview version of a work-in-progress">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=" Wherigo Player on Windows Phone."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="With this preview version, you should be able to play most of the Wherigo cartridges to completion, "/><Run Text="for free">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text="."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="But sometimes, "/><Run Text="the app may crash">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=". "/><LineBreak/><Run Text="When "/><Run Text="it "/><Run Text="happens, "/><Run Text="keep cool">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=". The app "/><Run Text="automatically">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=" ">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Foreground="#FF9DD9FF" Text="sends"/><Run Text=" anonymous crash information to the developers."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="You can also "/><Run Text="report a problem directly">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=" to the developers through the main menu of the app."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="Finally, every"/><Run Text=" "/><Run Text="time the app is starting, it will "/><Run Text="check on the internet for updates ">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text="and bug"/><Run Text="-"/><Run Text="fixes. If "/><Run Text="an update is available, a message"/><Run Text=" "/><Run Text="box will appear and give you further instructions"/><Run Text="."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="This app is an "/><Run Text="open-source, free project">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text=". "/><Run Text="Thank you ">
+        				<Run.Foreground>
+        					<SolidColorBrush Color="#FF9DD9FF">
+        						<SolidColorBrush.RelativeTransform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.RelativeTransform>
+        						<SolidColorBrush.Transform>
+        							<MatrixTransform Matrix="Identity"/>
+        						</SolidColorBrush.Transform>
+        					</SolidColorBrush>
+        				</Run.Foreground>
+        			</Run><Run Text="for testing this preview version, and thank you for your support."/></TextBlock>
+        		<Button x:Name="AcceptBtn" Content="Accept and continue" Click="AcceptBtn_Click"/>
+        	</StackPanel>
+        </ScrollViewer>
+
+        <!--ContentPanel - placez tout contenu supplémentaire ici-->
+    </Grid>
+ 
+    <!--Exemple de code illustrant l'utilisation de l'ApplicationBar-->
+    <!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 1"/>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+
+</phone:PhoneApplicationPage>

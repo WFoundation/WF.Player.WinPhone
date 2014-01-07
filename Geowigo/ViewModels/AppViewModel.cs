@@ -507,10 +507,47 @@ namespace Geowigo.ViewModels
         /// </summary>
         internal void GoBeta()
         {
+            // Navigates to the beta license page.
+            //App.Current.RootFrame.Navigating += new NavigatingCancelEventHandler(Beta_Navigating);
+            App.Current.RootFrame.Navigated += new NavigatedEventHandler(Beta_Navigated);
+        }
+
+        void Beta_Navigated(object sender, NavigationEventArgs e)
+        {
+            // Bye bye event handler.
+            App.Current.RootFrame.Navigated -= new NavigatedEventHandler(Beta_Navigated);
+
+            // Navigates to the new page.
+            App.Current.RootFrame.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                App.Current.RootFrame.Navigate(new Uri("/Geowigo.Beta;component/BetaLicensePage.xaml", UriKind.Relative));
+            }));
+
+            // Adds a new event handler for starting the rest of beta features.
+            App.Current.RootFrame.Navigated += new NavigatedEventHandler(Beta_Navigated2);
+        }
+
+        void Beta_Navigated2(object sender, NavigationEventArgs e)
+        {
+            if (e.Uri.OriginalString.Contains("/HomePage.xaml"))
+            {
+                // Bye bye event
+                App.Current.RootFrame.Navigated -= new NavigatedEventHandler(Beta_Navigated2);
+
+                // Go beta
+                GoBetaRest();
+            }
+        }
+
+        private void GoBetaRest()
+        {
             // Registers events for update checks.
             Beta.UpdateManager updateMan = new Beta.UpdateManager();
             updateMan.UpdateFound += new EventHandler(Beta_UpdateFound);
             updateMan.BeginCheckForUpdate();
+
+            // Injects the beta appbar in the application.
+            ((PhoneApplicationPage)App.Current.RootFrame.Content).ApplicationBar = Beta.BetaManager.Instance.BetaAppBar;
         }
 
         private void Beta_UpdateFound(object sender, EventArgs e)

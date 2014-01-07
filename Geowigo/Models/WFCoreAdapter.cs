@@ -112,6 +112,9 @@ namespace Geowigo.Models
 
 			Start();
 
+            // TEMP DEBUG
+            ProcessPosition(_LastKnownPosition);
+
 			return cart;
 		}
 

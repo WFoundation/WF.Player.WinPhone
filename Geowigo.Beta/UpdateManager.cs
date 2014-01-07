@@ -55,6 +55,8 @@ namespace Geowigo.Beta
         #region Properties
         public event EventHandler UpdateFound;
 
+        public event EventHandler UpdateError;
+
         public UpdateInfo LatestVersion { get; private set; }
 
         public bool HasNewerVersion
@@ -109,7 +111,10 @@ namespace Geowigo.Beta
             }
             catch (Exception)
             {
-                // Ignore exceptions.
+                if (UpdateError != null)
+                {
+                    UpdateError(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -136,8 +141,5 @@ namespace Geowigo.Beta
                 task.Show();
             }
         }
-
-
-
     }
 }
