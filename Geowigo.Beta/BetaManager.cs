@@ -50,25 +50,10 @@ namespace Geowigo.Beta
             cfu.Click += new EventHandler(OnClick_CheckForUpdates);
             BetaAppBar.MenuItems.Add(cfu);
 
-            // Report a problem
-            ApplicationBarMenuItem rp = new ApplicationBarMenuItem("report a problem");
-            rp.Click += new EventHandler(OnClick_ReportProblem);
-            BetaAppBar.MenuItems.Add(rp);
-
             // Get help
             ApplicationBarMenuItem gh = new ApplicationBarMenuItem("talk / get support");
             gh.Click += new EventHandler(OnClick_GetHelp);
             BetaAppBar.MenuItems.Add(gh);
-        }
-
-        void OnClick_ReportProblem(object sender, EventArgs e)
-        {
-            StartReportProblem();
-        }
-
-        private void StartReportProblem()
-        {
-            throw new NotImplementedException();
         }
 
         void OnClick_GetHelp(object sender, EventArgs e)

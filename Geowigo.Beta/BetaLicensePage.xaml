@@ -105,7 +105,7 @@
         						</SolidColorBrush.Transform>
         					</SolidColorBrush>
         				</Run.Foreground>
-        			</Run><Run Text=" to the developers through the main menu of the app."/></TextBlock>
+        			</Run><Run Text=" to the developers "/><Run Text="on the Groundspeak forums's thread (see main menu)."/></TextBlock>
         		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="Finally, every"/><Run Text=" "/><Run Text="time the app is starting, it will "/><Run Text="check on the internet for updates ">
         				<Run.Foreground>
         					<SolidColorBrush Color="#FF9DD9FF">
