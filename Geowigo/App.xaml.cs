@@ -52,6 +52,9 @@ namespace Geowigo
             // Gestionnaire global pour les exceptions non interceptées. 
             UnhandledException += Application_UnhandledException;
 
+            // Starting BugSense.
+            BugSense.BugSenseHandler.Instance.InitAndStartSession(new BugSense.Core.Model.ExceptionManager(this), "88834254");
+
             // Initialisation Silverlight standard
             InitializeComponent();
 
