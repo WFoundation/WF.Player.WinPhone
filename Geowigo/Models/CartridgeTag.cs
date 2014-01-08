@@ -228,16 +228,39 @@ namespace Geowigo.Models
 		}
 
         /// <summary>
-        /// Adds a savegame to this tag.
+        /// Exports a savegame to the isolated storage and adds it to this tag.
         /// </summary>
         /// <param name="cs">The savegame to add.</param>
         public void AddSavegame(CartridgeSavegame cs)
         {
+            // Sanity check: a cartridge with similar name should
+            // not exist.
+            if (Savegames.Any(c => c.Name == cs.Name))
+            {
+                throw new InvalidOperationException("A savegame with the same name already exists for this savegame.");
+            }
+            
             // Makes sure the savegame is exported to the cache.
-            cs.ExportToCache();
+            cs.ExportToIsoStore();
             
             // Adds the savegame.
             _savegames.Add(cs);
+
+            // Notifies of a change.
+            RaisePropertyChanged("Savegames");
+        }
+
+        /// <summary>
+        /// Removes a savegame's contents from the isolated storage and removes
+        /// it from this tag.
+        /// </summary>
+        public void RemoveSavegame(CartridgeSavegame cs)
+        {
+            // Removes the savegame.
+            _savegames.Remove(cs);
+
+            // Makes sure the savegame is cleared from cache.
+            cs.RemoveFromIsoStore();
 
             // Notifies of a change.
             RaisePropertyChanged("Savegames");
@@ -294,7 +317,7 @@ namespace Geowigo.Models
             {
                 try
                 {
-                    cSavegames.Add(CartridgeSavegame.FromCache(PathToSavegames + "/" + file, isf));
+                    cSavegames.Add(CartridgeSavegame.FromIsoStore(PathToSavegames + "/" + file, isf));
                 }
                 catch (Exception ex)
                 {
@@ -321,7 +344,6 @@ namespace Geowigo.Models
 		} 
 
 		#endregion
-
 
 
     }

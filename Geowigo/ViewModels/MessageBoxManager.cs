@@ -16,7 +16,7 @@ using System.Linq;
 namespace Geowigo.ViewModels
 {
 	/// <summary>
-	/// A MessageBoxManager is responsible for handling the flow of message boxes of the app.
+	/// A manager for handling the flow of message boxes of the app.
 	/// </summary>
 	public class MessageBoxManager
 	{
@@ -29,34 +29,6 @@ namespace Geowigo.ViewModels
 		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
 
 		#endregion
-
-        /// <summary>
-        /// Displays a message box for editing a savegame's attributes. 
-        /// If a message box is on-screen, it is dismissed.
-        /// </summary>
-        /// <param name="cs"></param>
-        public void Show(CartridgeSavegame cs)
-        {
-            if (cs == null)
-            {
-                throw new ArgumentNullException("cs");
-            }
-
-            // Creates a custom message box.
-            CustomMessageBox cmb = new CustomMessageBox()
-            {
-                Caption = "Savegame",
-                Content = new Controls.SavegameMessageBoxContentControl() { Savegame = cs },
-                LeftButtonContent = "OK",
-                RightButtonContent = "Cancel"
-            };
-
-            // Adds event handlers.
-            RegisterEventHandlersForSavegame(cmb);
-
-            // Shows the message box.
-            cmb.Show();
-        }
 
 		/// <summary>
 		/// Displays a message box from a Wherigo game. 
@@ -117,15 +89,9 @@ namespace Geowigo.ViewModels
             cmb.Dismissed += new EventHandler<DismissedEventArgs>(OnWigCustomMessageBoxDismissed);
 		}
 
-        private void RegisterEventHandlersForSavegame(CustomMessageBox cmb)
-        {
-            cmb.Dismissed += new EventHandler<DismissedEventArgs>(OnSavegameCustomMessageBoxDismissed);
-        }
-
 		private void UnregisterEventHandlers(CustomMessageBox cmb)
 		{
             cmb.Dismissed -= new EventHandler<DismissedEventArgs>(OnWigCustomMessageBoxDismissed);
-            cmb.Dismissed -= new EventHandler<DismissedEventArgs>(OnSavegameCustomMessageBoxDismissed);
 		}
 
 		private void OnWigCustomMessageBoxDismissed(object sender, DismissedEventArgs e)
@@ -166,39 +132,6 @@ namespace Geowigo.ViewModels
 			}
 
 		}
-
-        private void OnSavegameCustomMessageBoxDismissed(object sender, DismissedEventArgs e)
-        {
-            CustomMessageBox cmb = (CustomMessageBox)sender;
-
-            // Unregisters events.
-            UnregisterEventHandlers(cmb);
-
-            // Only moves on if OK has been pushed.
-            if (e.Result != CustomMessageBoxResult.LeftButton)
-            {
-                return;
-            }
-
-            // Gets the associated savegame.
-            Controls.SavegameMessageBoxContentControl content = cmb.Content as Controls.SavegameMessageBoxContentControl;
-            if (content == null)
-            {
-                throw new InvalidOperationException("Message box has no SavegameMessageBoxContentControl.");
-            }
-            CartridgeSavegame cs = content.Savegame;
-            if (cs == null)
-            {
-                throw new InvalidOperationException("SavegameMessageBoxContentControl has no CartridgeSavegame.");
-            }
-
-            // Edits the savegame.
-            cs.Name = content.Name;
-            //cs.HashBrush = content.HashBrush;
-
-            // Commit.
-            cs.ExportToCache();
-        } 
 		#endregion
 
     }

@@ -32,6 +32,8 @@ namespace Geowigo.ViewModels
 
 		private SoundManager _SoundManagerInstance;
 
+        private SavegameManager _SavegameManagerInstance;
+
 		#endregion
 
 		#region Properties
@@ -115,6 +117,16 @@ namespace Geowigo.ViewModels
 		}
 
 		#endregion
+
+        #region SavegameManager
+        public SavegameManager SavegameManager
+        {
+            get
+            {
+                return _SavegameManagerInstance ?? (_SavegameManagerInstance = new SavegameManager(this));
+            }
+        }
+        #endregion
 
 		#endregion
 
@@ -357,30 +369,8 @@ namespace Geowigo.ViewModels
         /// </summary>
         public void SaveGame(bool isAutoSave)
         {
-            // Gets a new random CartridgeSavegame.
-            CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
-            CartridgeSavegame cs = new CartridgeSavegame(tag)
-            {
-                IsAutosave = isAutoSave
-            };
-
-            // Shows progress to the user.
-            App.Current.ViewModel.SetSystemTrayProgressIndicator("Saving game...");
-
-            // Performs the savegame.
-            Model.Core.Save(cs);
-
-            // Adds the savegame to the tag.
-            tag.AddSavegame(cs);
-
-            // Shows progress to the user.
-            App.Current.ViewModel.SetSystemTrayProgressIndicator(isVisible: false);
-
-            // If this is a manual save, shows a message box.
-            if (!isAutoSave)
-            {
-                MessageBoxManager.Show(cs);
-            }
+            // Delegates the protocol to the SavegameManager.
+            SavegameManager.SaveGame(isAutoSave);
         }
 
 		#endregion

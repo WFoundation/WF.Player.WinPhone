@@ -94,18 +94,7 @@
         					</SolidColorBrush>
         				</Run.Foreground>
         			</Run><Run Foreground="#FF9DD9FF" Text="sends"/><Run Text=" anonymous crash information to the developers."/></TextBlock>
-        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="You can also "/><Run Text="report a problem directly">
-        				<Run.Foreground>
-        					<SolidColorBrush Color="#FF9DD9FF">
-        						<SolidColorBrush.RelativeTransform>
-        							<MatrixTransform Matrix="Identity"/>
-        						</SolidColorBrush.RelativeTransform>
-        						<SolidColorBrush.Transform>
-        							<MatrixTransform Matrix="Identity"/>
-        						</SolidColorBrush.Transform>
-        					</SolidColorBrush>
-        				</Run.Foreground>
-        			</Run><Run Text=" to the developers "/><Run Text="on the Groundspeak forums's thread (see main menu)."/></TextBlock>
+        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20" Text="You can also report a problem directly to the developers on the forums thread (see main menu)."/>
         		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="Finally, every"/><Run Text=" "/><Run Text="time the app is starting, it will "/><Run Text="check on the internet for updates ">
         				<Run.Foreground>
         					<SolidColorBrush Color="#FF9DD9FF">

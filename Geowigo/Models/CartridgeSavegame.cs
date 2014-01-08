@@ -56,33 +56,18 @@ namespace Geowigo.Models
             SetFileProperties(tag);
         }
 
-        private string GetDefaultName(CartridgeTag tag)
-        {
-            return Timestamp.Ticks.ToString();
-        }
-
-        private void SetFileProperties(CartridgeTag tag)
-        {
-            string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
-            SavegameFile = String.Format("/{0}/{1}_{2}.gws",
-                tag.PathToSavegames,
-                Name,
-                fname
-            );
-            MetadataFile = SavegameFile + ".mf";
-        }
-
         #endregion
+        
 
         /// <summary>
-        /// Imports a CartridgeSavegame from metadata associated to a savegame
+        /// Imports a savegame from metadata associated to a savegame
         /// file.
         /// </summary>
         /// <param name="gwsFilePath">Path to the GWS savegame file.</param>
         /// <param name="isf">Isostore file to use to load.</param>
         /// <returns>The cartridge savegame.</returns>
         /// 
-        public static CartridgeSavegame FromCache(string gwsFilePath, IsolatedStorageFile isf)
+        public static CartridgeSavegame FromIsoStore(string gwsFilePath, IsolatedStorageFile isf)
         {
             // Checks that the metadata file exists.
             string mdFile = gwsFilePath + ".mf";
@@ -129,9 +114,9 @@ namespace Geowigo.Models
         }
 
         /// <summary>
-        /// Exports the cartridge metadata to the cache.
+        /// Exports the savegame to the isolated storage.
         /// </summary>
-        public void ExportToCache()
+        public void ExportToIsoStore()
         {
             // Creates a serializer.
             DataContractSerializer serializer = new DataContractSerializer(typeof(CartridgeSavegame));
@@ -144,6 +129,47 @@ namespace Geowigo.Models
                     serializer.WriteObject(fs, this);
                 }
             }
+        }
+
+        /// <summary>
+        /// Removes this savegame's files from the isolated storage.
+        /// </summary>
+        public void RemoveFromIsoStore()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Removes the gws if it exists.
+                if (isf.FileExists(SavegameFile))
+                {
+                    isf.DeleteFile(SavegameFile);
+                }
+
+                // Removes the metadata file if it exists.
+                if (isf.FileExists(MetadataFile))
+                {
+                    isf.DeleteFile(MetadataFile);
+                }
+            }
+        }
+
+        private string GetDefaultName(CartridgeTag tag)
+        {
+            return String.Format("MySavegame{0}{1}{2}{3}",
+                Timestamp.DayOfYear,
+                Timestamp.Hour,
+                Timestamp.Minute,
+                Timestamp.Second);
+        }
+
+        private void SetFileProperties(CartridgeTag tag)
+        {
+            string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
+            SavegameFile = String.Format("/{0}/{1}_{2}.gws",
+                tag.PathToSavegames,
+                Name,
+                fname
+            );
+            MetadataFile = SavegameFile + ".mf";
         }
     }
 }
