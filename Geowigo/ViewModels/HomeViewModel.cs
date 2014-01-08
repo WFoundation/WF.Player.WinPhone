@@ -14,9 +14,29 @@ using WF.Player.Core;
 
 namespace Geowigo.ViewModels
 {
-	public class HomeViewModel
+	public class HomeViewModel : DependencyObject
 	{
-		#region Properties
+        #region Dependency Properties
+
+        #region AreCartridgesVisible
+
+
+        public bool AreCartridgesVisible
+        {
+            get { return (bool)GetValue(AreCartridgesVisibleProperty); }
+            set { SetValue(AreCartridgesVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for AreCartridgesVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AreCartridgesVisibleProperty =
+            DependencyProperty.Register("AreCartridgesVisible", typeof(bool), typeof(HomeViewModel), new PropertyMetadata(false));
+
+        
+        #endregion
+
+        #endregion
+        
+        #region Properties
 
 		#region AppTitle
 
@@ -35,6 +55,17 @@ namespace Geowigo.ViewModels
 		public WherigoModel Model { get; private set; }
 
 		#endregion
+
+        #region IsoStoreSpyHomepageUri
+
+        public Uri IsoStoreSpyHomepageUri
+        {
+            get
+            {
+                return new Uri("/http://isostorespy.codeplex.com/", UriKind.Absolute);
+            }
+        }
+        #endregion
 
 		#endregion
 
@@ -78,6 +109,23 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region VisitIsoStoreHomePageCommand
+        private ICommand _VisitIsoStoreHomePageCommand;
+
+        public ICommand VisitIsoStoreHomePageCommand
+        {
+            get
+            {
+                if (_VisitIsoStoreHomePageCommand == null)
+                {
+                    _VisitIsoStoreHomePageCommand = new RelayCommand(VisitIsoStoreHomePage);
+                }
+
+                return _VisitIsoStoreHomePageCommand;
+            }
+        }
+        #endregion
+
 		#endregion
 
 		public HomeViewModel()
@@ -91,6 +139,8 @@ namespace Geowigo.ViewModels
 			App.Current.ViewModel.ClearBackStack();
 			
 			// Synchronizes the cartridge store.
+            RefreshVisibilities();
+            Model.CartridgeStore.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnCartridgeStoreCollectionChanged);
 			Model.CartridgeStore.SyncFromIsoStore();
 		}
 
@@ -105,5 +155,24 @@ namespace Geowigo.ViewModels
 			// Show the cartridge info!
 			App.Current.ViewModel.NavigateToCartridgeInfo(cartTag);
 		}
+
+        private void VisitIsoStoreHomePage()
+		{
+			// Browses to the page.
+            Microsoft.Phone.Tasks.WebBrowserTask task = new Microsoft.Phone.Tasks.WebBrowserTask();
+            task.Uri = new Uri("http://isostorespy.codeplex.com/", UriKind.Absolute);
+            task.Show();
+		}
+
+        private void OnCartridgeStoreCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RefreshVisibilities();
+        }
+
+        private void RefreshVisibilities()
+        {
+            // Refreshes if cartridges are visible.
+            AreCartridgesVisible = Model.CartridgeStore.Count > 0;
+        }
 	}
 }

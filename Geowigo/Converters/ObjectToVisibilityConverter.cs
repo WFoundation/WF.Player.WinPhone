@@ -16,9 +16,24 @@ namespace Geowigo.Converters
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			// If isStrict is true, the convertor only checks for null/non-null objects.
-			// If it is false, it checks for object values as well.
-			bool isStrict = String.Equals(parameter, "strict");
+            // If isStrict is true, the convertor only checks for null/non-null objects.
+            // If it is false, it checks for object values as well.
+            bool isStrict = false;
+
+            // If isInvert is true, the convertor inverts the returned value after
+            // is computation.
+            bool isInvert = false;
+
+            if (parameter != null)
+            {
+                // Breaks the parameters down.
+                string[] paramList = parameter.ToString().Split(new char[] { ';' });
+                foreach (string param in paramList)
+                {
+                    isStrict = isStrict || String.Equals(param, "strict");
+                    isInvert = isInvert || String.Equals(param, "invert");
+                } 
+            }
 			
 			Visibility target = Visibility.Visible;
 
@@ -39,6 +54,12 @@ namespace Geowigo.Converters
 					}
 				}
 			}
+
+            // Invert-mode.
+            if (isInvert)
+            {
+                target = target == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+            }
 
 			return target;
 		}

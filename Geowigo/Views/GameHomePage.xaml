@@ -60,7 +60,7 @@
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="OverviewPivotItem" Header="overview" Margin="22,28,12,0">
             	<StackPanel>
-            		<Geowigo_Controls:NavigationListBox NavigationCommand="{Binding ShowSectionCommand, Mode=OneWay}">
+            		<Geowigo_Controls:NavigationListBox NavigationCommand="{Binding ShowSectionCommand, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
 						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} TASK{1} TO DO" Items="{Binding Source={StaticResource CurrentTasksSource}}" Width="446" Tag="tasks" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
 						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} OF INTEREST" Items="{Binding Model.Core.ActiveVisibleThings}" Width="446" Tag="world" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>
 						<Geowigo_Controls:ListSummaryControl HeaderFormatText="{}{0} THING{1} IN INVENTORY" Items="{Binding Model.Core.VisibleInventory}" Width="446" Tag="inventory" HeaderStyle="{StaticResource OverviewListHeaderTextBlockStyle}" Margin="0,0,0,25" ItemToStringConverter="{StaticResource UIObjectToNameConverter}" ListStyle="{StaticResource OverviewListTextBlockStyle}"/>

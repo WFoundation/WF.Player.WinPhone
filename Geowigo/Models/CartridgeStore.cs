@@ -6,6 +6,7 @@ using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Windows;
 using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace Geowigo.Models
 {
@@ -23,7 +24,7 @@ namespace Geowigo.Models
 
 		#region Events
 
-		public new event System.ComponentModel.PropertyChangedEventHandler PropertyChanged
+		public new event PropertyChangedEventHandler PropertyChanged
 		{
 			add
 			{
@@ -35,6 +36,19 @@ namespace Geowigo.Models
 				base.PropertyChanged -= value;
 			}
 		}
+
+        public new event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add
+            {
+                base.CollectionChanged += value;
+            }
+
+            remove
+            {
+                base.CollectionChanged -= value;
+            }
+        }
 
 		#endregion
 		
