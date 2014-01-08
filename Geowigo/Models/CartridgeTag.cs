@@ -33,6 +33,7 @@ namespace Geowigo.Models
 		#region Constants
 
 		public const string GlobalCachePath = "/Cache";
+        public const string GlobalSavegamePath = "/Savegames";
 
 		public const int SmallThumbnailMinWidth = 173;
 		public const int BigThumbnailMinWidth = 432;
@@ -57,6 +58,11 @@ namespace Geowigo.Models
 		/// Gets the path to the cache folder for the Cartridge.
 		/// </summary>
 		public string PathToCache { get; private set; }
+
+        /// <summary>
+        /// Gets the path to the savegames folder for the Catridge.
+        /// </summary>
+        public string PathToSavegames { get; private set; }
 
 		/// <summary>
 		/// Gets the unique identifier for the Cartridge.
@@ -156,6 +162,11 @@ namespace Geowigo.Models
 			Guid = cart.Guid;
 			Title = cart.Name;
 			PathToCache = GlobalCachePath + "/" + Guid;
+            PathToSavegames = String.Format("{0}/{1}_{2}",
+                GlobalSavegamePath,
+                Guid.Substring(0, 4),
+                System.IO.Path.GetFileNameWithoutExtension(Cartridge.Filename)
+            );
 		} 
 		#endregion
 
@@ -169,6 +180,7 @@ namespace Geowigo.Models
 			{
 				// Ensures the cache folder exists.
 				isf.CreateDirectory(PathToCache);
+                isf.CreateDirectory(PathToSavegames);
 
 				// Thumbnail
 				string thumbCachePath = GetCachePathCore(ThumbCacheFilename);
@@ -270,7 +282,7 @@ namespace Geowigo.Models
 
         private void ImportSavegamesCache(IsolatedStorageFile isf)
         {
-            string[] gwsFiles = isf.GetFileNames(GetCachePathCore("*.gws"));
+            string[] gwsFiles = isf.GetFileNames(PathToSavegames + "/*.gws");
             if (gwsFiles == null)
             {
                 return;
@@ -282,7 +294,7 @@ namespace Geowigo.Models
             {
                 try
                 {
-                    cSavegames.Add(CartridgeSavegame.FromCache(GetCachePathCore(file), isf));
+                    cSavegames.Add(CartridgeSavegame.FromCache(PathToSavegames + "/" + file, isf));
                 }
                 catch (Exception ex)
                 {

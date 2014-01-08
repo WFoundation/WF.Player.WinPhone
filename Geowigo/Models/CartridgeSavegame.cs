@@ -53,7 +53,7 @@ namespace Geowigo.Models
             ModelVersion = GeneratedModelVersion;
             Timestamp = DateTime.Now;
             Name = GetDefaultName(tag);
-            SetFileProperties(tag.Cartridge.Filename, tag.Guid);
+            SetFileProperties(tag);
         }
 
         private string GetDefaultName(CartridgeTag tag)
@@ -61,12 +61,11 @@ namespace Geowigo.Models
             return Timestamp.Ticks.ToString();
         }
 
-        private void SetFileProperties(string cartFilename, string cartGuid)
+        private void SetFileProperties(CartridgeTag tag)
         {
-            string fname = System.IO.Path.GetFileNameWithoutExtension(cartFilename);
-            SavegameFile = String.Format("/Savegames/{0}_{1}/{2}_{3}.gws",
-                cartGuid.Substring(0, 4),
-                fname,
+            string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
+            SavegameFile = String.Format("/{0}/{1}_{2}.gws",
+                tag.PathToSavegames,
                 Name,
                 fname
             );
