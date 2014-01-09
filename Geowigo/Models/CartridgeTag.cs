@@ -266,6 +266,17 @@ namespace Geowigo.Models
             RaisePropertyChanged("Savegames");
         }
 
+        /// <summary>
+        /// Gets a savegame of this cartridge by name, or null if none
+        /// is found.
+        /// </summary>
+        /// <param name="name">Name of the savegame to find.</param>
+        /// <returns>The savegame, or null if it wasn't found.</returns>
+        public CartridgeSavegame GetSavegameByNameOrDefault(string name)
+        {
+            return Savegames.SingleOrDefault(cs => cs.Name == name);
+        }
+
 		#endregion
 
 		#region Private Methods

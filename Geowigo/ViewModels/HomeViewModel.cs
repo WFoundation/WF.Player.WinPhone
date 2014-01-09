@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using Geowigo.Models;
 using Geowigo.Controls;
 using WF.Player.Core;
+using System.Windows.Data;
 
 namespace Geowigo.ViewModels
 {
@@ -156,6 +157,16 @@ namespace Geowigo.ViewModels
 			App.Current.ViewModel.NavigateToCartridgeInfo(cartTag);
 		}
 
+        #region Collection View Sources
+
+        public void InitCollectionViewSources(CollectionViewSource historySource)
+        {
+            // The history is sorted by Timestamp descending.
+            historySource.SortDescriptions.Add(new System.ComponentModel.SortDescription("Timestamp", System.ComponentModel.ListSortDirection.Descending));
+        }
+
+        #endregion
+
         private void VisitIsoStoreHomePage()
 		{
 			// Browses to the page.
@@ -174,5 +185,5 @@ namespace Geowigo.ViewModels
             // Refreshes if cartridges are visible.
             AreCartridgesVisible = Model.CartridgeStore.Count > 0;
         }
-	}
+    }
 }

@@ -50,8 +50,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BugSense-WP7">
-      <HintPath>..\packages\BugSense.WP7.3.6.0.3\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
+    <Reference Include="BugSense-WP7, Version=3.6.0.4, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BugSense.WP7.3.6.0.4\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
     </Reference>
     <Reference Include="ImageTools">
       <HintPath>..\libs\ImageTools.dll</HintPath>
@@ -112,6 +113,7 @@
     <Compile Include="Controls\DistanceControl.xaml.cs">
       <DependentUpon>DistanceControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HistoryEntryTemplateSelector.cs" />
     <Compile Include="Controls\InputTemplateSelector.cs" />
     <Compile Include="Controls\ListSummaryControl.xaml.cs">
       <DependentUpon>ListSummaryControl.xaml</DependentUpon>

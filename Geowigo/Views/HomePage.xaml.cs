@@ -11,6 +11,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Geowigo.ViewModels;
+using System.Windows.Data;
 
 namespace Geowigo.Views
 {
@@ -31,15 +32,25 @@ namespace Geowigo.Views
 		#endregion
 
 		#endregion
+
+        #region Members
+
+        private CollectionViewSource _HistorySource;
+
+        #endregion
 		
 		public HomePage()
 		{
 			InitializeComponent();
+
+            _HistorySource = (CollectionViewSource)this.Resources["HistorySource"];
 		}
 
 		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
 		{
 			ViewModel.InitFromNavigation(e);
+
+            ViewModel.InitCollectionViewSources(_HistorySource);
 		}
 	}
 }

@@ -9,14 +9,15 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit" 
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" 
 	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
-    x:Class="Geowigo.Views.HomePage" 
+    xmlns:Geowigo_Models="clr-namespace:Geowigo.Models"
+    x:Class="Geowigo.Views.HomePage" x:Name="This"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
 	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False">
 	<phone:PhoneApplicationPage.Resources>
+		<toolkit:RelativeTimeConverter x:Key="RelativeTimeConverter"/>
+		<toolkit:ListViewDateTimeConverter x:Key="ListViewDateTimeConverter1"/>
+		<toolkit:ListViewDateTimeConverter x:Key="ListViewDateTimeConverter"/>
 		<ItemsPanelTemplate x:Key="CartridgesItemPanelTemplate">
 			<toolkit:WrapPanel Orientation="Vertical" d:DesignWidth="285" d:DesignHeight="206"/>
 		</ItemsPanelTemplate>
@@ -25,7 +26,87 @@
 				<toolkit:HubTile Title="{Binding Title, FallbackValue=Cartridge, Mode=OneWay}" Margin="0,0,12,12" Source="{Binding Thumbnail, Mode=OneWay}" Message="{Binding Cartridge.AuthorName}" Width="Auto" Height="Auto" GroupTag="cartridges"/>
 			</Grid>
 		</DataTemplate>
+		<DataTemplate x:Key="HistoryEntryStartedItemTemplate">
+			<Grid d:LayoutOverrides="HorizontalAlignment">
+				<StackPanel Orientation="Horizontal">
+					<Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
+						<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+					</Border>
+					<StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You started playing."/>
+						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="HistoryEntrySavedItemTemplate">
+			<Grid d:LayoutOverrides="HorizontalAlignment">
+				<StackPanel Orientation="Horizontal">
+                    <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
+                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+                    </Border>
+                    <StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You saved the game:"/>
+							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
+						</StackPanel>
+						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="HistoryEntryRestoredItemTemplate">
+			<Grid d:LayoutOverrides="HorizontalAlignment">
+				<StackPanel Orientation="Horizontal">
+                    <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
+                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+                    </Border>
+                    <StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You resumed a savegame:"/>
+							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
+						</StackPanel>
+						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="HistoryEntryCompletedItemTemplate">
+			<Grid d:LayoutOverrides="HorizontalAlignment">
+				<StackPanel Orientation="Horizontal">
+                    <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
+                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+                    </Border>
+                    <StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You completed the game!"/>
+						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="HistoryEntryListItemTemplate">
+			<Grid d:DesignWidth="103" d:DesignHeight="85">
+                <!--<TextBlock Text="{Binding}" />-->
+                <Geowigo_Controls:HistoryEntryTemplateSelector Content="{Binding}" StartedTemplate="{StaticResource HistoryEntryStartedItemTemplate}" SavedTemplate="{StaticResource HistoryEntrySavedItemTemplate}" RestoredTemplate="{StaticResource HistoryEntryRestoredItemTemplate}" CompletedTemplate="{StaticResource HistoryEntryCompletedItemTemplate}" Margin="0,0,0,20" />
+            </Grid>
+		</DataTemplate>
+        
+        <CollectionViewSource x:Key="HistorySource" Source="{Binding DataContext.Model.History, ElementName=This}" />
 	</phone:PhoneApplicationPage.Resources>
+
+	<phone:PhoneApplicationPage.FontFamily>
+		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
+	</phone:PhoneApplicationPage.FontFamily>
+	<phone:PhoneApplicationPage.FontSize>
+		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
+	</phone:PhoneApplicationPage.FontSize>
+	<phone:PhoneApplicationPage.Foreground>
+		<StaticResource ResourceKey="PhoneForegroundBrush"/>
+	</phone:PhoneApplicationPage.Foreground>
 
     <!--Les applications basées sur des panoramas ne devraient pas afficher d'ApplicationBar-->
 
@@ -40,7 +121,7 @@
             <!--Élément un de panorama-->
             <controls:PanoramaItem x:Name="CartridgePanoramaItem" Header="cartridges" Orientation="Horizontal">
             	<Grid>
-            		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Path=Model.CartridgeStore.IsBusy}"/>
+            		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
             		<StackPanel Margin="0,8,0,0" Orientation="Vertical" d:LayoutOverrides="Height">
             			<ScrollViewer x:Name="NoCartridgePanel" Width="420" Visibility="{Binding AreCartridgesVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}">
             				<StackPanel Orientation="Vertical">
@@ -57,7 +138,7 @@
             <!--Élément deux de panorama-->
             <controls:PanoramaItem x:Name="HistoryPanoramaItem" Header="recent">
                 <Grid>
-                    <Geowigo_Controls:NavigationListBox ItemsSource="{Binding Path=Model.History}" />
+                    <Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource HistoryEntryListItemTemplate}" ItemsSource="{Binding Source={StaticResource HistorySource}}" />
                 </Grid>
             </controls:PanoramaItem>
 

@@ -385,10 +385,9 @@ namespace Geowigo.ViewModels
 			model.Core.PlayMediaRequested += new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 			model.Core.StopSoundsRequested += new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
             model.Core.SaveRequested += new EventHandler<SavingEventArgs>(Core_SaveRequested);
-
-			// Temp debug
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
 			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+            model.Core.CartridgeCompleted += new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -399,26 +398,37 @@ namespace Geowigo.ViewModels
 			model.Core.PlayMediaRequested -= new EventHandler<ObjectEventArgs<Media>>(Core_PlaySoundRequested);
 			model.Core.StopSoundsRequested -= new EventHandler<WherigoEventArgs>(Core_StopSoundsRequested);
             model.Core.SaveRequested -= new EventHandler<SavingEventArgs>(Core_SaveRequested);
+            model.Core.AttributeChanged -= new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
+            model.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+            model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 		}
-		
-
-		void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == "IsBusy")
-			{
-				SetSystemTrayProgressIndicator("Loading...", true, Model.Core.IsBusy);
-			}
-		}
-
-		void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
-		{
-			string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
-			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
-		}
+	
 
 		#region Model Event Handlers
 
-        void Core_SaveRequested(object sender, SavingEventArgs e)
+        private void Core_CartridgeCompleted(object sender, WherigoEventArgs e)
+        {
+            // Logs a history entry for cartridge completion.
+            Model.History.AddCompletedGame(Model.CartridgeStore.GetCartridgeTag(e.Cartridge));
+        }
+
+        private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsBusy")
+            {
+                // Updates the tray progress indicator if the engine is busy.
+                SetSystemTrayProgressIndicator("Loading...", true, Model.Core.IsBusy);
+            }
+        }
+
+        private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
+        {
+            // Show some debug info with attribute changes.
+            string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
+            System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
+        }
+
+        private void Core_SaveRequested(object sender, SavingEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
 

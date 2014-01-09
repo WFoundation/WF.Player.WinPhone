@@ -209,6 +209,19 @@ namespace Geowigo.Utils
 			return targetImage;
 		}
 
+        public static string ToBase64String(BitmapSource bitmapSource, int width, int height)
+        {
+            // Encodes the image to JPEG and writes it to a byte array.
+            byte[] imageData;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                WriteableBitmap wb = new WriteableBitmap(bitmapSource);
+                wb.SaveJpeg(ms, width, height, 0, 100);
+                imageData = ms.ToArray();
+            }
 
-	}
+            // Converts the data to a base64 string.
+            return Convert.ToBase64String(imageData);
+        }
+    }
 }

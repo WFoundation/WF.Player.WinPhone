@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.IO.IsolatedStorage;
 using Geowigo.Utils;
+using WF.Player.Core;
+using System.Collections.Specialized;
 
 namespace Geowigo.Models
 {
     [CollectionDataContract]
-    public class History : List<HistoryEntry>
+    public class History : ObservableCollection<HistoryEntry>
     {
         #region Properties
 
@@ -29,19 +31,21 @@ namespace Geowigo.Models
 
         private static readonly string CommonHistoryPath = "/History/userhistory.txt";
 
+        private bool _isSynced;
+
         #endregion
         
         #region Constructors
 
-        private History()
-            : base(new List<HistoryEntry>())
+        public History()
+            : base()
         {
             
         }
 
         #endregion
-
-        #region Methods
+        
+        #region Cache
 
         /// <summary>
         /// Imports the history from the isolated storage, or creates
@@ -61,7 +65,9 @@ namespace Geowigo.Models
                         {
                             // Tries to deserialize the history.
                             DataContractSerializer serializer = new DataContractSerializer(typeof(History));
-                            return (History)serializer.ReadObject(fs);
+                            History history = (History)serializer.ReadObject(fs);
+                            history._isSynced = true;
+                            return history;
                         }
 
                     }
@@ -85,7 +91,7 @@ namespace Geowigo.Models
         /// Exports the contents of the current history to the isolated
         /// storage.
         /// </summary>
-        private void ExportToCache()
+        public void ExportToCache()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
@@ -98,6 +104,98 @@ namespace Geowigo.Models
                     DataContractSerializer serializer = new DataContractSerializer(typeof(History));
                     serializer.WriteObject(fs, this);
                 }
+            }
+        }
+
+        #endregion
+
+        #region Add to History
+
+        /// <summary>
+        /// Adds a history entry for a game that has been restored.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="savegame"></param>
+        public void AddRestoredGame(CartridgeTag tag, CartridgeSavegame savegame)
+        {
+            Add(new HistoryEntry(HistoryEntry.Type.Restored, tag)
+                {
+                    RelatedSavegameName = savegame.Name
+                });
+        }
+
+        /// <summary>
+        /// Adds a history entry for a game that has been started.
+        /// </summary>
+        /// <param name="tag"></param>
+        public void AddStartedGame(CartridgeTag tag)
+        {
+            Add(new HistoryEntry(HistoryEntry.Type.Started, tag));
+        }
+
+        /// <summary>
+        /// Adds a history entry for a game that has been saved.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="savegame"></param>
+        public void AddSavedGame(CartridgeTag tag, CartridgeSavegame savegame)
+        {
+            Add(new HistoryEntry(HistoryEntry.Type.Saved, tag)
+            {
+                RelatedSavegameName = savegame.Name
+            });
+        }
+
+        /// <summary>
+        /// Adds a history entry for a game that has been completed.
+        /// </summary>
+        /// <param name="tag"></param>
+        public void AddCompletedGame(CartridgeTag tag)
+        {
+            Add(new HistoryEntry(HistoryEntry.Type.Completed, tag));
+        }
+
+        #endregion
+
+        #region Collection Overrides
+
+        protected override void ClearItems()
+        {
+            base.ClearItems();
+
+            if (_isSynced)
+            {
+                ExportToCache();
+            }
+        }
+
+        protected override void InsertItem(int index, HistoryEntry item)
+        {
+            base.InsertItem(index, item);
+
+            if (_isSynced)
+            {
+                ExportToCache();
+            }
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            base.RemoveItem(index);
+
+            if (_isSynced)
+            {
+                ExportToCache();
+            }
+        }
+
+        protected override void SetItem(int index, HistoryEntry item)
+        {
+            base.SetItem(index, item);
+
+            if (_isSynced)
+            {
+                ExportToCache();
             }
         }
 

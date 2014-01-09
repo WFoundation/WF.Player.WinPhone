@@ -119,7 +119,7 @@ namespace Geowigo.Models
 		}
 
         /// <summary>
-        /// Starts to play a Wherigo cartridge game.
+        /// Resumes playing a Wherigo cartridge saved game.
         /// </summary>
         /// <param name="filename">Filename of the cartridge in the isolated storage.</param>
         /// <param name="gwsFilename">Filename of the savegame to restore.</param>

@@ -9,6 +9,8 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Runtime.Serialization;
+using System.Linq;
+using System.Windows.Media.Imaging;
 
 namespace Geowigo.Models
 {
@@ -18,6 +20,20 @@ namespace Geowigo.Models
     [DataContract]
     public class HistoryEntry
     {
+        #region Constants
+
+        public const int ThumbnailWidth = 62;
+
+        #endregion
+        
+        #region Members
+
+        private CartridgeTag _tag;
+        private CartridgeSavegame _savegame;
+        private BitmapSource _thumbnail;
+        
+        #endregion
+        
         #region Enums
         
         /// <summary>
@@ -28,7 +44,7 @@ namespace Geowigo.Models
             Started,
             Restored,
             Saved,
-            Installed
+            Completed
         } 
 
         #endregion
@@ -45,7 +61,62 @@ namespace Geowigo.Models
         public string RelatedCartridgeGuid { get; set; }
 
         [DataMember]
+        public string RelatedCartridgeFilename { get; set; }
+
+        [DataMember]
+        public string RelatedCartridgeName { get; set; }
+
+        [DataMember]
+        public string RelatedCartridgeThumbnailBase64 { get; set; }
+
+        [DataMember]
         public DateTime Timestamp { get; set; }
+
+        public CartridgeTag Tag
+        {
+            get
+            {
+                if (_tag == null)
+                {
+                    // Binds the cartridge tag.
+                    _tag = App.Current.Model.CartridgeStore.GetCartridgeTag(RelatedCartridgeFilename, RelatedCartridgeGuid);
+                }
+
+                return _tag;
+            }
+        }
+
+        public CartridgeSavegame Savegame
+        {
+            get
+            {
+                if (_savegame == null)
+                {
+                    // Binds the savegame.
+                    CartridgeTag tag = Tag;
+                    if (tag != null)
+                    {
+                        _savegame = tag.GetSavegameByNameOrDefault(RelatedSavegameName);
+                    }
+                }
+
+                return _savegame;
+            }
+        }
+
+        public ImageSource Thumbnail
+        {
+            get
+            {
+                if (_thumbnail == null && RelatedCartridgeThumbnailBase64 != null)
+                {
+                    // Gets the thumbnail from the base64 data.
+                    _thumbnail = Utils.ImageUtils.GetBitmapSource(Convert.FromBase64String(RelatedCartridgeThumbnailBase64));
+                }
+
+                return _thumbnail;
+            }
+        }
 
         #endregion
 
@@ -53,12 +124,26 @@ namespace Geowigo.Models
 
         internal HistoryEntry()
         {
-
         }
 
-        public HistoryEntry(CartridgeTag cartTag)
+        /// <summary>
+        /// Constructs a history entry of a particular type, populating
+        /// its fields with the contents of a cartridge tag, and using
+        /// <code>DateTime.Now</code> as timestamp.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="cartTag"></param>
+        public HistoryEntry(HistoryEntry.Type type, CartridgeTag cartTag)
         {
+            EntryType = type;
+            RelatedCartridgeFilename = cartTag.Cartridge.Filename;
+            RelatedCartridgeGuid = cartTag.Guid;
+            RelatedCartridgeName = cartTag.Title;
 
+            BitmapSource thumb = (BitmapSource)cartTag.Thumbnail;
+            RelatedCartridgeThumbnailBase64 = thumb == null ? null : Utils.ImageUtils.ToBase64String(thumb, ThumbnailWidth, ThumbnailWidth);
+
+            Timestamp = DateTime.Now;
         }
 
         #endregion

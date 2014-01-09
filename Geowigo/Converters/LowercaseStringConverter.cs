@@ -16,7 +16,12 @@ namespace Geowigo.Converters
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return value.ToString().ToLower();
+            if (value == null)
+            {
+                return null;
+            }
+
+            return value.ToString().ToLower();
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

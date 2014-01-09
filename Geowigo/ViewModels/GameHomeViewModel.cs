@@ -329,15 +329,28 @@ namespace Geowigo.ViewModels
                 // Restores the cartridge or starts a new game?
                 if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))
                 {
+                    // Gives feeedback.
                     App.Current.ViewModel.SetSystemTrayProgressIndicator("Loading savegame...");
 
+                    // Restores the game.
                     Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
+
+                    // Registers a history entry.
+                    CartridgeTag cart = Model.CartridgeStore.GetCartridgeTag(Cartridge);
+                    Model.History.AddRestoredGame(
+                        cart,
+                        cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
                 }
                 else
                 {
+                    // Gives feeedback.
                     App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
 
+                    // Starts the game.
                     Cartridge = Model.Core.InitAndStartCartridge(filename);
+
+                    // Registers a history entry.
+                    Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTag(Cartridge));
                 }
 			}
 
