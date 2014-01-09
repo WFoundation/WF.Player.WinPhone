@@ -11,29 +11,36 @@ namespace Geowigo.Models
     [DataContract]
     public class CartridgeSavegame
     {
-        #region Constants
-
-        private const int GeneratedModelVersion = 2;
-
-        #endregion
         
         #region Properties
 
+        /// <summary>
+        /// Gets or sets the unique name of this savegame.
+        /// </summary>
         [DataMember]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets when this savegame has been made.
+        /// </summary>
         [DataMember]
         public DateTime Timestamp { get; set; }
 
+        /// <summary>
+        /// Gets or sets if this savegame has been made automatically.
+        /// </summary>
         [DataMember]
         public bool IsAutosave { get; set; }
 
+        /// <summary>
+        /// Gets or sets the file path of the savegame.
+        /// </summary>
         public string SavegameFile { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the file path of the metadata file.
+        /// </summary>
         public string MetadataFile { get; private set; }
-
-        [DataMember]
-        public int ModelVersion { get; set; }
 
         #endregion
 
@@ -50,7 +57,6 @@ namespace Geowigo.Models
         /// <param name="cartridge">Cartridge to save.</param>
         public CartridgeSavegame(CartridgeTag tag)
         {
-            ModelVersion = GeneratedModelVersion;
             Timestamp = DateTime.Now;
             Name = GetDefaultName(tag);
             SetFileProperties(tag);

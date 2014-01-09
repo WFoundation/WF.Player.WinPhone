@@ -56,16 +56,19 @@ namespace Geowigo.ViewModels
             // Performs the savegame.
             _appViewModel.Model.Core.Save(cs);
 
-            // Adds the savegame to the tag.
-            tag.AddSavegame(cs);
-
             // Shows progress to the user.
             _appViewModel.SetSystemTrayProgressIndicator(isVisible: false);
 
             // If this is a manual save, shows a message box.
             if (!isAutoSave)
             {
+                // What happens next depends on the result of this message box.
                 ShowNewSavegameMessageBox(cs);
+            }
+            else
+            {
+                // Adds the savegame to the tag.
+                tag.AddSavegame(cs);
             }
         }
 
@@ -148,6 +151,13 @@ namespace Geowigo.ViewModels
 
             // Commit.
             cs.ExportToIsoStore();
+
+            // Adds an history entry for this savegame.
+            CartridgeTag tag = _appViewModel.Model.CartridgeStore.GetCartridgeTag(_appViewModel.Model.Core.Cartridge);
+            _appViewModel.Model.History.AddSavedGame(tag, cs);
+
+            // Adds the savegame to the tag.
+            tag.AddSavegame(cs);
         }
 
         #endregion
@@ -163,7 +173,7 @@ namespace Geowigo.ViewModels
         private CartridgeSavegame GetSavegameByName(string name)
         {
             // Returns the savegame by name, if it exists.
-            return GetCurrentTag().Savegames.SingleOrDefault(cs => cs.Name == name);
+            return GetCurrentTag().GetSavegameByNameOrDefault(name);
         }
 
         #endregion
