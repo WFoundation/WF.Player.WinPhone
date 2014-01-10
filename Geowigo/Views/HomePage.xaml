@@ -141,7 +141,15 @@
             <!--Élément deux de panorama-->
             <controls:PanoramaItem x:Name="HistoryPanoramaItem" Header="recent">
                 <Grid>
-                    <Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource HistoryEntryListItemTemplate}" ItemsSource="{Binding Source={StaticResource HistorySource}}" />
+                	<StackPanel Orientation="Vertical" d:LayoutOverrides="Height">
+                		<ScrollViewer x:Name="NoHistoryPanel" Height="497" Visibility="{Binding IsHistoryVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}">
+                			<StackPanel Orientation="Vertical">
+                				<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Your recently played cartridges will appear here. "/><Run Text="But there is nothing to show just yet."/></TextBlock>
+                				<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="0,10,0,0"><Run Text="Go ahe"/><Run Text="a"/><Run Text="d and "/><Run Text="play a game!"/></TextBlock>
+                			</StackPanel>
+                		</ScrollViewer>
+                		<Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource HistoryEntryListItemTemplate}" ItemsSource="{Binding Source={StaticResource HistorySource}}" Visibility="{Binding IsHistoryVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Height="425" />
+                	</StackPanel>
                 </Grid>
             </controls:PanoramaItem>
 

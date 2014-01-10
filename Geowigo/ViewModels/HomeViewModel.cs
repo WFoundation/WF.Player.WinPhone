@@ -35,6 +35,22 @@ namespace Geowigo.ViewModels
         
         #endregion
 
+        #region IsHistoryVisible
+
+
+        public bool IsHistoryVisible
+        {
+            get { return (bool)GetValue(IsHistoryVisibleProperty); }
+            set { SetValue(IsHistoryVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsHistoryVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsHistoryVisibleProperty =
+            DependencyProperty.Register("IsHistoryVisible", typeof(bool), typeof(HomeViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
         #endregion
         
         #region Properties
@@ -143,6 +159,9 @@ namespace Geowigo.ViewModels
             RefreshVisibilities();
             Model.CartridgeStore.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnCartridgeStoreCollectionChanged);
 			Model.CartridgeStore.SyncFromIsoStore();
+
+            // Monitors the history.
+            Model.History.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnHistoryCollectionChanged);
 		}
 
 		private void StartCartridge(CartridgeTag cartTag)
@@ -180,10 +199,15 @@ namespace Geowigo.ViewModels
             RefreshVisibilities();
         }
 
+        private void OnHistoryCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RefreshVisibilities();
+        }
+
         private void RefreshVisibilities()
         {
-            // Refreshes if cartridges are visible.
             AreCartridgesVisible = Model.CartridgeStore.Count > 0;
+            IsHistoryVisible = Model.History.Count > 0;
         }
     }
 }
