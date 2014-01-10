@@ -43,7 +43,7 @@ namespace Geowigo.Views
 		public BasePage()
 			: base()
 		{
-			LayoutUpdated += new EventHandler(BasePage_LayoutUpdated);
+            Loaded += new RoutedEventHandler(BasePage_Loaded);
 		}
 
 		#endregion
@@ -68,10 +68,29 @@ namespace Geowigo.Views
 
 		private void BasePage_LayoutUpdated(object sender, EventArgs e)
 		{
-			LayoutUpdated -= BasePage_LayoutUpdated;
+            // Unregisters the event handler, because many more 
+            // are coming our way.
+            LayoutUpdated -= new EventHandler(BasePage_LayoutUpdated);
 
-			OnReady();
+            // Raises OnReady in the dispatcher.
+            // This way, we make sure the event will be fired at a moment
+            // when the dispatcher is done rendering the page.
+            // And, therefore, the page is probably ready.
+            // (WTF, Silverlight?!)
+            Dispatcher.BeginInvoke(OnReady);
 		}
+
+        void BasePage_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Unregisters the event handler, because more Loaded event may
+            // come our way. (WTF, Silverlight?)
+            Loaded -= new RoutedEventHandler(BasePage_Loaded);
+
+            // Registers the handler for LayoutUpdated, because the next one
+            // coming is a good candidate for the page nearing readiness.
+            // (WTF, Silverlight?)
+            LayoutUpdated += new EventHandler(BasePage_LayoutUpdated);
+        }
 
 		#endregion
 

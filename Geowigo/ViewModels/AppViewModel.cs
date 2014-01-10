@@ -430,8 +430,6 @@ namespace Geowigo.ViewModels
 
         private void Core_SaveRequested(object sender, SavingEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("WARNING!!! Core_SaveRequested NOT IMPLEMENTED !!!!!");
-
             // Saves game.
             SaveGame(true);
 
