@@ -191,6 +191,38 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region IsProgressBarVisible
+
+
+        public bool IsProgressBarVisible
+        {
+            get { return (bool)GetValue(IsProgressBarVisibleProperty); }
+            set { SetValue(IsProgressBarVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsProgressBarVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsProgressBarVisibleProperty =
+            DependencyProperty.Register("IsProgressBarVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
+        #region ProgressBarStatusText
+
+
+        public string ProgressBarStatusText
+        {
+            get { return (string)GetValue(ProgressBarStatusTextProperty); }
+            set { SetValue(ProgressBarStatusTextProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ProgressBarStatusText.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ProgressBarStatusTextProperty =
+            DependencyProperty.Register("ProgressBarStatusText", typeof(string), typeof(GameHomeViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
 		#endregion
 
 		#region Commands
@@ -303,7 +335,14 @@ namespace Geowigo.ViewModels
             {
                 return;
             }
-            Dispatcher.BeginInvoke(_cartridgeStartAction);
+            Dispatcher.BeginInvoke(() =>
+            {
+                // Runs the action.
+                _cartridgeStartAction();
+
+                // Gives feedback.
+                IsProgressBarVisible = false;
+            });
         }
 
 		protected override void OnCorePropertyChanged(string propName)
@@ -364,7 +403,7 @@ namespace Geowigo.ViewModels
                                 cart,
                                 cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
                         }),
-                        "Starting cartridge");
+                        "Restoring cartridge...");
                 }
                 else
                 {
@@ -378,7 +417,7 @@ namespace Geowigo.ViewModels
                             // Registers a history entry.
                             Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTag(Cartridge));
                         }),
-                        "Starting cartridge");
+                        "Starting cartridge...");
                 }
 			}
 
@@ -395,12 +434,15 @@ namespace Geowigo.ViewModels
         private void RunOrDeferIfNotReady(Action action, string trayMessage)
         {
             // Gives feeedback.
-            App.Current.ViewModel.SetSystemTrayProgressIndicator(trayMessage);
+            //App.Current.ViewModel.SetSystemTrayProgressIndicator(trayMessage);
+            ProgressBarStatusText = trayMessage;
+            IsProgressBarVisible = true;
 
             // Runs the action later if the page is not ready yet.
             if (_isReady)
             {
                 action();
+                IsProgressBarVisible = false;
             }
             else
             {
