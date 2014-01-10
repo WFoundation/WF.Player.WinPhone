@@ -20,15 +20,42 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class MessageBoxManager
 	{
+        #region Events
 
-		#region Fields
+        public event EventHandler HasMessageBoxChanged;
+
+        #endregion
+
+		#region Members
 
 		/// <summary>
 		/// Matches a custom message box to its wherigo equivalent.
 		/// </summary>
 		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
 
+        private object _syncRoot = new object();
+
 		#endregion
+
+        #region Properties
+
+        #region Count
+        /// <summary>
+        /// Gets if this manager has an active message box.
+        /// </summary>
+        public bool HasMessageBox
+        {
+            get
+            {
+                lock (_syncRoot)
+                {
+                    return _WherigoMessageBoxes.Count > 0;
+                }
+            }
+        }
+        #endregion
+
+        #endregion
 
 		/// <summary>
 		/// Displays a message box from a Wherigo game. 
@@ -42,7 +69,7 @@ namespace Geowigo.ViewModels
 				throw new ArgumentNullException("mbox");
 			}
 
-			Accept(mbox).Show();
+            Accept(mbox).Show();
 		}
 
 		/// <summary>
@@ -77,7 +104,16 @@ namespace Geowigo.ViewModels
 				RegisterEventHandlersForWig(cmb);
 
 				// Adds the pair to the dictionary.
-				_WherigoMessageBoxes.Add(cmb, wmb);
+                lock (_syncRoot)
+                {
+                    _WherigoMessageBoxes.Add(cmb, wmb); 
+                }
+
+                // Sends an event.
+                if (HasMessageBoxChanged != null)
+                {
+                    HasMessageBoxChanged(this, EventArgs.Empty);
+                }
 			}
 
 			return cmb;
@@ -106,9 +142,7 @@ namespace Geowigo.ViewModels
 			WF.Player.Core.MessageBox wmb;
 			if (_WherigoMessageBoxes.TryGetValue(cmb, out wmb))
 			{
-				// Bye bye box.
-				_WherigoMessageBoxes.Remove(cmb);
-				
+                // Gives result to the Wherigo message box.
 				switch (e.Result)
 				{
 					case CustomMessageBoxResult.LeftButton:
@@ -129,6 +163,18 @@ namespace Geowigo.ViewModels
 					default:
 						throw new InvalidOperationException("Unknown value of CustomMessageBoxResult cannot be processed: " + e.Result.ToString());
 				}
+
+                // Bye bye box.
+                lock (_syncRoot)
+                {
+                    _WherigoMessageBoxes.Remove(cmb); 
+                }
+				
+                // If no more message box is managed, send an event.
+                if (_WherigoMessageBoxes.Count == 0 && HasMessageBoxChanged != null)
+                {
+                    HasMessageBoxChanged(this, EventArgs.Empty);
+                }
 			}
 
 		}

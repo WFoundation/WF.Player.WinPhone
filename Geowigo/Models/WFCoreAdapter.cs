@@ -56,7 +56,7 @@ namespace Geowigo.Models
 
 		#endregion
 
-		#region Fields
+		#region Members
 
 		private GeoCoordinateWatcher _GeoWatcher;
 		private GeoPosition<GeoCoordinate> _LastKnownPosition;
@@ -147,16 +147,6 @@ namespace Geowigo.Models
 
             return cart;
         }
-
-        //public void InitAndStartCartridgeAsync(string filename, Action<Cartridge> callback)
-        //{
-        //    BackgroundWorker bw = new BackgroundWorker();
-        //    bw.DoWork += (o, e) =>
-        //    {
-        //        callback(InitAndStartCartridge(filename));
-        //    };
-        //    bw.RunWorkerAsync();
-        //}
 
         /// <summary>
         /// Saves the game to a CartridgeSavegame object.
@@ -277,7 +267,7 @@ namespace Geowigo.Models
 
 		private void LogDebug(string message)
 		{
-			Debug.WriteLine("[DEBUG] " + message);
+			Debug.WriteLine("WFCoreAdapter: " + message);
 		}
     }
 }

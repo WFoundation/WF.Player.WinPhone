@@ -65,6 +65,14 @@ namespace Geowigo.Views
 
 			// Sets the filters for the task collection views.
 			ViewModel.InitCollectionViewSourcesForTasks(_CurrentTasksSource, _HistoryTasksSource);
+
+            // Informs the data model that the page is ready.
+            ViewModel.OnPageReady();
 		}
+
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+        }
 	}
 }

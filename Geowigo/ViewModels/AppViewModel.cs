@@ -17,22 +17,26 @@ using System.IO;
 using System.Windows.Navigation;
 using System.Linq;
 using Microsoft.Phone.Shell;
+using WF.Player.Core.Threading;
 
 namespace Geowigo.ViewModels
 {	
 	/// <summary>
-	/// The application view model, which is responsible for application-wide flow and control of the app and game UI.
+	/// The application view model, which is responsible for application-wide flow and 
+    /// control of the app and game UI.
 	/// </summary>
 	public class AppViewModel
 	{
 
-		#region Fields
+		#region Members
 
 		private MessageBoxManager _MBManagerInstance;
 
 		private SoundManager _SoundManagerInstance;
 
         private SavegameManager _SavegameManagerInstance;
+
+        private ActionPump _actionPump;
 
 		#endregion
 
@@ -129,6 +133,17 @@ namespace Geowigo.ViewModels
         #endregion
 
 		#endregion
+
+        #region Constructors
+
+        public AppViewModel()
+        {
+            _actionPump = new ActionPump();
+
+            MessageBoxManager.HasMessageBoxChanged += new EventHandler(MessageBoxManager_HasMessageBoxChanged);
+        }
+
+        #endregion
 
 		#region Public Methods
 
@@ -377,7 +392,49 @@ namespace Geowigo.ViewModels
 
 		#region Private Methods
 
-		private void RegisterModel(WherigoModel model)
+        #region Action Pump Management
+
+        private void OnCoreIsBusyChanged(bool isBusy)
+        {
+            // Refreshes if the action pump is pumping.
+            _actionPump.IsPumping = !isBusy && !MessageBoxManager.HasMessageBox;
+        }
+
+        private void MessageBoxManager_HasMessageBoxChanged(object sender, EventArgs e)
+        {
+            // Refreshes if the action pump is pumping.
+            _actionPump.IsPumping = !Model.Core.IsBusy && !MessageBoxManager.HasMessageBox;
+        }
+
+        /// <summary>
+        /// Runs an action as soon as the engine is not busy and no
+        /// game message box is onscreen.
+        /// </summary>
+        /// <param name="action"></param>
+        private void BeginRunOnIdle(Action action)
+        {            
+            // Wraps the action in a dispatcher action.
+            Action wrapper = new Action(() =>
+            {
+                App.Current.RootFrame.Dispatcher.BeginInvoke(action);
+            });
+            
+            // If the engine is idle, runs the action immediately.
+            if (!Model.Core.IsBusy && !MessageBoxManager.HasMessageBox)
+            {
+                wrapper();
+            }
+            else
+            {
+                _actionPump.AcceptAction(wrapper);
+            }
+        }
+
+        #endregion
+
+        #region Model Event Handlers
+        
+        private void RegisterModel(WherigoModel model)
 		{
 			model.Core.InputRequested += new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
 			model.Core.ShowMessageBoxRequested += new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
@@ -402,9 +459,6 @@ namespace Geowigo.ViewModels
             model.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 		}
-	
-
-		#region Model Event Handlers
 
         private void Core_CartridgeCompleted(object sender, WherigoEventArgs e)
         {
@@ -417,7 +471,11 @@ namespace Geowigo.ViewModels
             if (e.PropertyName == "IsBusy")
             {
                 // Updates the tray progress indicator if the engine is busy.
-                SetSystemTrayProgressIndicator("Loading...", true, Model.Core.IsBusy);
+                bool isBusy = Model.Core.IsBusy;
+                SetSystemTrayProgressIndicator("Loading...", true, isBusy);
+
+                // Relays the information.
+                OnCoreIsBusyChanged(isBusy);
             }
         }
 
@@ -436,7 +494,15 @@ namespace Geowigo.ViewModels
             // If e.CloseAfterSave, close the game.
             if (e.CloseAfterSave)
             {
-                NavigateToAppHome(true);
+                // Wait for the engine to be done doing what it's doing.
+                BeginRunOnIdle(() =>
+                {
+                    // Shows a message box for that.
+                    System.Windows.MessageBox.Show("The cartridge has requested to be terminated. The game has been automatically saved, and you will now be taken back to the main menu of the app.", "The game is ending.", MessageBoxButton.OK);
+
+                    // Back to app home.
+                    NavigateToAppHome(true);
+                });
             }
         }
 

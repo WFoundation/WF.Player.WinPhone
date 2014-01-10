@@ -19,6 +19,7 @@ using Microsoft.Phone.Shell;
 using Geowigo.Utils;
 using Geowigo.Models;
 using System.IO.IsolatedStorage;
+using System.ComponentModel;
 
 namespace Geowigo.ViewModels
 {
@@ -34,6 +35,13 @@ namespace Geowigo.ViewModels
         public static readonly string SectionValue_Tasks = "tasks";
 
         public static readonly string SavegameFilenameKey = "gwsFilename";
+        #endregion
+
+        #region Members
+
+        private Action _cartridgeStartAction;
+        private bool _isReady;
+
         #endregion
 
 		#region Dependency Properties
@@ -284,6 +292,20 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+        public void OnPageReady()
+        {
+            // Remembers that the page is ready.
+            _isReady = true;
+            
+            // If a start action is defined, now is time to run it in the
+            // UI thread dispatcher.
+            if (_cartridgeStartAction == null)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(_cartridgeStartAction);
+        }
+
 		protected override void OnCorePropertyChanged(string propName)
 		{
 			// Refreshes all visibilities if the model is now ready. Otherwise tries our best
@@ -329,34 +351,62 @@ namespace Geowigo.ViewModels
                 // Restores the cartridge or starts a new game?
                 if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))
                 {
-                    // Gives feeedback.
-                    App.Current.ViewModel.SetSystemTrayProgressIndicator("Loading savegame...");
+                    // Starts restoring the game.
+                    RunOrDeferIfNotReady(
+                        new Action(() =>
+                        {
+                            // Restores the game.
+                            Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
 
-                    // Restores the game.
-                    Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
-
-                    // Registers a history entry.
-                    CartridgeTag cart = Model.CartridgeStore.GetCartridgeTag(Cartridge);
-                    Model.History.AddRestoredGame(
-                        cart,
-                        cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+                            // Registers a history entry.
+                            CartridgeTag cart = Model.CartridgeStore.GetCartridgeTag(Cartridge);
+                            Model.History.AddRestoredGame(
+                                cart,
+                                cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+                        }),
+                        "Starting cartridge");
                 }
                 else
                 {
-                    // Gives feeedback.
-                    App.Current.ViewModel.SetSystemTrayProgressIndicator("Starting cartridge...");
+                    // Starts a new game.
+                    RunOrDeferIfNotReady(
+                        new Action(() =>
+                        {
+                            // Starts the game.
+                            Cartridge = Model.Core.InitAndStartCartridge(filename);
 
-                    // Starts the game.
-                    Cartridge = Model.Core.InitAndStartCartridge(filename);
-
-                    // Registers a history entry.
-                    Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTag(Cartridge));
+                            // Registers a history entry.
+                            Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTag(Cartridge));
+                        }),
+                        "Starting cartridge");
                 }
 			}
 
 			// TODO: Cancel nav if no cartridge in parameter?
 
 		}
+
+        /// <summary>
+        /// Displays a tray message, and runs an action now or defers it if
+        /// the page is not ready yet.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="trayMessage"></param>
+        private void RunOrDeferIfNotReady(Action action, string trayMessage)
+        {
+            // Gives feeedback.
+            App.Current.ViewModel.SetSystemTrayProgressIndicator(trayMessage);
+
+            // Runs the action later if the page is not ready yet.
+            if (_isReady)
+            {
+                action();
+            }
+            else
+            {
+                _cartridgeStartAction = action;
+            }
+        }
 
 		/// <summary>
 		/// Makes the app show the details of a thing.
@@ -469,5 +519,5 @@ namespace Geowigo.ViewModels
             // Saves the game!
             App.Current.ViewModel.SaveGame(false);
         }
-	}
+    }
 }
