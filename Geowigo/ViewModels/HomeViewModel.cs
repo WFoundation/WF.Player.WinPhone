@@ -119,7 +119,7 @@ namespace Geowigo.ViewModels
             {
                 if (_VisitIsoStoreHomePageCommand == null)
                 {
-                    _VisitIsoStoreHomePageCommand = new RelayCommand(VisitIsoStoreHomePage);
+                    _VisitIsoStoreHomePageCommand = new RelayCommand(VisitIsoStoreSpyHomePage);
                 }
 
                 return _VisitIsoStoreHomePageCommand;
@@ -167,7 +167,7 @@ namespace Geowigo.ViewModels
 
         #endregion
 
-        private void VisitIsoStoreHomePage()
+        private void VisitIsoStoreSpyHomePage()
 		{
 			// Browses to the page.
             Microsoft.Phone.Tasks.WebBrowserTask task = new Microsoft.Phone.Tasks.WebBrowserTask();

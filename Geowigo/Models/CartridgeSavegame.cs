@@ -2,6 +2,7 @@
 using WF.Player.Core;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization;
+using System.Windows.Media;
 
 namespace Geowigo.Models
 {
@@ -33,6 +34,12 @@ namespace Geowigo.Models
         public bool IsAutosave { get; set; }
 
         /// <summary>
+        /// Gets or sets the hash color representing this savegame.
+        /// </summary>
+        [DataMember]
+        public Color HashColor { get; set; }
+
+        /// <summary>
         /// Gets or sets the file path of the savegame.
         /// </summary>
         public string SavegameFile { get; private set; }
@@ -59,11 +66,26 @@ namespace Geowigo.Models
         {
             Timestamp = DateTime.Now;
             Name = GetDefaultName(tag);
+            HashColor = GetHashColor(Name);
             SetFileProperties(tag);
         }
 
         #endregion
-        
+
+        /// <summary>
+        /// Computes the color brush hash that corresponds to a particular
+        /// name for a savegame.
+        /// </summary>
+        /// <param name="name">Name of a savegame.</param>
+        /// <returns>The hash color brush corresponding to the name.</returns>
+        public static Color GetHashColor(string name)
+        {
+            // Gets bytes from the hash of the name.
+            byte[] bytes = BitConverter.GetBytes(name.GetHashCode());
+
+            // Computes a color from each byte.
+            return Color.FromArgb(255, bytes[1], bytes[2], bytes[3]);
+        }
 
         /// <summary>
         /// Imports a savegame from metadata associated to a savegame

@@ -127,6 +127,7 @@
       <DependentUpon>WherigoMessageBoxContentControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\ByteArrayToImageSourceConverter.cs" />
+    <Compile Include="Converters\ColorToBrushConverter.cs" />
     <Compile Include="Converters\ItemSourceToVisibilityConverter.cs" />
     <Compile Include="Converters\LowercaseStringConverter.cs" />
     <Compile Include="Converters\ObjectToVisibilityConverter.cs" />

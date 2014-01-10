@@ -118,10 +118,7 @@ namespace Geowigo.Models
         /// <param name="savegame"></param>
         public void AddRestoredGame(CartridgeTag tag, CartridgeSavegame savegame)
         {
-            Add(new HistoryEntry(HistoryEntry.Type.Restored, tag)
-                {
-                    RelatedSavegameName = savegame.Name
-                });
+            Add(new HistoryEntry(HistoryEntry.Type.Restored, tag, savegame));
         }
 
         /// <summary>
@@ -140,10 +137,7 @@ namespace Geowigo.Models
         /// <param name="savegame"></param>
         public void AddSavedGame(CartridgeTag tag, CartridgeSavegame savegame)
         {
-            Add(new HistoryEntry(HistoryEntry.Type.Saved, tag)
-            {
-                RelatedSavegameName = savegame.Name
-            });
+            Add(new HistoryEntry(HistoryEntry.Type.Saved, tag, savegame));
         }
 
         /// <summary>

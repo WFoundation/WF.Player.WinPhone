@@ -10,13 +10,14 @@
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" 
 	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
     xmlns:Geowigo_Models="clr-namespace:Geowigo.Models"
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters"
     x:Class="Geowigo.Views.HomePage" x:Name="This"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     SupportedOrientations="Portrait"  Orientation="Portrait"
 	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False">
 	<phone:PhoneApplicationPage.Resources>
+		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<toolkit:RelativeTimeConverter x:Key="RelativeTimeConverter"/>
-		<toolkit:ListViewDateTimeConverter x:Key="ListViewDateTimeConverter1"/>
 		<toolkit:ListViewDateTimeConverter x:Key="ListViewDateTimeConverter"/>
 		<ItemsPanelTemplate x:Key="CartridgesItemPanelTemplate">
 			<toolkit:WrapPanel Orientation="Vertical" d:DesignWidth="285" d:DesignHeight="206"/>
@@ -43,10 +44,11 @@
 		<DataTemplate x:Key="HistoryEntrySavedItemTemplate">
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
-                    <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
-                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
-                    </Border>
-                    <StackPanel Orientation="Vertical">
+                    <Grid Background="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62">
+						<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}" />
+						<Rectangle Fill="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" HorizontalAlignment="Right" Height="29" VerticalAlignment="Bottom" Width="29"/>
+					</Grid>
+					<StackPanel Orientation="Vertical">
 						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">
 							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You saved the game:"/>
@@ -60,9 +62,10 @@
 		<DataTemplate x:Key="HistoryEntryRestoredItemTemplate">
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
-                    <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
-                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
-                    </Border>
+                    <Grid Background="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62">
+                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}" />
+                        <Rectangle Fill="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" HorizontalAlignment="Right" Height="29" VerticalAlignment="Bottom" Width="29"/>
+                    </Grid>
                     <StackPanel Orientation="Vertical">
 						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">

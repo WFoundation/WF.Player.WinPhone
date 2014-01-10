@@ -58,6 +58,9 @@ namespace Geowigo.Models
         public string RelatedSavegameName { get; set; }
 
         [DataMember]
+        public Color RelatedSavegameHashColor { get; set; }
+
+        [DataMember]
         public string RelatedCartridgeGuid { get; set; }
 
         [DataMember]
@@ -144,6 +147,21 @@ namespace Geowigo.Models
             RelatedCartridgeThumbnailBase64 = thumb == null ? null : Utils.ImageUtils.ToBase64String(thumb, ThumbnailWidth, ThumbnailWidth);
 
             Timestamp = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Constructs a history entry of a particular type, populating
+        /// its fields with the contents of a cartridge tag and a cartridge
+        /// savegame, and using <code>DateTime.Now</code> as timestamp.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="cartTag"></param>
+        /// <param name="savegame"></param>
+        public HistoryEntry(HistoryEntry.Type type, CartridgeTag cartTag, CartridgeSavegame savegame)
+            : this(type, cartTag)
+        {
+            RelatedSavegameHashColor = savegame.HashColor;
+            RelatedSavegameName = savegame.Name;
         }
 
         #endregion

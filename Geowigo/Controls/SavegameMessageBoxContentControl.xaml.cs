@@ -37,34 +37,38 @@ namespace Geowigo.Controls
 
         #endregion
 
-        #region Name
+        #region SavegameName
 
-        public string Name
+        public string SavegameName
         {
-            get { return (string)GetValue(NameProperty); }
-            set { SetValue(NameProperty, value); }
+            get { return (string)GetValue(SavegameNameProperty); }
+            set { SetValue(SavegameNameProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for Name.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty NameProperty =
-            DependencyProperty.Register("Name", typeof(string), typeof(SavegameMessageBoxContentControl), new PropertyMetadata(null));
+        public static readonly DependencyProperty SavegameNameProperty =
+            DependencyProperty.Register("SavegameName", typeof(string), typeof(SavegameMessageBoxContentControl), new PropertyMetadata(null, OnSavegameNameChanged));
 
-
+        private static void OnSavegameNameChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+        {
+            ((SavegameMessageBoxContentControl)o).OnSavegameNameChanged(e.NewValue as string);
+        }
 
         #endregion
 
-        #region HashBrush
+        #region HashColor
 
 
-        public Brush HashBrush
+
+        public Color HashColor
         {
-            get { return (Brush)GetValue(HashBrushProperty); }
-            set { SetValue(HashBrushProperty, value); }
+            get { return (Color)GetValue(HashColorProperty); }
+            set { SetValue(HashColorProperty, value); }
         }
 
-        // Using a DependencyProperty as the backing store for HashBrush.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty HashBrushProperty =
-            DependencyProperty.Register("HashBrush", typeof(Brush), typeof(SavegameMessageBoxContentControl), new PropertyMetadata(null));
+        // Using a DependencyProperty as the backing store for HashColor.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty HashColorProperty =
+            DependencyProperty.Register("HashColor", typeof(Color), typeof(SavegameMessageBoxContentControl), new PropertyMetadata(default(Color)));
 
 
         #endregion
@@ -81,22 +85,18 @@ namespace Geowigo.Controls
             if (cs == null)
             {
                 Name = null;
-                HashBrush = null;
+                HashColor = default(Color);
             }
             else
             {
                 Name = cs.Name;
-                HashBrush = GetHashBrush(cs);
+                HashColor = cs.HashColor;
             }
         }
 
-        private Brush GetHashBrush(CartridgeSavegame cs)
+        private void OnSavegameNameChanged(string newValue)
         {
-            // Gets bytes from the hash of the name.
-            byte[] bytes = BitConverter.GetBytes(cs.Name.GetHashCode());
-
-            // Computes a color from each byte.
-            return new SolidColorBrush(Color.FromArgb(255, bytes[1], bytes[2], bytes[3]));
+            HashColor = CartridgeSavegame.GetHashColor(newValue ?? "");
         }
     }
 }

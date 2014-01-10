@@ -147,7 +147,7 @@ namespace Geowigo.ViewModels
 
             // Edits the savegame.
             cs.Name = content.Name;
-            //cs.HashBrush = content.HashBrush;
+            cs.HashColor = content.HashColor;
 
             // Commit.
             cs.ExportToIsoStore();
