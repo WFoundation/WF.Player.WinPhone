@@ -6,6 +6,7 @@ using System.IO.IsolatedStorage;
 using Geowigo.Utils;
 using WF.Player.Core;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace Geowigo.Models
 {
@@ -25,13 +26,41 @@ namespace Geowigo.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets if this history is synchronized with the cache.
+        /// </summary>
+        /// <remarks>
+        /// If true, this history exports itself to the cache every time
+        /// it is modified.
+        /// </remarks>
+        protected bool IsSyncedWithCache
+        {
+            get
+            {
+                lock (_syncRoot)
+                {
+                    return _isSynced;
+                }
+            }
+
+            set
+            {
+                lock (_syncRoot)
+                {
+                    _isSynced = value;
+                }
+            }
+        }
+
         #endregion
 
         #region Members
 
         private static readonly string CommonHistoryPath = "/History/userhistory.txt";
 
-        private bool _isSynced;
+        private bool _isSynced = false;
+
+        private object _syncRoot = new object();
 
         #endregion
         
@@ -66,7 +95,7 @@ namespace Geowigo.Models
                             // Tries to deserialize the history.
                             DataContractSerializer serializer = new DataContractSerializer(typeof(History));
                             History history = (History)serializer.ReadObject(fs);
-                            history._isSynced = true;
+                            history.IsSyncedWithCache = true;
                             return history;
                         }
 
@@ -151,13 +180,41 @@ namespace Geowigo.Models
 
         #endregion
 
+        #region Remove from History
+
+        /// <summary>
+        /// Removes all entries related to a specific cartridge GUID
+        /// from the history.
+        /// </summary>
+        /// <param name="cartrigeGuid"></param>
+        public void RemoveAllOf(string cartrigeGuid)
+        {
+            // Disables sync.
+            IsSyncedWithCache = false;
+
+            // Removes all related entries.
+            List<HistoryEntry> removedItems = this.Where(he => he.RelatedCartridgeGuid == cartrigeGuid).ToList();
+            foreach (var entry in removedItems)
+            {
+                this.Remove(entry);
+            }
+
+            // Exports to cache.
+            ExportToCache();
+
+            // Reenables sync.
+            IsSyncedWithCache = true;
+        }
+
+        #endregion
+
         #region Collection Overrides
 
         protected override void ClearItems()
         {
             base.ClearItems();
 
-            if (_isSynced)
+            if (IsSyncedWithCache)
             {
                 ExportToCache();
             }
@@ -167,7 +224,7 @@ namespace Geowigo.Models
         {
             base.InsertItem(index, item);
 
-            if (_isSynced)
+            if (IsSyncedWithCache)
             {
                 ExportToCache();
             }
@@ -177,7 +234,7 @@ namespace Geowigo.Models
         {
             base.RemoveItem(index);
 
-            if (_isSynced)
+            if (IsSyncedWithCache)
             {
                 ExportToCache();
             }
@@ -187,7 +244,7 @@ namespace Geowigo.Models
         {
             base.SetItem(index, item);
 
-            if (_isSynced)
+            if (IsSyncedWithCache)
             {
                 ExportToCache();
             }

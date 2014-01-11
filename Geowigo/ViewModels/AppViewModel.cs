@@ -364,7 +364,7 @@ namespace Geowigo.ViewModels
 		public void PlayMediaSound(Media media)
 		{
 			// Gets the media filename in cache.
-			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTag(Model.Core.Cartridge);
+			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTagOrDefault(Model.Core.Cartridge);
 			string filename = tag.GetCachePath(media);
 
 			// Plays the file.
@@ -463,7 +463,7 @@ namespace Geowigo.ViewModels
         private void Core_CartridgeCompleted(object sender, WherigoEventArgs e)
         {
             // Logs a history entry for cartridge completion.
-            Model.History.AddCompletedGame(Model.CartridgeStore.GetCartridgeTag(e.Cartridge));
+            Model.History.AddCompletedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(e.Cartridge));
         }
 
         private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

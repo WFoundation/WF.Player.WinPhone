@@ -398,7 +398,7 @@ namespace Geowigo.ViewModels
                             Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
 
                             // Registers a history entry.
-                            CartridgeTag cart = Model.CartridgeStore.GetCartridgeTag(Cartridge);
+                            CartridgeTag cart = Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge);
                             Model.History.AddRestoredGame(
                                 cart,
                                 cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
@@ -415,7 +415,7 @@ namespace Geowigo.ViewModels
                             Cartridge = Model.Core.InitAndStartCartridge(filename);
 
                             // Registers a history entry.
-                            Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTag(Cartridge));
+                            Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge));
                         }),
                         "Starting cartridge...");
                 }
@@ -450,49 +450,60 @@ namespace Geowigo.ViewModels
             }
         }
 
-		/// <summary>
-		/// Makes the app show the details of a thing.
-		/// </summary>
-		/// <param name="t"></param>
-		private void ShowDetails(UIObject t)
-		{
-			// Navigates to the appropriate view.
-			App.Current.ViewModel.NavigateToView(t);
-		}
+        #region Menu Commands
+        /// <summary>
+        /// Starts the process of saving a game.
+        /// </summary>
+        private void StartSaveGame()
+        {
+            // Saves the game!
+            App.Current.ViewModel.SaveGame(false);
+        }
 
-		/// <summary>
-		/// Shows a particular section of the view.
-		/// </summary>
-		/// <param name="section"></param>
-		private void ShowSection(string section)
-		{
-			if (SectionValue_World.Equals(section))
-			{
-				PivotSelectedIndex = 1;
-			}
-			else if (SectionValue_Inventory.Equals(section))
-			{
-				PivotSelectedIndex = 2;
-			}
-			else if (SectionValue_Tasks.Equals(section))
-			{
-				PivotSelectedIndex = 3;
-			}
-		}
+        /// <summary>
+        /// Makes the app show the details of a thing.
+        /// </summary>
+        /// <param name="t"></param>
+        private void ShowDetails(UIObject t)
+        {
+            // Navigates to the appropriate view.
+            App.Current.ViewModel.NavigateToView(t);
+        }
 
-		/// <summary>
-		/// Shows a particular section of the view from the tag of a FrameworkElement.
-		/// </summary>
-		/// <param name="element"></param>
-		private void ShowSectionFromTag(FrameworkElement element)
-		{
-			if (element == null)
-			{
-				return;
-			}
+        /// <summary>
+        /// Shows a particular section of the view.
+        /// </summary>
+        /// <param name="section"></param>
+        private void ShowSection(string section)
+        {
+            if (SectionValue_World.Equals(section))
+            {
+                PivotSelectedIndex = 1;
+            }
+            else if (SectionValue_Inventory.Equals(section))
+            {
+                PivotSelectedIndex = 2;
+            }
+            else if (SectionValue_Tasks.Equals(section))
+            {
+                PivotSelectedIndex = 3;
+            }
+        }
 
-			ShowSection(element.Tag as string);
-		}
+        /// <summary>
+        /// Shows a particular section of the view from the tag of a FrameworkElement.
+        /// </summary>
+        /// <param name="element"></param>
+        private void ShowSectionFromTag(FrameworkElement element)
+        {
+            if (element == null)
+            {
+                return;
+            }
+
+            ShowSection(element.Tag as string);
+        } 
+        #endregion
 
 		/// <summary>
 		/// Refreshes the visibility of one or all wherigo object panels.
@@ -551,15 +562,6 @@ namespace Geowigo.ViewModels
 
             // Adds the savegame menu item.
             ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
-        }
-
-        /// <summary>
-        /// Starts the process of saving a game.
-        /// </summary>
-        private void StartSaveGame()
-        {
-            // Saves the game!
-            App.Current.ViewModel.SaveGame(false);
         }
     }
 }

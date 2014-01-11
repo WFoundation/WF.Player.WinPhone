@@ -194,7 +194,7 @@ namespace Geowigo.ViewModels
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filenameParam) && 
 				navCtx.QueryString.TryGetValue(CartridgeIdKey, out cidParam))
 			{
-				CartridgeTag = Model.CartridgeStore.GetCartridgeTag(filenameParam, cidParam);
+				CartridgeTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filenameParam, cidParam);
 
 				if (CartridgeTag != null)
 				{
@@ -236,7 +236,7 @@ namespace Geowigo.ViewModels
 
             // For each savegame in the tag, get the key and add it to the
             // related group.
-            foreach (CartridgeSavegame savegame in CartridgeTag.Savegames.OrderBy(cs => cs.Timestamp).Reverse())
+            foreach (CartridgeSavegame savegame in CartridgeTag.Savegames.OrderByDescending(cs => cs.Timestamp))
             {
                 // The key is the day during which the savegame was made.
                 DateTime key = savegame.Timestamp.Date;

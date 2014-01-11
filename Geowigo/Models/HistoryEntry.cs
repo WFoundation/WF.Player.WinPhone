@@ -75,14 +75,14 @@ namespace Geowigo.Models
         [DataMember]
         public DateTime Timestamp { get; set; }
 
-        public CartridgeTag Tag
+        public CartridgeTag CartridgeTag
         {
             get
             {
                 if (_tag == null)
                 {
                     // Binds the cartridge tag.
-                    _tag = App.Current.Model.CartridgeStore.GetCartridgeTag(RelatedCartridgeFilename, RelatedCartridgeGuid);
+                    _tag = App.Current.Model.CartridgeStore.GetCartridgeTagOrDefault(RelatedCartridgeFilename, RelatedCartridgeGuid);
                 }
 
                 return _tag;
@@ -96,7 +96,7 @@ namespace Geowigo.Models
                 if (_savegame == null)
                 {
                     // Binds the savegame.
-                    CartridgeTag tag = Tag;
+                    CartridgeTag tag = CartridgeTag;
                     if (tag != null)
                     {
                         _savegame = tag.GetSavegameByNameOrDefault(RelatedSavegameName);

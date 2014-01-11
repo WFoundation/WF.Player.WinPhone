@@ -71,12 +71,23 @@ namespace Geowigo.Controls
 			// Navigates to the details of the first selected item.
 			if (NavigationCommand != null && _isManipulating)
 			{
-				object target = e.AddedItems.OfType<object>().FirstOrDefault();
-				if (NavigationCommand.CanExecute(target))
+                // Considers that the manipulation is over, so that
+                // if the selected item changes during the execution of the
+                // navigation command, the command does not run again.
+                _isManipulating = false;
+                
+                // Gets the first selected item.
+                object target = e.AddedItems.OfType<object>().FirstOrDefault();
+				
+                // Executes the command if possible.
+                if (NavigationCommand.CanExecute(target))
 				{
 					NavigationCommand.Execute(target);
 				} 
 			}
+
+            // The navigation cannot possibly be still happening.
+            _isManipulating = false;
 
 			// Clears the listbox selection.
 			((ListBox)sender).SelectedItem = null;

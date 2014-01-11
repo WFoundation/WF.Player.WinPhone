@@ -175,8 +175,8 @@ namespace Geowigo.Models
 		/// Imports or create the cache for this CartridgeTag.
 		/// </summary>
 		public void ImportOrMakeCache()
-		{
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+		{            
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
 				// Ensures the cache folder exists.
 				isf.CreateDirectory(PathToCache);

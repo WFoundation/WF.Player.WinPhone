@@ -106,7 +106,7 @@ namespace Geowigo.Models
 		/// </summary>
 		/// <param name="cartridge">The Cartridge to get the tag for.</param>
 		/// <returns></returns>
-		public CartridgeTag GetCartridgeTag(Cartridge cartridge)
+		public CartridgeTag GetCartridgeTagOrDefault(Cartridge cartridge)
 		{
 			lock (_syncRoot)
 			{
@@ -123,7 +123,7 @@ namespace Geowigo.Models
 		/// <param name="filename">Filename of the cartridge.</param>
 		/// <param name="guid">Guid of the Cartridge to get.</param>
 		/// <returns>Null if the tag was not found.</returns>
-		public CartridgeTag GetCartridgeTag(string filename, string guid)
+		public CartridgeTag GetCartridgeTagOrDefault(string filename, string guid)
 		{
 			CartridgeTag tag = null;
 			lock (_syncRoot)
@@ -142,7 +142,7 @@ namespace Geowigo.Models
 			tag = AcceptCartridge(filename);
 
 			// Only returns the tag if both GUIDs match.
-			return tag.Guid == guid ? tag : null;
+			return tag == null || tag.Guid != guid ? null : tag;
 		}
 
 		/// <summary>
@@ -220,7 +220,7 @@ namespace Geowigo.Models
 		/// if there was none in store for this cartridge.</returns>
 		private CartridgeTag AcceptCartridge(string filename)
 		{
-            System.Diagnostics.Debug.WriteLine("CartridgeStore: Accepting cartridge " + filename);
+            System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to accept cartridge " + filename);
             
             // Creates a cartridge object.
 			Cartridge cart = new Cartridge(filename);
@@ -229,11 +229,18 @@ namespace Geowigo.Models
 			CartridgeTag existingCC;
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
-				using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-				{
-					// Loads the metadata.
-					WF.Player.Core.Formats.FileFormats.Load(isfs, cart);
-				}
+                // File exist check.
+                if (!isf.FileExists(filename))
+                {
+                    System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Cartridge file not found: " + filename);
+                    return null;
+                }
+
+                // Loads the metadata.
+                using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                {
+                    WF.Player.Core.Formats.FileFormats.Load(isfs, cart);
+                }
 			}
 			
 			// Returns the existing cartridge if it was found.

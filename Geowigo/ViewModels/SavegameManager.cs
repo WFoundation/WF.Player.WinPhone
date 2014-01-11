@@ -153,7 +153,7 @@ namespace Geowigo.ViewModels
             cs.ExportToIsoStore();
 
             // Adds an history entry for this savegame.
-            CartridgeTag tag = _appViewModel.Model.CartridgeStore.GetCartridgeTag(_appViewModel.Model.Core.Cartridge);
+            CartridgeTag tag = _appViewModel.Model.CartridgeStore.GetCartridgeTagOrDefault(_appViewModel.Model.Core.Cartridge);
             _appViewModel.Model.History.AddSavedGame(tag, cs);
 
             // Adds the savegame to the tag.
@@ -167,7 +167,7 @@ namespace Geowigo.ViewModels
         private CartridgeTag GetCurrentTag()
         {
             // Returns the tag of the currently playing cartridge.
-            return _appViewModel.Model.CartridgeStore.GetCartridgeTag(_appViewModel.Model.Core.Cartridge);
+            return _appViewModel.Model.CartridgeStore.GetCartridgeTagOrDefault(_appViewModel.Model.Core.Cartridge);
         }
 
         private CartridgeSavegame GetSavegameByName(string name)
