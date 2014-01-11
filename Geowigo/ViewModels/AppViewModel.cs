@@ -147,6 +147,15 @@ namespace Geowigo.ViewModels
 
 		#region Public Methods
 
+        /// <summary>
+        /// Removes all entries from the user history.
+        /// </summary>
+        public void ClearHistory()
+        {
+            // Bye bye history.
+            Model.History.Clear();
+        }
+
 		/// <summary>
 		/// Navigates the app to the main page of the app.
 		/// </summary>
@@ -611,7 +620,19 @@ namespace Geowigo.ViewModels
             updateMan.BeginCheckForUpdate();
 
             // Injects the beta appbar in the application.
+            IApplicationBar bar = Beta.BetaManager.Instance.BetaAppBar;
+            ApplicationBarMenuItem iem = new ApplicationBarMenuItem("clear history");
+            iem.Click += new EventHandler(Beta_ClearHistoryMenuItemClick);
+            bar.MenuItems.Add(iem);
             ((PhoneApplicationPage)App.Current.RootFrame.Content).ApplicationBar = Beta.BetaManager.Instance.BetaAppBar;
+        }
+
+        private void Beta_ClearHistoryMenuItemClick(object sender, EventArgs e)
+        {
+            if (System.Windows.MessageBox.Show("Do you want to delete all entries of the history?", "Clear history", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+            {
+                ClearHistory();
+            }
         }
 
         private void Beta_UpdateFound(object sender, EventArgs e)
