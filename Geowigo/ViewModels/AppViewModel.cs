@@ -604,14 +604,12 @@ namespace Geowigo.ViewModels
         {
             if (e.Uri.OriginalString.Contains("/HomePage.xaml"))
             {
-                // Bye bye event
-                App.Current.RootFrame.Navigated -= new NavigatedEventHandler(Beta_Navigated2);
-
                 // Go beta
                 GoBetaRest();
             }
         }
 
+        private IApplicationBar _appBar;
         private void GoBetaRest()
         {
             // Registers events for update checks.
@@ -620,11 +618,14 @@ namespace Geowigo.ViewModels
             updateMan.BeginCheckForUpdate();
 
             // Injects the beta appbar in the application.
-            IApplicationBar bar = Beta.BetaManager.Instance.BetaAppBar;
-            ApplicationBarMenuItem iem = new ApplicationBarMenuItem("clear history");
-            iem.Click += new EventHandler(Beta_ClearHistoryMenuItemClick);
-            bar.MenuItems.Add(iem);
-            ((PhoneApplicationPage)App.Current.RootFrame.Content).ApplicationBar = Beta.BetaManager.Instance.BetaAppBar;
+            if (_appBar == null)
+            {
+                _appBar = Beta.BetaManager.Instance.BetaAppBar;
+                ApplicationBarMenuItem iem = new ApplicationBarMenuItem("clear history");
+                iem.Click += new EventHandler(Beta_ClearHistoryMenuItemClick);
+                _appBar.MenuItems.Add(iem);
+            }
+            ((PhoneApplicationPage)App.Current.RootFrame.Content).ApplicationBar = _appBar;
         }
 
         private void Beta_ClearHistoryMenuItemClick(object sender, EventArgs e)
