@@ -170,7 +170,7 @@ namespace Geowigo.Models
 		} 
 		#endregion
 
-		#region Public Methods
+		#region Cache
 		/// <summary>
 		/// Imports or create the cache for this CartridgeTag.
 		/// </summary>
@@ -226,6 +226,10 @@ namespace Geowigo.Models
 				return isf.FileExists(filename) ? filename : null;
 			}
 		}
+
+        #endregion
+
+        #region Savegames
 
         /// <summary>
         /// Exports a savegame to the isolated storage and adds it to this tag.
@@ -316,25 +320,24 @@ namespace Geowigo.Models
 
         private void ImportSavegamesCache(IsolatedStorageFile isf)
         {
-            string[] gwsFiles = isf.GetFileNames(PathToSavegames + "/*.gws");
-            if (gwsFiles == null)
-            {
-                return;
-            }
-
-            // For each file, imports its metadata.
             List<CartridgeSavegame> cSavegames = new List<CartridgeSavegame>();
-            foreach (string file in gwsFiles)
+            
+            string[] gwsFiles = isf.GetFileNames(PathToSavegames + "/*.gws");
+            if (gwsFiles != null)
             {
-                try
+                // For each file, imports its metadata.
+                foreach (string file in gwsFiles)
                 {
-                    cSavegames.Add(CartridgeSavegame.FromIsoStore(PathToSavegames + "/" + file, isf));
-                }
-                catch (Exception ex)
-                {
-                    // Outputs the exception.
-                    System.Diagnostics.Debug.WriteLine("CartridgeTag: WARNING: Exception during savegame import.");
-                    DebugUtils.DumpException(ex);
+                    try
+                    {
+                        cSavegames.Add(CartridgeSavegame.FromIsoStore(PathToSavegames + "/" + file, isf));
+                    }
+                    catch (Exception ex)
+                    {
+                        // Outputs the exception.
+                        System.Diagnostics.Debug.WriteLine("CartridgeTag: WARNING: Exception during savegame import.");
+                        DebugUtils.DumpException(ex);
+                    }
                 }
             }
 

@@ -10,24 +10,55 @@
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
     xmlns:JeffWilcox_Controls="clr-namespace:JeffWilcox.Controls;assembly=JeffWilcox.Maps" 
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" x:Name="This" 
     x:Class="Geowigo.Views.CartridgeInfoPage"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     SupportedOrientations="Portrait"  Orientation="Portrait"
     toolkit:TiltEffect.IsTiltEnabled="True"
-    shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeNormal}" Foreground="{StaticResource PhoneForegroundBrush}">
+    shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
-		<DataTemplate x:Key="SavegameListItemTemplate">
-			<Grid>
-				<TextBlock Margin="0,0,1,0" TextWrapping="Wrap" Text="{Binding Name}" d:LayoutOverrides="Width, Height"/>
-			</Grid>
-		</DataTemplate>
+		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
+		<toolkit:HourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
+		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
+		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
+		<toolkit:FullViewDateTimeConverter x:Key="FullViewDateTimeConverter"/>
 		<ControlTemplate x:Key="StaticMapsButtonTemplate" TargetType="Button">
 			<Grid>
 				<ContentPresenter/>
 			</Grid>
 		</ControlTemplate>
+		<DataTemplate x:Key="SavegameListGroupItemInnerTemplate">
+			<Grid d:LayoutOverrides="HorizontalAlignment" Margin="0,0,0,20">
+				<StackPanel Orientation="Horizontal">
+					<Grid Background="{Binding HashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62"/>
+					<StackPanel Orientation="Vertical">
+						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<StackPanel>
+							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="Saved manually." Visibility="{Binding IsAutosave, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Visibility="{Binding IsAutosave, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Saved "/><Run Text="automatically"/><Run Text="."/></TextBlock>
+						</StackPanel>
+						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource HourlyDateTimeConverter}}"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="SavegameListGroupItemTemplate">
+			<StackPanel d:DesignWidth="72" d:DesignHeight="65" Margin="0,0,0,40">
+				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,30"/>
+				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=This}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+			</StackPanel>
+		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>
-	<!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
+	<Geowigo_Views:BasePage.FontFamily>
+		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
+	</Geowigo_Views:BasePage.FontFamily>
+	<Geowigo_Views:BasePage.FontSize>
+		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
+	</Geowigo_Views:BasePage.FontSize>
+	<Geowigo_Views:BasePage.Foreground>
+		<StaticResource ResourceKey="PhoneForegroundBrush"/>
+	</Geowigo_Views:BasePage.Foreground>
+<!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
     
 	<Geowigo_Views:BasePage.DataContext>
 		<Geowigo_ViewModels:CartridgeInfoViewModel/>
@@ -68,7 +99,9 @@
             </controls:PivotItem>
             <controls:PivotItem x:Name="SavegamesItem" Header="savegames">
             	<Grid>
-            		<Geowigo_Controls:NavigationListBox ItemsSource="{Binding CartridgeTag.Savegames, Mode=OneWay}" NavigationCommand="{Binding ResumeGameCommand, Mode=OneWay}" ItemTemplate="{StaticResource SavegameListItemTemplate}"/>
+            		<ScrollViewer>
+            			<ItemsControl toolkit:TiltEffect.SuppressTilt="True" ItemsSource="{Binding SavegameGroups}" ItemTemplate="{StaticResource SavegameListGroupItemTemplate}"/>
+            		</ScrollViewer>
             	</Grid>
             </controls:PivotItem>
         </controls:Pivot>
