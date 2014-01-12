@@ -125,6 +125,23 @@ namespace Geowigo.ViewModels
         
         #endregion
 
+        #region AreSavegamesVisible
+
+
+        public bool AreSavegamesVisibles
+        {
+            get { return (bool)GetValue(AreSavegamesVisiblesProperty); }
+            set { SetValue(AreSavegamesVisiblesProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for AreSavegamesVisibles.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AreSavegamesVisiblesProperty =
+            DependencyProperty.Register("AreSavegamesVisibles", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
+
+
+        
+        #endregion
+
 		#endregion
 
 		#region Commands
@@ -258,6 +275,9 @@ namespace Geowigo.ViewModels
 
             // The savegame collection is ready for the long list!
             SavegameGroups = new List<SavegameKeyGroup>(groups.Values);
+
+            // Refreshes the visibility.
+            AreSavegamesVisibles = CartridgeTag.Savegames.Any();
         }
 
         #endregion

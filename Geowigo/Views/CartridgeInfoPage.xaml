@@ -22,7 +22,7 @@
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 		<toolkit:FullViewDateTimeConverter x:Key="FullViewDateTimeConverter"/>
-		<ControlTemplate x:Key="StaticMapsButtonTemplate" TargetType="Button">
+		<ControlTemplate x:Key="NoBorderButtonTemplate" TargetType="Button">
 			<Grid>
 				<ContentPresenter/>
 			</Grid>
@@ -44,9 +44,14 @@
 		</DataTemplate>
 		<DataTemplate x:Key="SavegameListGroupItemTemplate">
 			<StackPanel d:DesignWidth="72" d:DesignHeight="65" Margin="0,0,0,40">
-				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,30"/>
+				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
 				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=This}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
 			</StackPanel>
+		</DataTemplate>
+		<DataTemplate x:Key="EmptyTextContentTemplate">
+			<Grid>
+				<TextBlock HorizontalAlignment="Left" Margin="0,0,0,1" TextWrapping="Wrap" Text="{Binding Mode=OneWay}" d:LayoutOverrides="Height" Style="{StaticResource EmptyListTextStyle}"/>
+			</Grid>
 		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>
 	<Geowigo_Views:BasePage.FontFamily>
@@ -86,7 +91,7 @@
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="NavigateItem" Header="navigate">
                 <StackPanel Orientation="Vertical" d:LayoutOverrides="Height">
-            		<Button Template="{StaticResource StaticMapsButtonTemplate}" Margin="-12,0,-12,30" Height="150" d:LayoutOverrides="Width, HorizontalMargin" Command="{Binding NavigateToStartCommand, Mode=OneWay}">
+            		<Button Template="{StaticResource NoBorderButtonTemplate}" Margin="-12,0,-12,30" Height="150" d:LayoutOverrides="Width, HorizontalMargin" Command="{Binding NavigateToStartCommand, Mode=OneWay}">
                 		<JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
                 	</Button>
             		<ScrollViewer Margin="0,0,0,-400">
@@ -99,8 +104,15 @@
             </controls:PivotItem>
             <controls:PivotItem x:Name="SavegamesItem" Header="savegames">
             	<Grid>
-            		<ScrollViewer>
-            			<ItemsControl toolkit:TiltEffect.SuppressTilt="True" ItemsSource="{Binding SavegameGroups}" ItemTemplate="{StaticResource SavegameListGroupItemTemplate}"/>
+            		<ScrollViewer Margin="8,0,0,0">
+            			<StackPanel Orientation="Vertical">
+            				<StackPanel x:Name="NoSavegamePanel" Orientation="Vertical" d:LayoutOverrides="Width" Visibility="{Binding AreSavegamesVisibles, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}">
+            					<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="The savegames "/><Run Text="you made"/><Run Text=" for this cartridge will appear here."/><Run Text=" But there are "/><Run Text="none"/><Run Text=" just yet."/></TextBlock>
+            					<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="0,10,0,0" Text="Sometimes, the cartridge will perform an autosave. Autosaves will appear here too!"/>
+            					<Button Content="Tap here to start a new game!" Margin="0,10,0,0" Template="{StaticResource NoBorderButtonTemplate}" ContentTemplate="{StaticResource EmptyTextContentTemplate}" Command="{Binding StartNewGameCommand, Mode=OneWay}"/>
+            				</StackPanel>
+            				<ItemsControl x:Name="SavegamesListItemControl" toolkit:TiltEffect.SuppressTilt="True" ItemsSource="{Binding SavegameGroups}" ItemTemplate="{StaticResource SavegameListGroupItemTemplate}" d:LayoutOverrides="Width" Visibility="{Binding AreSavegamesVisibles, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
+            			</StackPanel>
             		</ScrollViewer>
             	</Grid>
             </controls:PivotItem>
