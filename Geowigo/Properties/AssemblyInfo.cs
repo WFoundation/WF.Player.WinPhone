@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Wherigo Foundation")]
 [assembly: AssemblyProduct("Geowigo")]
-[assembly: AssemblyCopyright("Copyright Brice Clocher ©  2013")]
+[assembly: AssemblyCopyright("Copyright Brice Clocher & Wherigo Foundation ©  2012 - 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // Vous pouvez spécifier toutes les valeurs ou indiquer les numéros de révision et de build par défaut 
 // en utilisant '*', comme indiqué ci-dessous :
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1")]
+[assembly: AssemblyFileVersion("1.0.1")]
 [assembly: NeutralResourcesLanguageAttribute("en")]

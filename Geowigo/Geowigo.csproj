@@ -64,6 +64,12 @@
       <HintPath>..\packages\JeffWilcox.Maps.1.1\lib\sl4-windowsphone71\JeffWilcox.Maps.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
+    <Reference Include="Microsoft.Live">
+      <HintPath>..\packages\LiveSDK.5.5\lib\WindowsPhone71\Microsoft.Live.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Live.Controls">
+      <HintPath>..\packages\LiveSDK.5.5\lib\WindowsPhone71\Microsoft.Live.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=7.0.1.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
@@ -232,6 +238,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Fonts\LiveSymbol.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\WMAppManifest.xml" />
