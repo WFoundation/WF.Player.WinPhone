@@ -143,10 +143,13 @@
     <Compile Include="Converters\UIObjectToNameConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
     <Compile Include="Mockups\InputMockup.cs" />
+    <Compile Include="Models\Providers\CartridgeProviderSyncEventArgs.cs" />
     <Compile Include="Models\CartridgeSavegame.cs" />
     <Compile Include="Models\CartridgeTag.cs" />
     <Compile Include="Models\History.cs" />
     <Compile Include="Models\HistoryEntry.cs" />
+    <Compile Include="Models\Providers\ICartridgeProvider.cs" />
+    <Compile Include="Models\Providers\SkyDriveCartridgeProvider.cs" />
     <Compile Include="Models\WFCoreAdapter.cs" />
     <Compile Include="Models\WherigoModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

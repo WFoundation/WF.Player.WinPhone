@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using Geowigo.Models.Providers;
 
 namespace Geowigo.Models
 {
@@ -17,6 +18,7 @@ namespace Geowigo.Models
 	{
 		#region Members
 
+		private List<ICartridgeProvider> _providers = new List<ICartridgeProvider>();
 		private bool _isBusy = false;
 		private object _syncRoot = new object();
 
@@ -87,6 +89,18 @@ namespace Geowigo.Models
 			}
 		}
 
+		/// <summary>
+		/// Gets an enumeration of the cartridge providers that can download
+		/// cartridges for this instance.
+		/// </summary>
+		public IEnumerable<ICartridgeProvider> Providers
+		{
+			get
+			{
+				return _providers;
+			}
+		}
+
 		#endregion
 
 		#region Constructors
@@ -94,12 +108,12 @@ namespace Geowigo.Models
 		public CartridgeStore() 
 			: base(new ObservableCollection<CartridgeTag>())
 		{
-			
+			AddDefaultProviders();
 		}
 
 		#endregion
 		
-		#region Public Methods
+		#region Tag Retrieval
 
 		/// <summary>
 		/// Gets the single tag for a Cartridge.
@@ -145,61 +159,143 @@ namespace Geowigo.Models
 			return tag == null || tag.Guid != guid ? null : tag;
 		}
 
+		#endregion
+
+		#region Sync From IsoStore
 		/// <summary>
 		/// Synchronizes the store from the Isolated Storage.
 		/// </summary>
 		public void SyncFromIsoStore()
 		{
-            BackgroundWorker bw = new BackgroundWorker();
-            
-            bw.DoWork += (o, e) => { 
-                SyncFromIsoStoreCore(false); 
-            };
-            
-            bw.RunWorkerAsync();
+			BackgroundWorker bw = new BackgroundWorker();
+
+			bw.DoWork += (o, e) =>
+			{
+				SyncFromIsoStoreCore(false);
+			};
+
+			bw.RunWorkerAsync();
 		}
 
-        private void SyncFromIsoStoreCore(bool asyncEachCartridge)
-        {
-            // Opens the isolated storage.
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                // Checks if the Cartridge folder exists.
-                string[] dirs = isf.GetDirectoryNames(IsoStoreCartridgesPath);
-                if (dirs.Count() > 1)
-                {
-                    System.Diagnostics.Debug.WriteLine("WARNING !!! CartridgeStore.SyncFromIsoStore: More than one cartridge directory: " + IsoStoreCartridgesPath);
-                }
+		private void SyncFromIsoStoreCore(bool asyncEachCartridge)
+		{
+			// Opens the isolated storage.
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				// Makes sure the folder exists.
+				isf.CreateDirectory(IsoStoreCartridgesPath);
 
-                // Business changes.
-                IsBusy = true;
+				// Business changes.
+				IsBusy = true;
 
-                foreach (string dir in dirs)
-                {
-                    // Imports all GWC files from the directory.
-                    foreach (string filename in isf.GetFileNames(IsoStoreCartridgesPath + "/*.gwc"))
-                    {
-                        // Accept the GWC.
-                        if (asyncEachCartridge)
-                        {
-                            AcceptCartridgeAsync(IsoStoreCartridgesPath + "/" + filename);
-                        }
-                        else
-                        {
-                            AcceptCartridge(IsoStoreCartridgesPath + "/" + filename);
-                        }
-                        
-                    }
-                }
+				// Goes through all the sub-directories and accepts the cartridge files.
+				IEnumerable<string> dirs = GetAllDirectoryNames(isf, IsoStoreCartridgesPath);
+				foreach (string dir in dirs)
+				{
+					// Imports all GWC files from the directory.
+					foreach (string filename in isf.GetFileNames(dir + "/*.gwc"))
+					{
+						string filepath = dir + "/" + filename;
+						
+						// Accept the GWC.
+						if (asyncEachCartridge)
+						{
+							AcceptCartridgeAsync(filepath);
+						}
+						else
+						{
+							AcceptCartridge(filepath);
+						}
 
-                // Business changes.
-                IsBusy = false;
-            }
-        }
+					}
+				}
+
+				// Business changes.
+				IsBusy = false;
+			}
+		}
+
+		private IEnumerable<string> GetAllDirectoryNames(IsolatedStorageFile isf, string rootPath)
+		{
+			List<string> allDirs = new List<string>();
+
+			// Gets the paths of sub-directories of first level in rootPath.
+			IEnumerable<string> subPaths;
+			try
+			{
+				subPaths = isf
+					.GetDirectoryNames(rootPath + "/*")
+					.Select(s => rootPath + "/" + s);
+			}
+			catch (Exception)
+			{
+				subPaths = new string[] { };
+			}
+
+			// For each of them, check for sub-directories.
+			foreach (string subPath in subPaths)
+			{
+				allDirs.AddRange(GetAllDirectoryNames(isf, subPath));
+			}
+
+			// Adds the root path to the list.
+			allDirs.Add(rootPath);
+			
+			return allDirs;
+		} 
 
 		#endregion
 
-		#region Cartridge Tags Management
+		#region Sync From Providers
+
+		/// <summary>
+		/// Starts syncing all linked providers that are not syncing.
+		/// </summary>
+		public void SyncFromProviders()
+		{
+			bool shouldBeBusy = false; 
+
+			foreach (ICartridgeProvider provider in _providers)
+			{
+				if (provider.IsLinked && !provider.IsSyncing)
+				{
+					provider.BeginSync();
+					shouldBeBusy = true;
+				}
+			}
+
+			if (shouldBeBusy)
+			{
+				IsBusy = true;
+			}
+		}
+
+		#endregion
+
+		#region Tag Acceptance
+
+		/// <summary>
+		/// Ensures that a cartridge is not present in the store.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge to remove.</param>
+		/// <remarks>This method does not effectively remove the cartridge
+		/// from the isolated storage.</remarks>
+		private void RejectCartridge(string filename)
+		{
+			System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to reject cartridge " + filename);
+
+			lock (_syncRoot)
+			{
+				// Gets the existing cartridge if it was found.
+				CartridgeTag existingTag = this.Items.SingleOrDefault(cc => cc.Cartridge.Filename == filename);
+
+				// Removes the tag if it was found.
+				if (existingTag != null)
+				{
+					this.Items.Remove(existingTag); 
+				}
+			}
+		}
 
 		/// <summary>
 		/// Ensures asynchronously that a cartridge is present in the store.
@@ -239,7 +335,7 @@ namespace Geowigo.Models
                 // Loads the metadata.
                 using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
                 {
-                    WF.Player.Core.Formats.FileFormats.Load(isfs, cart);
+					WF.Player.Core.Formats.FileFormats.Load(isfs, cart);
                 }
 			}
 			
@@ -271,6 +367,98 @@ namespace Geowigo.Models
 
 		#endregion
 
+		#region Provider Management
+
+		private void AddDefaultProviders()
+		{
+			AddProvider(new SkyDriveCartridgeProvider());
+		}
+
+		private void AddProvider(ICartridgeProvider provider)
+		{
+			// Sanity check.
+			if (_providers.Any(p => p.ServiceName == provider.ServiceName))
+			{
+				throw new InvalidOperationException("A provider with same ServiceName already exists. " + provider.ServiceName);
+			}
+			
+			// Registers event handlers.
+			provider.PropertyChanged += new PropertyChangedEventHandler(OnProviderPropertyChanged);
+			provider.SyncCompleted += new EventHandler<CartridgeProviderSyncEventArgs>(OnProviderSyncCompleted);
+			provider.SyncProgress += new EventHandler<CartridgeProviderSyncEventArgs>(OnProviderSyncProgress);
+			
+			// Sets the provider up.
+			provider.IsoStoreCartridgesPath = String.Format("{0}/From {1}", IsoStoreCartridgesPath, provider.ServiceName);
+
+			// Adds the provider to the list.
+			_providers.Add(provider);
+
+			// Notifies the list has changed.
+			OnPropertyChanged(new PropertyChangedEventArgs("Providers"));
+		}
+
+		private void OnProviderSyncCompleted(object sender, CartridgeProviderSyncEventArgs e)
+		{
+			ProcessSyncEvent(e, true);
+		}
+
+		private void OnProviderSyncProgress(object sender, CartridgeProviderSyncEventArgs e)
+		{
+			IsBusy = true;
+			ProcessSyncEvent(e, false);
+		}
+
+		private void ProcessSyncEvent(CartridgeProviderSyncEventArgs e, bool busyStateChange)
+		{
+			// The sync is complete.
+			if (busyStateChange)
+			{
+				IsBusy = true; 
+			}
+
+			// Rejects the files marked to be removed.
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				foreach (string filename in e.ToRemoveFiles)
+				{
+					// Removes the file from the list.
+					RejectCartridge(filename);
+
+					// Deletes the file in the store. 
+					if (isf.FileExists(filename))
+					{
+						isf.DeleteFile(filename);
+					}
+				}
+			}
+
+			// Accepts the files that have been added.
+			foreach (string filename in e.AddedFiles)
+			{
+				AcceptCartridge(filename);
+			}
+
+			// Finished.
+			if (busyStateChange)
+			{
+				IsBusy = false; 
+			}
+		}
+
+		private void OnProviderPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			ICartridgeProvider provider = (ICartridgeProvider)sender;
+
+			if (e.PropertyName == "IsLinked" && provider.IsLinked)
+			{
+				// The provider is now linked. Start syncing.
+				IsBusy = true;
+				provider.BeginSync();
+			}
+		}
+
+		#endregion
+
 		#region ReadOnlyObservableCollection
 
 		protected override void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs args)
@@ -284,8 +472,5 @@ namespace Geowigo.Models
 		}
 
 		#endregion
-
-
-
 	}
 }

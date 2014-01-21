@@ -621,9 +621,14 @@ namespace Geowigo.ViewModels
             if (_appBar == null)
             {
                 _appBar = Beta.BetaManager.Instance.BetaAppBar;
+
                 ApplicationBarMenuItem iem = new ApplicationBarMenuItem("clear history");
                 iem.Click += new EventHandler(Beta_ClearHistoryMenuItemClick);
                 _appBar.MenuItems.Add(iem);
+
+				ApplicationBarMenuItem iem2 = new ApplicationBarMenuItem("sync cartridges");
+				iem2.Click += new EventHandler(Beta_SyncCartridgesMenuItemClick);
+				_appBar.MenuItems.Add(iem2);
             }
             ((PhoneApplicationPage)App.Current.RootFrame.Content).ApplicationBar = _appBar;
         }
@@ -635,6 +640,11 @@ namespace Geowigo.ViewModels
                 ClearHistory();
             }
         }
+
+		private void Beta_SyncCartridgesMenuItemClick(object sender, EventArgs e)
+		{
+			Model.CartridgeStore.SyncFromProviders();
+		}
 
         private void Beta_UpdateFound(object sender, EventArgs e)
         {

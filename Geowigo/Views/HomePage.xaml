@@ -11,6 +11,7 @@
 	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
     xmlns:Geowigo_Models="clr-namespace:Geowigo.Models"
     xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters"
+    xmlns:Microsoft_Live_Controls="clr-namespace:Microsoft.Live.Controls;assembly=Microsoft.Live.Controls"
     x:Class="Geowigo.Views.HomePage" x:Name="This"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     SupportedOrientations="Portrait"  Orientation="Portrait"
@@ -99,6 +100,15 @@
 		</DataTemplate>
         
         <CollectionViewSource x:Key="HistorySource" Source="{Binding DataContext.Model.History, ElementName=This}" />
+		<DataTemplate x:Key="CartridgeProviderListItemTemplate">
+			<StackPanel d:DesignWidth="574" d:DesignHeight="45" Orientation="Horizontal">
+				<TextBlock TextWrapping="Wrap" Text="{Binding ServiceName, FallbackValue=Provider}" Style="{StaticResource EmptyListTextAccentStyle}"/>
+				<TextBlock TextWrapping="Wrap" Style="{StaticResource EmptyListTextAccentStyle}" Text=":" Margin="0,0,5,0"/>
+				<TextBlock TextWrapping="Wrap" Style="{StaticResource EmptyListTextAccentStyle}" Text="Tap to link" Visibility="{Binding IsLinked, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+				<TextBlock TextWrapping="Wrap" Style="{StaticResource EmptyListTextStyle}" Text="Linked" Visibility="{Binding IsLinked, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+				<TextBlock TextWrapping="Wrap" Style="{StaticResource EmptyListTextStyle}" Text="(Syncing...)" Visibility="{Binding IsSyncing, Converter={StaticResource ObjectToVisibilityConverter}}" Margin="5,0,0,0"/>
+			</StackPanel>
+		</DataTemplate>
 	</phone:PhoneApplicationPage.Resources>
 
 	<phone:PhoneApplicationPage.FontFamily>
@@ -126,11 +136,10 @@
             	<Grid>
             		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
             		<StackPanel Margin="0,8,0,0" Orientation="Vertical" d:LayoutOverrides="Height">
-            			<ScrollViewer x:Name="NoCartridgePanel" Width="420" Visibility="{Binding AreCartridgesVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}">
+            			<ScrollViewer x:Name="NoCartridgePanel" Width="420" Visibility="{Binding AreCartridgesVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Height="490">
             				<StackPanel Orientation="Vertical">
-            					<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap"><Run Text="Your installed cartridges "/><Run Text="will "/><Run Text="appear here."/><Run Text=" "/><Run Text="Unfortunately, no cartridge has been found."/></TextBlock>
-            					<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="0,10,0,0"><Run Text="To install a cartridge, "/><Run Text="you have to copy it t"/><Run Text="o"/><Run Text=" the Cartridges directory"/><Run Text=" of the isolated storage of this ap"/><Run Text="p"/><Run Text=", using a third-party tool."/></TextBlock>
-            					<HyperlinkButton Content="Visit IsoStoreSpy's homepage" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding VisitIsoStoreHomePageCommand, Mode=OneWay}"/>
+            					<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="0,0,0,10"><Run Text="Your installed cartridges "/><Run Text="will "/><Run Text="appear here."/><Run Text=" "/><Run Text="Unfortunately, no cartridge has been found."/></TextBlock>
+            					<Geowigo_Controls:NavigationListBox x:Name="CartridgeProviderList" ItemTemplate="{StaticResource CartridgeProviderListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore.Providers, Mode=OneWay}" NavigationCommand="{Binding RunProviderActionCommand, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             				</StackPanel>
             			</ScrollViewer>
             			<Geowigo_Controls:NavigationListBox x:Name="CartridgesListBox" ItemsPanel="{StaticResource CartridgesItemPanelTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" ItemTemplate="{StaticResource CartridgeListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore}" Height="490" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Height" Visibility="{Binding AreCartridgesVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>

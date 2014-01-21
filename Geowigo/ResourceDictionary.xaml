@@ -7,6 +7,21 @@
     xmlns:Core="clr-namespace:System;assembly=mscorlib"
     xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
     mc:Ignorable="d">
+	<ControlTemplate x:Key="NoBorderButtonTemplate" TargetType="Button">
+		<Grid>
+			<ContentPresenter/>
+		</Grid>
+	</ControlTemplate>
+	<DataTemplate x:Key="EmptyTextButtonContentTemplate">
+		<Grid>
+			<TextBlock HorizontalAlignment="Left" Margin="0,0,0,1" TextWrapping="Wrap" Text="{Binding Mode=OneWay}" d:LayoutOverrides="Height" Style="{StaticResource EmptyListTextAccentStyle}"/>
+		</Grid>
+	</DataTemplate>
+	<Style x:Key="EmptyListTextAccentStyle" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+		<Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
+	</Style>
 
     <Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
 
@@ -64,6 +79,7 @@
 	<Style x:Key="EmptyListTextStyle" TargetType="TextBlock">
 		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
 		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+		<Setter Property="Foreground" Value="{StaticResource PhoneTextBoxBrush}"/>
 	</Style>
 	
 	<ControlTemplate x:Key="AudioPlayerContentTemplate">

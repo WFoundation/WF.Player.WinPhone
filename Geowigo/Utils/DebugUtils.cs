@@ -83,7 +83,8 @@ namespace Geowigo.Utils
 		/// Dumps an exception to the isolated storage.
 		/// </summary>
 		/// <param name="ex"></param>
-		public static void DumpException(Exception ex)
+		/// <param name="customMessage"></param>
+		public static void DumpException(Exception ex, string customMessage = null)
 		{
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -96,15 +97,22 @@ namespace Geowigo.Utils
 				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "stacktrace.txt"))
 				{
-					DumpException(ex, stream);
+					DumpException(ex, stream, customMessage);
 				}
 			}
 		}
 
-		private static void DumpException(Exception ex, Stream stream)
+		private static void DumpException(Exception ex, Stream stream, string header = null)
 		{
 			using (StreamWriter sw = new StreamWriter(stream))
 			{
+				if (header != null)
+				{
+					sw.WriteLine("Custom header message:");
+					sw.WriteLine(header);
+					sw.WriteLine("---"); 
+				}
+				
 				sw.WriteLine("Main Exception: " + ex.GetType().FullName);
 				sw.WriteLine("---");
 				sw.WriteLine(ex);

@@ -12,12 +12,14 @@ using Geowigo.Models;
 using Geowigo.Controls;
 using WF.Player.Core;
 using System.Windows.Data;
+using Geowigo.Models.Providers;
 
 namespace Geowigo.ViewModels
 {
 	public class HomeViewModel : DependencyObject
 	{
-        #region Dependency Properties
+
+		#region Dependency Properties
 
         #region AreCartridgesVisible
 
@@ -73,17 +75,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-        #region IsoStoreSpyHomepageUri
-
-        public Uri IsoStoreSpyHomepageUri
-        {
-            get
-            {
-                return new Uri("/http://isostorespy.codeplex.com/", UriKind.Absolute);
-            }
-        }
-        #endregion
-
 		#endregion
 
 		#region Commands
@@ -126,23 +117,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-        #region VisitIsoStoreHomePageCommand
-        private ICommand _VisitIsoStoreHomePageCommand;
-
-        public ICommand VisitIsoStoreHomePageCommand
-        {
-            get
-            {
-                if (_VisitIsoStoreHomePageCommand == null)
-                {
-                    _VisitIsoStoreHomePageCommand = new RelayCommand(VisitIsoStoreSpyHomePage);
-                }
-
-                return _VisitIsoStoreHomePageCommand;
-            }
-        }
-        #endregion
-
         #region RunHistoryEntryActionCommand
 
         private ICommand _RunHistoryEntryActionCommand;
@@ -158,6 +132,22 @@ namespace Geowigo.ViewModels
             }
         }
         #endregion
+
+		#region RunProviderActionCommand
+
+		private ICommand _RunProviderActionCommand;
+
+		/// <summary>
+		/// Gets a command to run the action associated with a cartridge provider.
+		/// </summary>
+		public ICommand RunProviderActionCommand
+		{
+			get
+			{
+				return _RunProviderActionCommand ?? (_RunProviderActionCommand = new RelayCommand<ICartridgeProvider>(RunProviderAction));
+			}
+		}
+		#endregion
 
 		#endregion
 
@@ -194,11 +184,32 @@ namespace Geowigo.ViewModels
             App.Current.ViewModel.NavigateToCartridgeInfo(cartTag);
         }
 
-        /// <summary>
-        /// Makes the app run the action most appropriate for
-        /// an history entry.
-        /// </summary>
-        /// <param name="entry"></param>
+		private void RunProviderAction(ICartridgeProvider provider)
+		{
+			if (provider.IsLinked)
+			{
+				if (provider.IsSyncing)
+				{
+					// The provider is syncing. Show it.
+					System.Windows.MessageBox.Show(String.Format("Your {0} account is linked, and the app is currently looking for or downloading cartridges.", provider.ServiceName), provider.ServiceName, MessageBoxButton.OK);
+				}
+				else
+				{
+					// The provider is linked but no cartridge has been downloaded yet.
+					// Show it.
+					if (System.Windows.MessageBox.Show(String.Format("Your {0} account is linked, but no cartridge has been downloaded yet.\nDo you want to sync again?", provider.ServiceName), provider.ServiceName, MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+					{
+						provider.BeginSync();
+					}
+				}
+			}
+			else
+			{
+				// The provider is not linked: try to do it.
+				provider.BeginLink();
+			}
+		}
+
         private void RunHistoryEntryAction(HistoryEntry entry)
         {
             // Is the entry is related to saving the game?
@@ -268,14 +279,6 @@ namespace Geowigo.ViewModels
         }
 
         #endregion
-
-        private void VisitIsoStoreSpyHomePage()
-		{
-			// Browses to the page.
-            Microsoft.Phone.Tasks.WebBrowserTask task = new Microsoft.Phone.Tasks.WebBrowserTask();
-            task.Uri = new Uri("http://isostorespy.codeplex.com/", UriKind.Absolute);
-            task.Show();
-		}
 
         private void OnCartridgeStoreCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
