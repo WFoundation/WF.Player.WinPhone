@@ -14,6 +14,12 @@ namespace Geowigo.Models.Providers
 	/// </summary>
 	public class SkyDriveCartridgeProvider : ICartridgeProvider
 	{
+		#region Constants
+
+		private static readonly string LiveConnectClientID = "000000004C10D95D";
+
+		#endregion
+		
 		#region Nested Classes
 
 		private class SkyDriveFile
@@ -157,7 +163,7 @@ namespace Geowigo.Models.Providers
 			// Makes sure the auth client exists.
 			if (_authClient == null)
 			{
-				_authClient = new LiveAuthClient("000000004C10D95D");
+				_authClient = new LiveAuthClient(LiveConnectClientID);
 				_authClient.InitializeCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientInitializeCompleted);
 				_authClient.LoginCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientLoginCompleted);
 			}
@@ -516,8 +522,7 @@ namespace Geowigo.Models.Providers
 				object rawDlLoc;
 				if (((LiveOperationCompletedEventArgs)e).Result.TryGetValue("downloadLocation", out rawDlLoc))
 				{
-					// The download location given by these event args can be corrupted
-					// in some cases where invalid characters were in the filename.
+					// The download location given by these event args can be corrupted.
 					// So let's just hack our way through it and figure out the actual
 					// filename of the file that was saved in the isostore.
 					dlFilename = ((string)rawDlLoc)

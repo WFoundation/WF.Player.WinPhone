@@ -41,6 +41,7 @@ namespace Geowigo.Beta
             _updateManager.UpdateFound += new EventHandler(UpdateManager_UpdateFound);
             _updateManager.UpdateError += new EventHandler(UpdateManager_UpdateError);
         }
+
         private void MakeAppBar()
         {
             BetaAppBar = new ApplicationBar();
