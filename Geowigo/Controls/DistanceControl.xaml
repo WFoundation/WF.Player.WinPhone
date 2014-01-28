@@ -3,14 +3,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:es="clr-namespace:Microsoft.Expression.Shapes;assembly=Microsoft.Expression.Drawing" xmlns:em="clr-namespace:Microsoft.Expression.Media;assembly=Microsoft.Expression.Drawing" x:Name="This" x:Class="Geowigo.Controls.DistanceControl"
+    xmlns:es="clr-namespace:Microsoft.Expression.Shapes;assembly=Microsoft.Expression.Drawing" xmlns:em="clr-namespace:Microsoft.Expression.Media;assembly=Microsoft.Expression.Drawing" x:Name="ThisDC" x:Class="Geowigo.Controls.DistanceControl"
     mc:Ignorable="d"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     d:DesignHeight="137" d:DesignWidth="119">
     
-    <StackPanel x:Name="LayoutRoot" Orientation="{Binding Orientation, ElementName=This}">
+    <StackPanel x:Name="LayoutRoot" Orientation="{Binding Orientation, ElementName=ThisDC}">
     	<VisualStateManager.VisualStateGroups>
     		<VisualStateGroup x:Name="GeometryStateGroup">
     			<VisualState x:Name="OutsideState">
@@ -66,14 +66,14 @@
     	</VisualStateManager.VisualStateGroups>
     	<Viewbox>
     		<Grid x:Name="IconsGrid" Height="80" Width="98">
-    			<es:BlockArrow x:Name="Arrow" Fill="{Binding Foreground, ElementName=This}" HorizontalAlignment="Center" Orientation="Up" Stroke="Black" UseLayoutRounding="False" Width="60" Margin="10,0" RenderTransformOrigin="0.5,0.5" ArrowheadAngle="73" ArrowBodySize="0.23" StrokeThickness="0" Height="60">
+    			<es:BlockArrow x:Name="Arrow" Fill="{Binding Foreground, ElementName=ThisDC}" HorizontalAlignment="Center" Orientation="Up" Stroke="Black" UseLayoutRounding="False" Width="60" Margin="10,0" RenderTransformOrigin="0.5,0.5" ArrowheadAngle="73" ArrowBodySize="0.23" StrokeThickness="0" Height="60">
     				<es:BlockArrow.RenderTransform>
-    					<CompositeTransform Rotation="{Binding Bearing, ElementName=This}"/>
+    					<CompositeTransform Rotation="{Binding Bearing, ElementName=ThisDC}"/>
     				</es:BlockArrow.RenderTransform>
     			</es:BlockArrow>
-    			<Ellipse x:Name="Ellipse" Fill="{Binding Foreground, ElementName=This}" StrokeThickness="0" Margin="20,11" Width="58" Height="58" RenderTransformOrigin="0.5,0.5"/>
+    			<Ellipse x:Name="Ellipse" Fill="{Binding Foreground, ElementName=ThisDC}" StrokeThickness="0" Margin="20,11" Width="58" Height="58" RenderTransformOrigin="0.5,0.5"/>
     		</Grid>
     	</Viewbox>
-    	<TextBlock x:Name="DistanceText" TextWrapping="Wrap" Text="Unknown" HorizontalAlignment="Center" FontSize="{Binding FontSize, ElementName=This}" VerticalAlignment="Center" Visibility="{Binding TextVisibility, ElementName=This}" Margin="{Binding TextMargin, ElementName=This}" FontFamily="{Binding FontFamily, ElementName=This}" Foreground="{Binding Foreground, ElementName=This}"/>
+    	<TextBlock x:Name="DistanceText" TextWrapping="Wrap" Text="Unknown" HorizontalAlignment="Center" FontSize="{Binding FontSize, ElementName=ThisDC}" VerticalAlignment="Center" Visibility="{Binding TextVisibility, ElementName=ThisDC}" Margin="{Binding TextMargin, ElementName=ThisDC}" FontFamily="{Binding FontFamily, ElementName=ThisDC}" Foreground="{Binding Foreground, ElementName=ThisDC}"/>
     </StackPanel>
 </UserControl>

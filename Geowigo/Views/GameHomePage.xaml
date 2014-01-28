@@ -7,7 +7,7 @@
     mc:Ignorable="d"
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="True"
-	x:Name="This"
+	x:Name="ThisGHP"
 	toolkit:TiltEffect.IsTiltEnabled="True" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
 
@@ -20,8 +20,8 @@
 			<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
 		</Style>
 
-		<CollectionViewSource x:Key="HistoryTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
-		<CollectionViewSource x:Key="CurrentTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=This}" />
+		<CollectionViewSource x:Key="HistoryTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=ThisGHP}" />
+		<CollectionViewSource x:Key="CurrentTasksSource" Source="{Binding DataContext.Model.Core.ActiveVisibleTasks, ElementName=ThisGHP}" />
 	</Geowigo_Views:BasePage.Resources>
 
     <!--Exemple de code illustrant l'utilisation d'ApplicationBar-->
