@@ -9,7 +9,7 @@
     Foreground="{StaticResource PhoneForegroundBrush}"
     d:DesignHeight="95" d:DesignWidth="265">
     
-    <StackPanel x:Name="LayoutRoot">
+    <StackPanel>
     	<TextBlock x:Name="HeaderTextBlock" TextWrapping="Wrap" Text="9 ITEMS" Style="{Binding HeaderStyle, ElementName=This}" Foreground="{StaticResource PhoneForegroundBrush}"/>
     	<TextBlock x:Name="ListTextBlock" TextWrapping="Wrap" Text="Item 1, Item 2, Item 3" Style="{Binding ListStyle, ElementName=This}" Foreground="{StaticResource PhoneForegroundBrush}"/>
     </StackPanel>

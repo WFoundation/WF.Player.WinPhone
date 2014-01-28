@@ -34,8 +34,6 @@ namespace Geowigo.Views
 
 		#region Fields
 
-		private ListBox _ChoicesList;
-
 		#endregion
 		
 		public InputPage()
