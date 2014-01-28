@@ -6,6 +6,7 @@ using System.IO.IsolatedStorage;
 using System.IO;
 using System.ComponentModel;
 using System.Windows;
+using System.Threading;
 
 namespace Geowigo.Models.Providers
 {
@@ -17,6 +18,10 @@ namespace Geowigo.Models.Providers
 		#region Constants
 
 		private static readonly string LiveConnectClientID = "000000004C10D95D";
+
+		private static readonly string[] _Scopes = new string[] { "wl.signin", "wl.basic", "wl.skydrive", "wl.offline_access" };
+
+		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
 
 		#endregion
 		
@@ -41,15 +46,18 @@ namespace Geowigo.Models.Providers
 		private bool _isLinked = false;
 		private bool _autoLoginOnInitFail = false;
 		private bool _isSyncing = false;
+
 		private CartridgeProviderSyncEventArgs _syncEventArgs;
+
 		private List<SkyDriveFile> _dlFiles = new List<SkyDriveFile>();
+
 		private object _syncRoot = new object();
 
 		private LiveAuthClient _authClient;
 		private LiveConnectClient _liveClient;
 
-		private static readonly string[] _Scopes = new string[] { "wl.signin", "wl.basic", "wl.skydrive", "wl.offline_access" };
-
+		private Timer _requestTimeout;
+		
 		#endregion
 
 		#region Properties
@@ -117,6 +125,8 @@ namespace Geowigo.Models.Providers
 
 		public event EventHandler<CartridgeProviderSyncEventArgs> SyncProgress;
 
+		public event EventHandler<CartridgeProviderSyncAbortEventArgs> SyncAborted;
+
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 
 		#endregion
@@ -137,6 +147,47 @@ namespace Geowigo.Models.Providers
 					PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propName));
 				}
 			});
+		}
+
+		private void StartTimeoutTimer(TimeSpan timeSpan)
+		{
+			Timer timer;
+			lock (_syncRoot)
+			{
+				// Creates the timer if it doesn't exist.
+				if (_requestTimeout == null)
+				{
+					// Creates and starts the timer.
+					_requestTimeout = new Timer(new TimerCallback(OnTimeoutTimerTick));
+				}
+
+				timer = _requestTimeout;
+			}
+
+			// The timer should fire once only.
+			timer.Change((int)timeSpan.TotalMilliseconds, Timeout.Infinite);
+		}
+
+		private void CancelTimeoutTimer()
+		{
+			lock (_syncRoot)
+			{
+				// Bye bye timer.
+				if (_requestTimeout != null)
+				{
+					_requestTimeout.Dispose();
+					_requestTimeout = null;
+				}
+			}
+		}
+
+		private void OnTimeoutTimerTick(object target)
+		{
+			// Cancels the timer.
+			CancelTimeoutTimer();
+
+			// Raise the event.
+			RaiseSyncAbort(true);
 		}
 
 		#region LiveConnect Auth/Login
@@ -206,6 +257,9 @@ namespace Geowigo.Models.Providers
 			_liveClient.BackgroundDownloadCompleted += new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientBackgroundDownloadCompleted);
 			_liveClient.GetCompleted += new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientGetCompleted);
 
+			// Makes the client download even when on battery, or cellular data scheme.
+			_liveClient.BackgroundTransferPreferences = BackgroundTransferPreferences.AllowCellularAndBattery;
+
 			// Attaches downloads that have been running in the background
 			// while the app was not active.
 			_liveClient.AttachPendingTransfers();
@@ -253,6 +307,9 @@ namespace Geowigo.Models.Providers
 
 			// Sync Step 1: Ask for the list of files from root folder.
 			_liveClient.GetAsync("me/skydrive/files?filter=folders", "root");
+
+			// Starts the timeout timer.
+			StartTimeoutTimer(GetRequestTimeoutTimeSpan);
 		}
 
 		private void BeginDownloadCartridge(SkyDriveFile file)
@@ -392,6 +449,9 @@ namespace Geowigo.Models.Providers
 
 		private void OnLiveClientGetCompleted(object sender, LiveOperationCompletedEventArgs e)
 		{
+			// Cancels the timeout timer.
+			CancelTimeoutTimer();
+			
 			// No result? Nothing to do.
 			if (e.Result == null)
 			{
@@ -419,6 +479,11 @@ namespace Geowigo.Models.Providers
 						{
 							// Sync Step 3. Asks for the list of files in this folder.
 							_liveClient.GetAsync((string)content["id"] + "/files", "geowigo");
+
+							// Starts the timeout timer.
+							StartTimeoutTimer(GetRequestTimeoutTimeSpan);
+
+							// Nothing more to do.
 							return;
 						}
 					}
@@ -442,7 +507,7 @@ namespace Geowigo.Models.Providers
 				{
 					// Is it a cartridge file?
 					string name = (string)content["name"];
-					if ("file".Equals(content["type"]) && name.EndsWith(".gwc"))
+					if ("file".Equals(content["type"]) && name.ToLower().EndsWith(".gwc"))
 					{
 						// Adds the file to the list.
 						string id = (string)content["id"];
@@ -578,7 +643,21 @@ namespace Geowigo.Models.Providers
 			}
 		}
 
+		private void RaiseSyncAbort(bool hasTimeout)
+		{
+			Deployment.Current.Dispatcher.BeginInvoke(() =>
+			{
+				if (SyncAborted != null)
+				{
+					SyncAborted(this, new CartridgeProviderSyncAbortEventArgs()
+					{
+						HasTimedOut = hasTimeout
+					});
+				}
+			});
+		}
 
 		#endregion
+
 	}
 }

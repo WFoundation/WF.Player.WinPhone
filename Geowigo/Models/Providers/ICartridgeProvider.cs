@@ -50,6 +50,12 @@ namespace Geowigo.Models.Providers
 		event EventHandler<CartridgeProviderSyncEventArgs> SyncProgress;
 
 		/// <summary>
+		/// Raised when the synchronization has aborted because it
+		/// timed out.
+		/// </summary>
+		event EventHandler<CartridgeProviderSyncAbortEventArgs> SyncAborted;
+
+		/// <summary>
 		/// Starts to sync this provider's isolated storage folder with
 		/// the contents of the remote storage.
 		/// </summary>
