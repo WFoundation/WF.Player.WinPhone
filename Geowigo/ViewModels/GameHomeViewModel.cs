@@ -361,9 +361,10 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
+		protected override void InitFromNavigation(NavigationInfo nav)
 		{
-			base.InitFromNavigation(navCtx);
+			base.InitFromNavigation(nav);
+			System.Windows.Navigation.NavigationContext navCtx = nav.NavigationContext;
 
 			// Tries to get a particular section to display.
 			string section;
@@ -384,8 +385,8 @@ namespace Geowigo.ViewModels
 			// Tries to get the filename to query for.
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
-			{
-                string gwsFilename;
+			{	
+				string gwsFilename;
 
                 // Restores the cartridge or starts a new game?
                 if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))

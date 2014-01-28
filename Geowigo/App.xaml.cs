@@ -17,11 +17,20 @@ namespace Geowigo
 {
     public partial class App : Application
     {
-        /// <summary>
-        /// Permet d'accéder facilement au frame racine de l'application téléphonique.
-        /// </summary>
-        /// <returns>Frame racine de l'application téléphonique.</returns>
-        public PhoneApplicationFrame RootFrame { get; private set; }
+		#region Fields
+
+		private ViewModels.AppViewModel _appViewModel;
+
+		private Models.WherigoModel _model;
+
+		#endregion
+
+		#region Properties
+		/// <summary>
+		/// Permet d'accéder facilement au frame racine de l'application téléphonique.
+		/// </summary>
+		/// <returns>Frame racine de l'application téléphonique.</returns>
+		public PhoneApplicationFrame RootFrame { get; private set; }
 
 		/// <summary>
 		/// Gets the current Application object.
@@ -30,19 +39,42 @@ namespace Geowigo
 		{
 			get
 			{
-				return (App) Application.Current;
+				return (App)Application.Current;
 			}
 		}
 
 		/// <summary>
 		/// Gets the application-wide view model that controls app flow.
 		/// </summary>
-		public ViewModels.AppViewModel ViewModel { get; private set; }
+		public ViewModels.AppViewModel ViewModel
+		{
+			get
+			{
+				if (_appViewModel == null)
+				{
+					_appViewModel = new ViewModels.AppViewModel() { Model = this.Model };
+				}
+
+				return _appViewModel;
+			}
+		}
 
 		/// <summary>
 		/// Gets the application-wide model.
 		/// </summary>
-		public Models.WherigoModel Model { get; private set; }
+		public Models.WherigoModel Model
+		{
+			get
+			{
+				if (_model == null)
+				{
+					_model = new Models.WherigoModel();
+				}
+
+				return _model;
+			}
+		}
+		#endregion
 
         /// <summary>
         /// Constructeur pour l'objet Application.
@@ -87,10 +119,6 @@ namespace Geowigo
         // Ce code ne s'exécute pas lorsque l'application est réactivée
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-			// Initializes the application life-long resources.
-			this.Model = new Models.WherigoModel();
-			this.ViewModel = new ViewModels.AppViewModel() { Model = this.Model };
-
             // Starts the Beta-specific features.
             this.ViewModel.GoBeta();
         }
@@ -99,7 +127,7 @@ namespace Geowigo
         // Ce code ne s'exécute pas lorsque l'application est démarrée pour la première fois
         private void Application_Activated(object sender, ActivatedEventArgs e)
         {
-			ViewModel.HandleAppActivated();
+			ViewModel.HandleAppActivated(!e.IsApplicationInstancePreserved);
         }
 
         // Code à exécuter lorsque l'application est désactivée (envoyée à l'arrière-plan)

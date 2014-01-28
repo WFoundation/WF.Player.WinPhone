@@ -20,6 +20,39 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class BaseViewModel : DependencyObject
 	{
+		#region Nested Classes
+
+		/// <summary>
+		/// Provides information about a navigation operation.
+		/// </summary>
+		protected class NavigationInfo
+		{
+			/// <summary>
+			/// Gets the navigation context.
+			/// </summary>
+			public NavigationContext NavigationContext { get; private set; }
+
+			/// <summary>
+			/// Gets if this navigation corresponds to a recovery from
+			/// tombstone.
+			/// </summary>
+			public bool IsTombstoneRecovery { get; private set; }
+
+			/// <summary>
+			/// Gets the navigation mode.
+			/// </summary>
+			public NavigationMode NavigationMode { get; private set; }
+
+			public NavigationInfo(NavigationContext ctx, NavigationMode mode, bool isTombstoneRecovery)
+			{
+				NavigationContext = ctx;
+				NavigationMode = mode;
+				IsTombstoneRecovery = isTombstoneRecovery;
+			}
+		}
+
+		#endregion
+		
 		#region Properties
 
 		#region Model
@@ -123,9 +156,19 @@ namespace Geowigo.ViewModels
 		/// <param name="navCtx"></param>
 		public void OnPageNavigatedTo(NavigationEventArgs e, NavigationContext navCtx)
 		{
+			// Discards the navigation if we are recovering from tombstone.
+			if (!e.IsNavigationInitiator)
+			{
+				// Navigates back home.
+				App.Current.ViewModel.NavigateToAppHome(true);
+			}
+			
+			// This view model needs to be init'ed only if the navigation 
+			// gets to the associated page for the first time, or if
+			// the app is recovering from being tombstoned.
 			if (e.NavigationMode == NavigationMode.New || e.NavigationMode == NavigationMode.Refresh)
 			{
-				InitFromNavigation(navCtx);
+				InitFromNavigation(new NavigationInfo(navCtx, e.NavigationMode, false));
 			}
 		}
 
@@ -135,17 +178,22 @@ namespace Geowigo.ViewModels
 		/// <remarks>The default behavior finds and binds to the right object depending
 		/// on the Id field.</remarks>
 		/// <param name="navCtx"></param>
-		protected virtual void InitFromNavigation(NavigationContext navCtx)
+		protected virtual void InitFromNavigation(NavigationInfo nav)
+		{
+			InitFromNavigationInternal(nav);
+		}
+
+		private void InitFromNavigationInternal(NavigationInfo nav)
 		{
 			// Parses the wherigo id parameter and tries to load its associed object.
 			string rawWidParam;
-			if (navCtx.QueryString.TryGetValue("wid", out rawWidParam))
+			if (nav.NavigationContext.QueryString.TryGetValue("wid", out rawWidParam))
 			{
 				int WidParam;
 				if (int.TryParse(rawWidParam, out WidParam))
 				{
-                    WherigoObject wObject;
-                    if (this.Model.Core.TryGetWherigoObject<WherigoObject>(WidParam, out wObject))
+					WherigoObject wObject;
+					if (this.Model.Core.TryGetWherigoObject<WherigoObject>(WidParam, out wObject))
 					{
 						// The object has been found: keep it.
 						this.WherigoObject = wObject;

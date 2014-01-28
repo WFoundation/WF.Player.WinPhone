@@ -203,8 +203,10 @@ namespace Geowigo.ViewModels
 
 		#endregion
 		
-		protected override void InitFromNavigation(System.Windows.Navigation.NavigationContext navCtx)
+		protected override void InitFromNavigation(NavigationInfo nav)
 		{
+			System.Windows.Navigation.NavigationContext navCtx = nav.NavigationContext;
+
 			// Parses the cartridge guid parameter and tries to get its tag.
 			string filenameParam;
 			string cidParam;

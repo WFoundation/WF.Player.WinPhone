@@ -342,7 +342,8 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Called when the app is being activated.
 		/// </summary>
-		public void HandleAppActivated()
+		/// <param name="isRecoveringFromTombstone"></param>
+		public void HandleAppActivated(bool isRecoveringFromTombstone)
 		{
 			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Paused)
 			{
