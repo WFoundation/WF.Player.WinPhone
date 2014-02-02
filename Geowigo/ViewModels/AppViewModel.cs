@@ -373,6 +373,13 @@ namespace Geowigo.ViewModels
 		/// <param name="media">The sound to play.</param>
 		public void PlayMediaSound(Media media)
 		{
+			// Sanity check.
+			if (!SoundManager.IsPlayableSound(media))
+			{
+				System.Diagnostics.Debug.WriteLine("AppViewModel: Ignored playing sound of unsupported type: " + media.Type.ToString());
+				return;
+			}
+			
 			// Gets the media filename in cache.
 			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTagOrDefault(Model.Core.Cartridge);
 			string filename = tag.GetMediaCachePath(media, true);

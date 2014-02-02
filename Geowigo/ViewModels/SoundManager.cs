@@ -10,6 +10,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Geowigo.Utils;
 using System.IO.IsolatedStorage;
+using WF.Player.Core;
 
 namespace Geowigo.ViewModels
 {
@@ -38,7 +39,7 @@ namespace Geowigo.ViewModels
 				// Opens the file and starts playing.
 				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
-					using (IsolatedStorageFileStream fs = isf.OpenFile(isoStoreFile, System.IO.FileMode.Open))
+					using (IsolatedStorageFileStream fs = isf.OpenFile(isoStoreFile, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
 					{
 						_soundPlayer.SetSource(fs);
 						_soundPlayer.Play();
@@ -56,6 +57,18 @@ namespace Geowigo.ViewModels
 			{
 				StopSoundsInternal();
 			}
+		}
+
+		/// <summary>
+		/// Determines if a media represents a sound that can be played 
+		/// by this SoundManager.
+		/// </summary>
+		/// <param name="media"></param>
+		/// <returns>True if the sound type is supported by this sound 
+		/// manager.</returns>
+		public bool IsPlayableSound(Media media)
+		{
+			return media.Type == MediaType.MP3 || media.Type == MediaType.WAV;
 		}
 
 		#endregion

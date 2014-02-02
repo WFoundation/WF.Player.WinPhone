@@ -252,7 +252,7 @@ namespace Geowigo.Models
 					isf.CreateDirectory(System.IO.Path.GetDirectoryName(filename));
 
 					// Writes the contents of the media.
-					using (IsolatedStorageFileStream fs = isf.CreateFile(filename))
+					using (IsolatedStorageFileStream fs = isf.OpenFile(filename, FileMode.Create, FileAccess.Write))
 					{
 						fs.Write(media.Data, 0, media.Data.Length);
 					}
