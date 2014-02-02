@@ -421,10 +421,11 @@ namespace Geowigo.Models.Providers
 					{
 						isf.MoveFile(GetTempIsoStorePath(dlFilename), filepath);
 					}
-					catch (Exception)
+					catch (Exception ex)
 					{
 						// In case of exception here, do nothing.
 						// An attempt to load the file will be done anyway.
+						Geowigo.Utils.DebugUtils.DumpException(ex);
 					}
 				}
 			}
