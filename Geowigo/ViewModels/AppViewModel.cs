@@ -375,7 +375,7 @@ namespace Geowigo.ViewModels
 		{
 			// Gets the media filename in cache.
 			CartridgeTag tag = Model.CartridgeStore.GetCartridgeTagOrDefault(Model.Core.Cartridge);
-			string filename = tag.GetCachePath(media);
+			string filename = tag.GetMediaCachePath(media, true);
 
 			// Plays the file.
 			SoundManager.PlaySound(filename);

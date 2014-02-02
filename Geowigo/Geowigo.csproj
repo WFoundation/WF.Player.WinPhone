@@ -151,7 +151,6 @@
     <Compile Include="Converters\PlayerZoneStateToStringConverter.cs" />
     <Compile Include="Converters\UIObjectToNameConverter.cs" />
     <Compile Include="Converters\UppercaseStringConverter.cs" />
-    <Compile Include="Mockups\InputMockup.cs" />
     <Compile Include="Models\Providers\CartridgeProviderSyncAbortEventArgs.cs" />
     <Compile Include="Models\Providers\CartridgeProviderSyncEventArgs.cs" />
     <Compile Include="Models\CartridgeSavegame.cs" />

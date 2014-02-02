@@ -167,7 +167,7 @@ namespace Geowigo.Models
                 Guid.Substring(0, 4),
                 System.IO.Path.GetFileNameWithoutExtension(Cartridge.Filename)
             );
-		} 
+		}
 		#endregion
 
 		#region Cache
@@ -177,7 +177,7 @@ namespace Geowigo.Models
 		public void ImportOrMakeCache()
 		{            
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-			{
+			{				
 				// Ensures the cache folder exists.
 				isf.CreateDirectory(PathToCache);
                 isf.CreateDirectory(PathToSavegames);
@@ -209,22 +209,60 @@ namespace Geowigo.Models
 
                 // Savegames
                 ImportSavegamesCache(isf);
+
+				//// TEMP
+				//BackgroundWorker bw = new BackgroundWorker();
+				//bw.DoWork += new DoWorkEventHandler(bw_DoWork);
+				//bw.RunWorkerAsync();
 			}
 		}
+
+		//void bw_DoWork(object sender, DoWorkEventArgs e)
+		//{
+		//    using (WF.Player.Core.Engines.Engine engine = WherigoHelper.CreateEngine())
+		//    {
+		//        //engine.Init(Cartridge);
+		//    }
+		//}
 
 		/// <summary>
 		/// Gets the path to the cached version of a media.
 		/// </summary>
 		/// <param name="media"></param>
+		/// <param name="recacheIfFileNotFound">If true, the cache for this media
+		/// is recreated if its theoretical file path was not found. If false,
+		/// null is returned if </param>
 		/// <returns>The isostore path of the media if it is cached, null otherwise.</returns>
-		public string GetCachePath(Media media)
+		public string GetMediaCachePath(Media media, bool recacheIfFileNotFound)
 		{
-			string filename = GetCachePathCore(media);
+			// Looks the file up in the registered sounds.
+			// If not found, gets the theoretical value instead.
+			string filename;
+			if (!_soundFiles.TryGetValue(media.MediaId, out filename))
+			{
+				filename = GetCachePathCore(media);
+			}
 
+			// Recreates the file if it doesn't exist.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
-				return isf.FileExists(filename) ? filename : null;
+				if (!isf.FileExists(filename))
+				{
+					// Makes sure the directory exists.
+					isf.CreateDirectory(System.IO.Path.GetDirectoryName(filename));
+
+					// Writes the contents of the media.
+					using (IsolatedStorageFileStream fs = isf.CreateFile(filename))
+					{
+						fs.Write(media.Data, 0, media.Data.Length);
+					}
+				}
 			}
+
+			// Updates the path in the sounds dictionary.
+			_soundFiles[media.MediaId] = filename;
+
+			return filename;
 		}
 
         #endregion

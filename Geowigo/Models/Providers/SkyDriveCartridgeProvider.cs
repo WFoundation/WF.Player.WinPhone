@@ -409,7 +409,15 @@ namespace Geowigo.Models.Providers
 					isf.CreateDirectory(IsoStoreCartridgesPath);
 
 					// Moves the downloaded file to the right place.
-					isf.MoveFile(GetTempIsoStorePath(dlFilename), filepath);
+					try
+					{
+						isf.MoveFile(GetTempIsoStorePath(dlFilename), filepath);
+					}
+					catch (Exception)
+					{
+						// In case of exception here, do nothing.
+						// An attempt to load the file will be done anyway.
+					}
 				}
 			}
 

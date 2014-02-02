@@ -26,10 +26,6 @@ namespace Geowigo.Controls
 			{
 				iType = ((Input)item).InputType;
 			}
-			else if (item is Mockups.InputMockup)
-			{
-				iType = ((Mockups.InputMockup)item).InputType;
-			}
 
 			// Returns the proper template according to the type of the input.
 			switch (iType)
