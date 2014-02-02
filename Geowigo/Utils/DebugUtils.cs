@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using System.IO.IsolatedStorage;
 using System.IO;
 using System.Diagnostics;
+using BugSense;
 
 namespace Geowigo.Utils
 {
@@ -80,12 +81,26 @@ namespace Geowigo.Utils
 		}
 
 		/// <summary>
-		/// Dumps an exception to the isolated storage.
+		/// Dumps an exception to the isolated storage and on BugSense.
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <param name="customMessage"></param>
 		public static void DumpException(Exception ex, string customMessage = null)
 		{
+			// BugSense dump.
+			if (BugSenseHandler.IsInitialized)
+			{
+				BugSense.Core.Model.LimitedCrashExtraDataList extraData = null;
+				if (customMessage != null)
+				{
+					extraData = new BugSense.Core.Model.LimitedCrashExtraDataList();
+					extraData.Add("customMessage", customMessage); 
+				}
+				
+				BugSenseHandler.Instance.SendExceptionAsync(ex, extraData);
+			}
+			
+			// Local dump.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
 				// Ensures the folder exists.

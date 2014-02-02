@@ -220,7 +220,15 @@ namespace Geowigo.Models.Providers
 			}
 
 			// Starts initializing.
-			_authClient.InitializeAsync(_Scopes);
+			try
+			{
+				_authClient.InitializeAsync(_Scopes);
+			}
+			catch (LiveAuthException ex)
+			{
+				// Ignores but dumps the exception.
+				Geowigo.Utils.DebugUtils.DumpException(ex);
+			}
 		}
 
 		private void OnAuthClientInitializeCompleted(object sender, LoginCompletedEventArgs e)
