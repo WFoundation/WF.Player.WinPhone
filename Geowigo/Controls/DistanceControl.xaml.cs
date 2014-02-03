@@ -44,7 +44,12 @@ namespace Geowigo.Controls
 
 		// Using a DependencyProperty as the backing store for ArrowOrientation.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty BearingProperty =
-			DependencyProperty.Register("Bearing", typeof(double), typeof(DistanceControl), new PropertyMetadata(0d));
+			DependencyProperty.Register("Bearing", typeof(double), typeof(DistanceControl), new PropertyMetadata(0d, OnBearingPropertyChanged));
+
+		private static void OnBearingPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+		{
+			((DistanceControl)o).OnBearingChanged(e);
+		}
 
 		#endregion
 
@@ -123,11 +128,48 @@ namespace Geowigo.Controls
 
 		#endregion
 
+		#region Members
+
+		private double _originalBearing;
+		private bool _isChangingBearingInternal;
+
+		#endregion
+
 		public DistanceControl()
 		{
 			InitializeComponent();
 
 			VisualStateManager.GoToState(this, this.UnknownState.Name, true);
+
+			Unloaded += new RoutedEventHandler(OnUnloaded);
+			App.Current.Model.Core.PlayerLocationChanged += new EventHandler<Models.PlayerLocationChangedEventArgs>(OnPlayerLocationChanged);
+		}
+
+		private void OnUnloaded(object sender, RoutedEventArgs e)
+		{
+			App.Current.Model.Core.PlayerLocationChanged -= new EventHandler<Models.PlayerLocationChangedEventArgs>(OnPlayerLocationChanged);
+		}
+
+		private void OnPlayerLocationChanged(object sender, Models.PlayerLocationChangedEventArgs e)
+		{
+			// If the heading of the device has changed, adjusts the bearing that is on-screen.
+			if (e.Heading.HasValue)
+			{
+				_isChangingBearingInternal = true;
+				Bearing = _originalBearing - e.Heading.Value % 360;
+				_isChangingBearingInternal = false;
+			}
+		}
+
+		private void OnBearingChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (_isChangingBearingInternal)
+			{
+				return;
+			}
+
+			// Updates the original bearing.
+			_originalBearing = (double)e.NewValue;
 		}
 
 		private void OnDistanceChanged(DependencyPropertyChangedEventArgs e)

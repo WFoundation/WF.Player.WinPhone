@@ -296,7 +296,7 @@ namespace Geowigo.ViewModels
 			JournalEntry previousPage = App.Current.RootFrame.BackStack.FirstOrDefault();
 			if (previousPage == null)
 			{
-				System.Diagnostics.Debug.WriteLine("Warning: NavigateBack() cancelled because no page in the stack.");
+				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because no page in the stack.");
 				
 				return;
 			}
@@ -307,7 +307,7 @@ namespace Geowigo.ViewModels
 				previousPageName.StartsWith(prefix + "TaskPage.xaml") ||
 				previousPageName.StartsWith(prefix + "ThingPage.xaml")))
 			{
-				System.Diagnostics.Debug.WriteLine("Warning: NavigateBack() cancelled because previous page is no game!");
+				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because previous page is no game!");
 				
 				return;
 			}

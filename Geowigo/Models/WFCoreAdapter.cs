@@ -16,6 +16,7 @@ using System.Device.Location;
 using WF.Player.Core.Engines;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Devices.Sensors;
 
 namespace Geowigo.Models
 {
@@ -32,14 +33,20 @@ namespace Geowigo.Models
 		public GeoCoordinate Location { get; private set; }
 
 		/// <summary>
+		/// Gets the current heading of the player.
+		/// </summary>
+		public double? Heading { get; private set; }
+
+		/// <summary>
 		/// Gets the player character.
 		/// </summary>
 		public Character Player { get; private set; }
 
-		internal PlayerLocationChangedEventArgs(Character player, GeoCoordinate gc)
+		internal PlayerLocationChangedEventArgs(Character player, GeoCoordinate gc, double? heading)
 		{
 			Location = gc;
 			Player = player;
+			Heading = heading;
 		}
 	}
 
@@ -50,7 +57,7 @@ namespace Geowigo.Models
 		#region Events
 
 		/// <summary>
-		/// raised when the player location has changed.
+		/// Raised when the player location has changed.
 		/// </summary>
 		public event EventHandler<PlayerLocationChangedEventArgs> PlayerLocationChanged;
 
@@ -59,20 +66,85 @@ namespace Geowigo.Models
 		#region Members
 
 		private GeoCoordinateWatcher _GeoWatcher;
-		private GeoPosition<GeoCoordinate> _LastKnownPosition;
+		private GeoCoordinate _LastKnownLocation;
+		private bool _HasLastKnownLocationChanged;
+
+		private Compass _Compass;
+		private bool _IsCompassEnabled;
+		private double? _LastKnownHeading;
+		private bool _HasLastKnownHeadingChanged;
+
 		private object _SyncRoot = new Object();
 
 		#endregion
 
 		#region Properties
 
-		#region ActiveVisibleThings
-
 		public List<Thing> ActiveVisibleThings { get; private set; }
 
-        public GeoCoordinate DeviceLocation { get; private set; }
+		public GeoCoordinate DeviceLocation 
+		{
+			get
+			{
+				lock (_SyncRoot)
+				{
+					return _LastKnownLocation != null && !_LastKnownLocation.IsUnknown ? _LastKnownLocation : null;
+				}
+			}
 
-		#endregion
+			private set
+			{
+				bool hasChanged = false;
+				lock (_SyncRoot)
+				{
+					if (_LastKnownLocation != value)
+					{
+						_LastKnownLocation = value;
+						_HasLastKnownLocationChanged = true;
+						hasChanged = true;
+					}
+				}
+
+				if (hasChanged)
+				{
+					RaisePropertyChanged("DeviceLocation");
+
+					ApplySensorData();
+				}
+			}
+		}
+
+		public double? DeviceHeading
+		{
+			get
+			{
+				lock (_SyncRoot)
+				{
+					return _LastKnownHeading;
+				}
+			}
+
+			private set
+			{
+				bool hasChanged = false;
+				lock (_SyncRoot)
+				{
+					if (_LastKnownHeading != value)
+					{
+						_LastKnownHeading = value;
+						hasChanged = true;
+						_HasLastKnownHeadingChanged = true;
+					}
+				}
+
+				if (hasChanged)
+				{
+					RaisePropertyChanged("DeviceHeading");
+
+					ApplySensorData();
+				}
+			}
+		}
 
 		#endregion
 
@@ -86,12 +158,24 @@ namespace Geowigo.Models
 			_GeoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(GeoWatcher_PositionChanged);
 			_GeoWatcher.Start();
 
+			// Creates and starts the compass service.
+			if (Compass.IsSupported)
+			{
+				_IsCompassEnabled = true;
+				_Compass = new Compass();
+				_Compass.TimeBetweenUpdates = TimeSpan.FromMilliseconds(250);
+				_Compass.CurrentValueChanged += new EventHandler<SensorReadingEventArgs<CompassReading>>(Compass_CurrentValueChanged);
+				_Compass.Calibrate += new EventHandler<CalibrationEventArgs>(OnCompassCalibrate);
+				//_Compass.Start();
+			}
+
 			// Deploys handlers.
 			RegisterCoreEventHandlers();
 		}
 
 		#endregion
 
+		#region Engine
 		/// <summary>
 		/// Starts to play a Wherigo cartridge game.
 		/// </summary>
@@ -103,65 +187,121 @@ namespace Geowigo.Models
 
 			using (IsolatedStorageFileStream fs = IsolatedStorageFile.GetUserStoreForApplication().OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
 			{
-				Init(fs, cart); 
+				Init(fs, cart);
 			}
 
-			ProcessPosition(_LastKnownPosition);
+			ApplySensorData();
 
 			// Run Time: the game starts.
 
 			Start();
 
-            // TEMP DEBUG
-            ProcessPosition(_LastKnownPosition);
+			// TEMP DEBUG
+			ApplySensorData();
 
 			return cart;
 		}
 
-        /// <summary>
-        /// Resumes playing a Wherigo cartridge saved game.
-        /// </summary>
-        /// <param name="filename">Filename of the cartridge in the isolated storage.</param>
-        /// <param name="gwsFilename">Filename of the savegame to restore.</param>
-        public Cartridge InitAndRestoreCartridge(string filename, string gwsFilename)
-        {
-            // Boot Time: inits the cartridge and process position.
-            Cartridge cart = new Cartridge(filename);
+		/// <summary>
+		/// Resumes playing a Wherigo cartridge saved game.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge in the isolated storage.</param>
+		/// <param name="gwsFilename">Filename of the savegame to restore.</param>
+		public Cartridge InitAndRestoreCartridge(string filename, string gwsFilename)
+		{
+			// Boot Time: inits the cartridge and process position.
+			Cartridge cart = new Cartridge(filename);
 
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                using (IsolatedStorageFileStream fs = isf.OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-                {
-                    Init(fs, cart);
-                } 
-            
-                ProcessPosition(_LastKnownPosition);
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				using (IsolatedStorageFileStream fs = isf.OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+				{
+					Init(fs, cart);
+				}
 
-                // Run Time: the game starts.
+				ApplySensorData();
 
-                using (IsolatedStorageFileStream fs = isf.OpenFile(gwsFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-                {
-                    Restore(fs);
-                } 
-            }
+				// Run Time: the game starts.
 
-            return cart;
-        }
+				using (IsolatedStorageFileStream fs = isf.OpenFile(gwsFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+				{
+					Restore(fs);
+				}
+			}
 
-        /// <summary>
-        /// Saves the game to a CartridgeSavegame object.
-        /// </summary>
-        /// <param name="cs">The CartridgeSavegame representing the savegame.</param>
-        public void Save(CartridgeSavegame cs)
-        {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                using (System.IO.Stream fs = cs.CreateOrReplace(isf))
-                {
-                    Save(fs);
-                }
-            }
-        }
+			return cart;
+		}
+
+		/// <summary>
+		/// Saves the game to a CartridgeSavegame object.
+		/// </summary>
+		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
+		public void Save(CartridgeSavegame cs)
+		{
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				using (System.IO.Stream fs = cs.CreateOrReplace(isf))
+				{
+					Save(fs);
+				}
+			}
+		} 
+		#endregion
+
+		private void ApplySensorData()
+		{
+			if (!IsReady)
+			{
+				return;
+			}
+
+			// Applies heading if found.
+			bool shouldRefreshHeading = false;
+			double? deviceHeading;
+			lock (_SyncRoot)
+			{
+				shouldRefreshHeading = 
+					_LastKnownHeading.HasValue 
+					&& _HasLastKnownHeadingChanged;
+
+				deviceHeading = _LastKnownHeading;
+			}
+			if (shouldRefreshHeading)
+			{
+				this.RefreshHeading(deviceHeading.Value);
+			}
+			lock (_SyncRoot)
+			{
+				// Marks heading as refreshed.
+				_HasLastKnownHeadingChanged = false;
+			}
+
+			// Applies location if found.
+			bool shouldRefreshLoc = false;
+			GeoCoordinate deviceLoc;
+			lock (_SyncRoot)
+			{
+				shouldRefreshLoc = 
+					_LastKnownLocation != null 
+					&& _HasLastKnownLocationChanged;
+				deviceLoc = _LastKnownLocation;
+			}
+			if (shouldRefreshLoc)
+			{
+				this.RefreshLocation(deviceLoc.Latitude, deviceLoc.Longitude, deviceLoc.Altitude, deviceLoc.HorizontalAccuracy);
+			}
+			lock (_SyncRoot)
+			{
+				// Marks location as refreshed.
+				_HasLastKnownLocationChanged = false;
+			}
+
+			// Sends a new event if something changed.
+			if (shouldRefreshHeading || shouldRefreshLoc)
+			{
+				RaisePlayerLocationChanged(DeviceLocation, DeviceHeading);
+			}
+		} 
 
 		#region Location Service Events Handlers
 		
@@ -198,42 +338,59 @@ namespace Geowigo.Models
 
 		private void ProcessPosition(GeoPosition<GeoCoordinate> position)
 		{
-			// Stores the position.
-			_LastKnownPosition = position ?? _LastKnownPosition;
-
-			// No refresh if no position or if no game is running.
-			// Force refresh if the game is booting.
-			if (!IsReady || position == null || position.Location == null)
+			if (position == null || position.Location == null || position.Location.IsUnknown)
 			{
 				return;
 			}
 
-			GeoCoordinate gc = position.Location;
+			// Stores the new valid position.
+			DeviceLocation = position.Location;
 
-			// Updates the position if it is known.
-			if (!gc.IsUnknown)
+			// Uses the location's course if the compass is not enabled.
+			if (!_IsCompassEnabled)
 			{
-				this.RefreshLocation(gc.Latitude, gc.Longitude, gc.Altitude, gc.HorizontalAccuracy);
-				this.RefreshHeading(gc.Course);
-
-                this.DeviceLocation = gc;
-
-                RaisePropertyChanged("DeviceLocation");
-
-				RaisePlayerLocationChanged(new GeoCoordinate(Latitude, Longitude, Altitude, Accuracy, 0, 0, Heading));
+				DeviceHeading = position.Location.Course;
 			}
+		}
+
+		#endregion
+
+		#region Compass Service Event Handlers
+
+		private void Compass_CurrentValueChanged(object sender, SensorReadingEventArgs<CompassReading> e)
+		{
+			ProcessCompass(e.SensorReading);
+		}
+
+		private void OnCompassCalibrate(object sender, CalibrationEventArgs e)
+		{
+			
+		}
+
+		private void ProcessCompass(CompassReading compassReading)
+		{
+			if (Double.IsNaN(compassReading.TrueHeading))
+			{
+				return;
+			}
+			
+			// Stores the new valid heading.
+			DeviceHeading = compassReading.TrueHeading;
 		}
 
 		#endregion
 
 		#region Event Raisers
 
-		private void RaisePlayerLocationChanged(GeoCoordinate gc)
+		private void RaisePlayerLocationChanged(GeoCoordinate gc, double? heading)
 		{
-			if (PlayerLocationChanged != null)
+			Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
 			{
-				PlayerLocationChanged(this, new PlayerLocationChangedEventArgs(Player, gc));
-			}
+				if (PlayerLocationChanged != null)
+				{
+					PlayerLocationChanged(this, new PlayerLocationChangedEventArgs(Player, gc, heading));
+				}
+			}));
 		}
 
 		#endregion
@@ -255,6 +412,17 @@ namespace Geowigo.Models
 				ActiveVisibleThings.AddRange(VisibleObjects);
 
 				RaisePropertyChanged("ActiveVisibleThings");
+			}
+			else if (_Compass != null && e.PropertyName == "GameState")
+			{
+				if (GameState == EngineGameState.Playing)
+				{
+					_Compass.Start();
+				}
+				else
+				{
+					_Compass.Stop();
+				}
 			}
 		}
 
