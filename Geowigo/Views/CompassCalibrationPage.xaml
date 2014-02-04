@@ -1,0 +1,63 @@
+﻿<Geowigo_Views:BasePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views;assembly=Geowigo"
+    xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" x:Name="ThisCC" 
+    x:Class="Geowigo.Views.CompassCalibrationPage"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
+    shell:SystemTray.IsVisible="True">
+ 
+    <!--Exemple de code illustrant l'utilisation de l'ApplicationBar-->
+    <!--<phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
+            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 1"/>
+                <shell:ApplicationBarMenuItem Text="ÉlémentMenu 2"/>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>-->
+
+	<Geowigo_Views:BasePage.DataContext>
+		<Geowigo_ViewModels:CompassCalibrationViewModel/>
+	</Geowigo_Views:BasePage.DataContext>
+
+    <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--TitlePanel contient le nom de l'application et le titre de la page-->
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+            <TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, ElementName=ThisCC, Mode=OneWay}" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <TextBlock x:Name="PageTitle" Text="compass" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+        </StackPanel>
+
+        <!--ContentPanel - placez tout contenu supplémentaire ici-->
+		<!--Calibration UI-->
+		<StackPanel x:Name="CalibrationStackPanel" Margin="0,8,0,0" Grid.Row="1">
+			<Image Source="/Images/calibrate_compass.png" HorizontalAlignment="Center"/>
+			<TextBlock TextWrapping="Wrap" TextAlignment="Center" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="8,0"><Run Text="The compass on your device needs to be calibrated. Hold the device in front of you and sweep it through a figure 8 pattern as shown until the calibration is complete."/></TextBlock>
+			<TextBlock TextWrapping="Wrap" TextAlignment="Center" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="0,0,16,0" Visibility="Collapsed"><Run Text="Congratulations!"/><LineBreak/><Run Text="The compass is now calibrated."/></TextBlock>
+			<StackPanel Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center">
+				<TextBlock Margin="0,0,5,0" Text="Heading accuracy:" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+				<TextBlock FontFamily="{StaticResource PhoneFontFamilySemiLight}" Text="{Binding HeadingAccuracy, StringFormat=N2}" Foreground="{StaticResource PhoneAccentBrush}"/>
+				<TextBlock TextWrapping="Wrap" Text="°" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+			</StackPanel>
+			<Button x:Name="CalibrationButton" Content="Done" Command="{Binding DoneCommand, Mode=OneWay}"/>
+		</StackPanel>
+		<!--End Calibration UI-->
+	</Grid>
+
+</Geowigo_Views:BasePage>

@@ -194,6 +194,14 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Navigates the app to the page of compass calibration.
+		/// </summary>
+		public void NavigateToCompassCalibration()
+		{
+			App.Current.RootFrame.Navigate(new Uri("/Views/CompassCalibrationPage.xaml", UriKind.Relative));
+		}
+
+		/// <summary>
 		/// Navigates the app to the game main page of a cartridge.
 		/// </summary>
 		public void NavigateToGameHome(string filename)
@@ -405,6 +413,14 @@ namespace Geowigo.ViewModels
             SavegameManager.SaveGame(isAutoSave);
         }
 
+		/// <summary>
+		/// Vibrates the device for a moment in order to alert the user.
+		/// </summary>
+		public void Vibrate()
+		{
+			Microsoft.Devices.VibrateController.Default.Start(TimeSpan.FromSeconds(1));
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -462,6 +478,7 @@ namespace Geowigo.ViewModels
 			model.Core.AttributeChanged += new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
 			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
             model.Core.CartridgeCompleted += new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
+			model.Core.CompassCalibrationRequested += new EventHandler(Core_CompassCalibrationRequested);
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -475,6 +492,7 @@ namespace Geowigo.ViewModels
             model.Core.AttributeChanged -= new EventHandler<AttributeChangedEventArgs>(Core_AttributeChanged);
             model.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
+			model.Core.CompassCalibrationRequested -= new EventHandler(Core_CompassCalibrationRequested);
 		}
 
         private void Core_CartridgeCompleted(object sender, WherigoEventArgs e)
@@ -482,6 +500,12 @@ namespace Geowigo.ViewModels
             // Logs a history entry for cartridge completion.
             Model.History.AddCompletedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(e.Cartridge));
         }
+
+		private void Core_CompassCalibrationRequested(object sender, EventArgs e)
+		{
+			// Navigates to the compass calibration view.
+			NavigateToCompassCalibration();
+		}
 
         private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -678,5 +702,5 @@ namespace Geowigo.ViewModels
         }
 
         #endregion
-    }
+	}
 }

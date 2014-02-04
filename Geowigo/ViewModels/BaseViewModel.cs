@@ -70,7 +70,7 @@ namespace Geowigo.ViewModels
 			{
 				if (_Model != value)
 				{
-					OnModelChanging(_Model, value);
+					OnModelChangingInternal(_Model, value);
 
 					_Model = value;
 
@@ -224,7 +224,17 @@ namespace Geowigo.ViewModels
 
 		}
 
-		private void OnModelChanging(Models.WherigoModel oldValue, Models.WherigoModel newValue)
+		/// <summary>
+		/// Called when the underlying model is changing.
+		/// </summary>
+		/// <param name="oldValue"></param>
+		/// <param name="newValue"></param>
+		protected virtual void OnModelChanging(Models.WherigoModel oldValue, Models.WherigoModel newValue)
+		{
+			
+		}
+
+		private void OnModelChangingInternal(Models.WherigoModel oldValue, Models.WherigoModel newValue)
 		{
 			// Unregisters old event handlers.
 			if (oldValue != null)
@@ -237,6 +247,9 @@ namespace Geowigo.ViewModels
 			{
 				newValue.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
 			}
+
+			// Notifies children.
+			OnModelChanging(oldValue, newValue);
 		}
 
 		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

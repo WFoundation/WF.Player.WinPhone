@@ -50,9 +50,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BugSense-WP7, Version=3.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BugSense-WP7, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\BugSense.WP7.3.6.2.0\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
+      <HintPath>..\packages\BugSense.WP7.3.6.3.0\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
     </Reference>
     <Reference Include="ImageTools">
       <HintPath>..\libs\ImageTools.dll</HintPath>
@@ -172,6 +172,7 @@
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\CartridgeInfoViewModel.cs" />
+    <Compile Include="ViewModels\CompassCalibrationViewModel.cs" />
     <Compile Include="ViewModels\GameHomeViewModel.cs" />
     <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\InputViewModel.cs" />
@@ -183,6 +184,9 @@
     <Compile Include="Views\BasePage.cs" />
     <Compile Include="Views\CartridgeInfoPage.xaml.cs">
       <DependentUpon>CartridgeInfoPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CompassCalibrationPage.xaml.cs">
+      <DependentUpon>CompassCalibrationPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\GameHomePage.xaml.cs">
       <DependentUpon>GameHomePage.xaml</DependentUpon>
@@ -222,6 +226,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CartridgeInfoPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CompassCalibrationPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -283,6 +291,9 @@
       <Project>{86644A2C-6452-441D-AAA8-A1F693B6F1AB}</Project>
       <Name>Geowigo.Beta</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

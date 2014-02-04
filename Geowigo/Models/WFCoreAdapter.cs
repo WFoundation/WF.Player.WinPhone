@@ -61,6 +61,11 @@ namespace Geowigo.Models
 		/// </summary>
 		public event EventHandler<PlayerLocationChangedEventArgs> PlayerLocationChanged;
 
+		/// <summary>
+		/// Raised when the calibration of the compass is requested.
+		/// </summary>
+		public event EventHandler CompassCalibrationRequested;
+
 		#endregion
 
 		#region Members
@@ -72,6 +77,7 @@ namespace Geowigo.Models
 		private Compass _Compass;
 		private bool _IsCompassEnabled;
 		private double? _LastKnownHeading;
+		private double? _LastKnownHeadingAccuracy;
 		private bool _HasLastKnownHeadingChanged;
 
 		private object _SyncRoot = new Object();
@@ -142,6 +148,35 @@ namespace Geowigo.Models
 					RaisePropertyChanged("DeviceHeading");
 
 					ApplySensorData();
+				}
+			}
+		}
+
+		public double? DeviceHeadingAccuracy
+		{
+			get
+			{
+				lock (_SyncRoot)
+				{
+					return _LastKnownHeadingAccuracy;
+				}
+			}
+
+			private set
+			{
+				bool hasChanged = false;
+				lock (_SyncRoot)
+				{
+					if (_LastKnownHeadingAccuracy != value)
+					{
+						_LastKnownHeadingAccuracy = value;
+						hasChanged = true;
+					}
+				}
+
+				if (hasChanged)
+				{
+					RaisePropertyChanged("DeviceHeadingAccuracy");
 				}
 			}
 		}
@@ -359,16 +394,27 @@ namespace Geowigo.Models
 
 		private void Compass_CurrentValueChanged(object sender, SensorReadingEventArgs<CompassReading> e)
 		{
-			ProcessCompass(e.SensorReading);
+			if (((Compass)sender).IsDataValid)
+			{
+				ProcessCompass(e.SensorReading); 
+			}
 		}
 
 		private void OnCompassCalibrate(object sender, CalibrationEventArgs e)
 		{
-			
+			// Relay the event.
+			Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+			{
+				if (CompassCalibrationRequested != null)
+				{
+					CompassCalibrationRequested(this, EventArgs.Empty);
+				}
+			}));
 		}
 
 		private void ProcessCompass(CompassReading compassReading)
 		{
+			// Ignores the value if it's not a number or is not valid.
 			if (Double.IsNaN(compassReading.TrueHeading))
 			{
 				return;
@@ -376,6 +422,7 @@ namespace Geowigo.Models
 			
 			// Stores the new valid heading.
 			DeviceHeading = compassReading.TrueHeading;
+			DeviceHeadingAccuracy = compassReading.HeadingAccuracy;
 		}
 
 		#endregion
