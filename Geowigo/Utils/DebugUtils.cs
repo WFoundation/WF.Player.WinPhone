@@ -85,21 +85,22 @@ namespace Geowigo.Utils
 		/// </summary>
 		/// <param name="ex"></param>
 		/// <param name="customMessage"></param>
-		public static void DumpException(Exception ex, string customMessage = null)
+		/// <param name="dumpOnBugSenseToo"></param>
+		public static void DumpException(Exception ex, string customMessage = null, bool dumpOnBugSenseToo = false)
 		{
 			// BugSense dump.
-			if (BugSenseHandler.IsInitialized)
+			if (dumpOnBugSenseToo && BugSenseHandler.IsInitialized)
 			{
 				BugSense.Core.Model.LimitedCrashExtraDataList extraData = null;
 				if (customMessage != null)
 				{
 					extraData = new BugSense.Core.Model.LimitedCrashExtraDataList();
-					extraData.Add("customMessage", customMessage); 
+					extraData.Add("customMessage", customMessage);
 				}
-				
+
 				BugSenseHandler.Instance.SendExceptionAsync(ex, extraData);
 			}
-			
+
 			// Local dump.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{

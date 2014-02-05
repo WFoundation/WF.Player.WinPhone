@@ -227,7 +227,7 @@ namespace Geowigo.Models.Providers
 			catch (LiveAuthException ex)
 			{
 				// Ignores but dumps the exception.
-				Geowigo.Utils.DebugUtils.DumpException(ex);
+				Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
 			}
 		}
 
@@ -350,7 +350,7 @@ namespace Geowigo.Models.Providers
 				catch (Exception ex)
 				{
 					// Logs the exception.
-					Utils.DebugUtils.DumpException(ex, "SkyDriveCartridgeProvider, background download attempt on actual device.");
+					Utils.DebugUtils.DumpException(ex, "SkyDriveCartridgeProvider, background download attempt on actual device.", true);
 
 					// Tries the direct download method.
 					_liveClient.DownloadAsync(fileAttribute, GetDownloadUserState(file));
@@ -425,7 +425,7 @@ namespace Geowigo.Models.Providers
 					{
 						// In case of exception here, do nothing.
 						// An attempt to load the file will be done anyway.
-						Geowigo.Utils.DebugUtils.DumpException(ex);
+						Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
 					}
 				}
 			}
