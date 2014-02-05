@@ -175,38 +175,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-        #region IsProgressBarVisible
-
-
-        public bool IsProgressBarVisible
-        {
-            get { return (bool)GetValue(IsProgressBarVisibleProperty); }
-            set { SetValue(IsProgressBarVisibleProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for IsProgressBarVisible.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsProgressBarVisibleProperty =
-            DependencyProperty.Register("IsProgressBarVisible", typeof(bool), typeof(GameHomeViewModel), new PropertyMetadata(false));
-
-
-        #endregion
-
-        #region ProgressBarStatusText
-
-
-        public string ProgressBarStatusText
-        {
-            get { return (string)GetValue(ProgressBarStatusTextProperty); }
-            set { SetValue(ProgressBarStatusTextProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for ProgressBarStatusText.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ProgressBarStatusTextProperty =
-            DependencyProperty.Register("ProgressBarStatusText", typeof(string), typeof(GameHomeViewModel), new PropertyMetadata(null));
-
-
-        #endregion
-
 		#endregion
 
 		#region Commands

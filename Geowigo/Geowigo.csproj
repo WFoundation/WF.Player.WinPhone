@@ -125,6 +125,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\BlockingContentPresenter.xaml.cs">
+      <DependentUpon>BlockingContentPresenter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\DataTemplateSelector.cs" />
     <Compile Include="Controls\DistanceControl.xaml.cs">
       <DependentUpon>DistanceControl.xaml</DependentUpon>
@@ -209,6 +212,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="Controls\BlockingContentPresenter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\DistanceControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

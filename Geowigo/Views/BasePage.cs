@@ -18,6 +18,12 @@ namespace Geowigo.Views
 	/// </summary>
 	public abstract class BasePage : PhoneApplicationPage
 	{
+		#region Fields
+
+		private Geowigo.Controls.BlockingContentPresenter _blockingContentPresenter;
+
+		#endregion
+		
 		#region Properties
 
 		/// <summary>
@@ -44,6 +50,36 @@ namespace Geowigo.Views
 			: base()
 		{
             Loaded += new RoutedEventHandler(BasePage_Loaded);
+		}
+
+		#endregion
+
+		#region Blocking Content Presenter
+
+		/// <summary>
+		/// Adds a blocking content presenter to this page, that can
+		/// block user interaction and display a progress bar and a message.
+		/// </summary>
+		/// <remarks>If this page already has a blocking content presenter,
+		/// this method does nothing.</remarks>
+		public void AddBlockingContentPresenter()
+		{
+			if (_blockingContentPresenter != null)
+			{
+				return;
+			}
+
+			// Creates the control.
+			_blockingContentPresenter = new Controls.BlockingContentPresenter();
+			_blockingContentPresenter.DataContext = ViewModel;
+			
+			// Sets the current content of this page as the inner content of the control.
+			UIElement currentContent = Content;
+			Content = null;
+			_blockingContentPresenter.InnerContent = currentContent;
+			
+			// Sets the control as current content of this page.
+			Content = _blockingContentPresenter;
 		}
 
 		#endregion

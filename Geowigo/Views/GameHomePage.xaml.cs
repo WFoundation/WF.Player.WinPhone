@@ -45,6 +45,9 @@ namespace Geowigo.Views
 		{
 			InitializeComponent();
 
+			// Adds a blocking content presenter to block and show progress.
+			AddBlockingContentPresenter();
+
 			// Gets resources.
 			_HistoryTasksSource = (CollectionViewSource)this.Resources["HistoryTasksSource"];
 			_CurrentTasksSource = (CollectionViewSource)this.Resources["CurrentTasksSource"];
