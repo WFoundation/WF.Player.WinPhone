@@ -76,22 +76,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		#region ApplicationBar
-
-
-		public IApplicationBar ApplicationBar
-		{
-			get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
-			set { SetValue(ApplicationBarProperty, value); }
-		}
-
-		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
-		public static readonly DependencyProperty ApplicationBarProperty =
-			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
-
-
-		#endregion
-
         #region StartingCoordinate
 
 

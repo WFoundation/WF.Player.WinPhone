@@ -175,22 +175,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-        #region ApplicationBar
-
-
-        public IApplicationBar ApplicationBar
-        {
-            get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
-            set { SetValue(ApplicationBarProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ApplicationBarProperty =
-            DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(GameHomeViewModel), new PropertyMetadata(null));
-
-
-        #endregion
-
         #region IsProgressBarVisible
 
 
@@ -436,14 +420,19 @@ namespace Geowigo.ViewModels
         {
             // Gives feeedback.
             //App.Current.ViewModel.SetSystemTrayProgressIndicator(trayMessage);
+			ApplicationBar.IsVisible = false;
             ProgressBarStatusText = trayMessage;
             IsProgressBarVisible = true;
 
             // Runs the action later if the page is not ready yet.
             if (_isReady)
             {
-                action();
+                // Runs the action.
+				action();
+
+				// When the action is done, removes the blocking screen.
                 IsProgressBarVisible = false;
+				ApplicationBar.IsVisible = true;
             }
             else
             {

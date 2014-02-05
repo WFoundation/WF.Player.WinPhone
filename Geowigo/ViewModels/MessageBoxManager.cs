@@ -12,6 +12,7 @@ using Geowigo.Models;
 using Microsoft.Phone.Controls;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Geowigo.ViewModels
 {
@@ -20,7 +21,17 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class MessageBoxManager
 	{
-        #region Events
+		#region Constants
+
+		/// <summary>
+		/// How much time to wait before a HasMessageBoxChanged event is
+		/// confirmed and raised.
+		/// </summary>
+		private const int MessageBoxChangeRaisingDelayMilliseconds = 100;
+
+		#endregion
+		
+		#region Events
 
         public event EventHandler HasMessageBoxChanged;
 
@@ -32,6 +43,8 @@ namespace Geowigo.ViewModels
 		/// Matches a custom message box to its wherigo equivalent.
 		/// </summary>
 		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
+
+		private Timer _eventRaisingTimer;
 
         private object _syncRoot = new object();
 
@@ -171,14 +184,64 @@ namespace Geowigo.ViewModels
                 }
 				
                 // If no more message box is managed, send an event.
-                if (_WherigoMessageBoxes.Count == 0 && HasMessageBoxChanged != null)
-                {
-                    HasMessageBoxChanged(this, EventArgs.Empty);
-                }
+				//if (_WherigoMessageBoxes.Count == 0 && HasMessageBoxChanged != null)
+				//{
+				//    HasMessageBoxChanged(this, EventArgs.Empty);
+				//}
+				BeginRaiseHasMessageBoxChanged();
 			}
 
 		}
 		#endregion
 
+		#region Event Raising
+
+		private void BeginRaiseHasMessageBoxChanged()
+		{
+			// If a timer is already waiting for a message box to arrive,
+			// stop it, because the change it carries has been overriden by
+			// this very event.
+			// If not, starts the timer.
+			lock (_syncRoot)
+			{
+				if (_eventRaisingTimer != null)
+				{
+					_eventRaisingTimer.Change(Timeout.Infinite, Timeout.Infinite);
+					_eventRaisingTimer.Dispose();
+					_eventRaisingTimer = null;
+				}
+				else
+				{
+					_eventRaisingTimer = new Timer(OnEventRaisingTimerTick, null, MessageBoxChangeRaisingDelayMilliseconds, Timeout.Infinite);
+				}
+			}
+		}
+
+		private void OnEventRaisingTimerTick(object state)
+		{
+			// Disposes the timer.
+			int messageBoxCount;
+			lock (_syncRoot)
+			{
+				if (_eventRaisingTimer != null)
+				{
+					_eventRaisingTimer.Dispose();
+					_eventRaisingTimer = null;
+				}
+
+				messageBoxCount = _WherigoMessageBoxes.Count;
+			}
+
+			// Sends the event.
+			Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+			{
+				if (HasMessageBoxChanged != null && messageBoxCount == 0)
+				{
+					HasMessageBoxChanged(this, EventArgs.Empty);
+				}
+			}));
+		}
+
+		#endregion
     }
 }

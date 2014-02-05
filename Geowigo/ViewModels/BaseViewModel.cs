@@ -12,6 +12,7 @@ using WF.Player.Core;
 using Geowigo.Controls;
 using System.Windows.Navigation;
 using WF.Player.Core.Engines;
+using Microsoft.Phone.Shell;
 
 namespace Geowigo.ViewModels
 {
@@ -139,6 +140,21 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region ApplicationBar
+
+		public IApplicationBar ApplicationBar
+		{
+			get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
+			set { SetValue(ApplicationBarProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty ApplicationBarProperty =
+			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(BaseViewModel), new PropertyMetadata(null));
+
+
+		#endregion
+
 		#endregion
 
 		public BaseViewModel()
@@ -146,6 +162,9 @@ namespace Geowigo.ViewModels
 			// Base ressources construction.
 			Model = App.Current.Model;
 			Cartridge = Model.Core.Cartridge;
+
+			// App view model event handlers.
+			App.Current.ViewModel.MessageBoxManager.HasMessageBoxChanged += new EventHandler(OnAppViewModelHasMessageBoxChanged);
 		}
 
 		#region Navigation
@@ -203,6 +222,32 @@ namespace Geowigo.ViewModels
 
 			// TODO: in case of nothing found, do something special ?
 		} 
+		#endregion
+
+		#region App View Model Event Handlers
+
+		private void OnAppViewModelHasMessageBoxChanged(object sender, EventArgs e)
+		{
+			// Relays the information.
+			OnHasMessageBoxChanged(((MessageBoxManager)sender).HasMessageBox);
+		}
+
+		/// <summary>
+		/// Called when a non-native message box appears or disappears. This allows
+		/// view models to adjust their layout, such as removing application bars.
+		/// </summary>
+		/// <remarks>The default implementation hides the application bar when a
+		/// message box appears and shows it when a message box disappears.</remarks>
+		/// <param name="hasMessageBox"></param>
+		protected virtual void OnHasMessageBoxChanged(bool hasMessageBox)
+		{
+			// Hides or shows the application bar if there is any.
+			if (ApplicationBar != null)
+			{
+				ApplicationBar.IsVisible = !hasMessageBox;
+			}
+		}
+
 		#endregion
 
 		#region Core' Properties Change
