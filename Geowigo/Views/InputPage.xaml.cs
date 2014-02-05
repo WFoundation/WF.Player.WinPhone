@@ -31,14 +31,17 @@ namespace Geowigo.Views
 		}
 
 		#endregion
-
-		#region Fields
-
-		#endregion
 		
 		public InputPage()
 		{
 			InitializeComponent();
+		}
+
+		protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		{
+			ViewModel.OnPageBackKeyPress(e);
+
+			base.OnBackKeyPress(e);
 		}
 	}
 }
