@@ -99,12 +99,17 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		public CompassCalibrationViewModel()
+		{
+			MaxHeadingAccuracy = 15;
+		}
+
 		protected override void OnModelChanging(Models.WherigoModel oldValue, Models.WherigoModel newValue)
 		{
 			// Unregisters event handlers.
 			if (oldValue != null)
 			{
-				Model.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+				newValue.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
 			}
 
 			// Registers event handlers.
@@ -112,7 +117,10 @@ namespace Geowigo.ViewModels
 			{
 				// Registers this event manually to bypass BaseViewModel's relay restrictions.
 				// (OnCorePropertyChanged is not relayed until the Engine is ready.)
-				Model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+				newValue.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+
+				// Refreshes the heading accuracy.
+				RefreshCalibrationFromCore(newValue.Core);
 			}
 		}
 
@@ -121,11 +129,21 @@ namespace Geowigo.ViewModels
 			if (e.PropertyName == "DeviceHeadingAccuracy")
 			{
 				// Refreshes the value of heading accuracy.
-				double? hAcc = ((WFCoreAdapter)sender).DeviceHeadingAccuracy;
-				if (hAcc.HasValue)
-				{
-					RefreshCalibration(hAcc.Value);
-				}
+				RefreshCalibrationFromCore((WFCoreAdapter)sender);
+			}
+		}
+
+		private void RefreshCalibrationFromCore(WFCoreAdapter engine)
+		{
+			if (engine == null)
+			{
+				return;
+			}			
+
+			double? hAcc = engine.DeviceHeadingAccuracy;
+			if (hAcc.HasValue)
+			{
+				RefreshCalibration(hAcc.Value);
 			}
 		}
 
