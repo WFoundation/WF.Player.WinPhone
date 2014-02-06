@@ -72,10 +72,5 @@ namespace Geowigo.Views
             // Informs the data model that the page is ready.
             ViewModel.OnPageReady();
 		}
-
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-        }
 	}
 }

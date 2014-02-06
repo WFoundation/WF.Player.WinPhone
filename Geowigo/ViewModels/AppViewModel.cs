@@ -132,6 +132,25 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+		#region IsScreenLockEnabled
+		/// <summary>
+		/// Gets or sets if the screen should lock automatically if the user does
+		/// not interact with the app.
+		/// </summary>
+		public bool IsScreenLockEnabled
+		{
+			get
+			{
+				return PhoneApplicationService.Current.UserIdleDetectionMode == IdleDetectionMode.Enabled;
+			}
+
+			set
+			{
+				PhoneApplicationService.Current.UserIdleDetectionMode = value ? IdleDetectionMode.Enabled : IdleDetectionMode.Disabled;
+			}
+		}
+		#endregion
+
 		#endregion
 
         #region Constructors

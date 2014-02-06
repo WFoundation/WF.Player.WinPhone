@@ -291,9 +291,6 @@ namespace Geowigo.ViewModels
             {
                 // Runs the action.
                 _cartridgeStartAction();
-
-				//// Gives feedback.
-				//IsProgressBarVisible = false;
             });
         }
 
@@ -305,9 +302,14 @@ namespace Geowigo.ViewModels
 		}
 
 		protected override void OnCoreGameStateChanged(WF.Player.Core.Engines.EngineGameState oldState, WF.Player.Core.Engines.EngineGameState newState)
-		{
-			System.Diagnostics.Debug.WriteLine("!!!!!!!!!!!!!!!!! " + newState);
+		{			
+			// If the engine is stopping or pausing, enables screen lock again.
+			if (newState == WF.Player.Core.Engines.EngineGameState.Stopping || newState == WF.Player.Core.Engines.EngineGameState.Pausing)
+			{
+				App.Current.ViewModel.IsScreenLockEnabled = false;
+			}
 
+			// Refreshes the blocking progress bar.
 			RefreshProgressBar(newState);
 		}
 
@@ -340,6 +342,9 @@ namespace Geowigo.ViewModels
 			{
 				return;
 			}
+
+			// Makes sure the screen lock is disabled.
+			App.Current.ViewModel.IsScreenLockEnabled = false;
 
 			// We probably have a lot of things to do.
 			// Let's block the UI and show some progress bar.
@@ -466,6 +471,7 @@ namespace Geowigo.ViewModels
         } 
         #endregion
 
+		#region UI Refresh
 		/// <summary>
 		/// Refreshes the visibility of one or all wherigo object panels.
 		/// </summary>
@@ -537,7 +543,7 @@ namespace Geowigo.ViewModels
 				case WF.Player.Core.Engines.EngineGameState.Playing:
 					// message = null;
 					break;
-				
+
 				default:
 					message = ProgressBarStatusText ?? "";
 					break;
@@ -548,21 +554,22 @@ namespace Geowigo.ViewModels
 			IsProgressBarVisible = message != null;
 		}
 
-        /// <summary>
-        /// Refreshes the application bar.
-        /// </summary>
-        private void RefreshAppBar()
-        {
-            if (ApplicationBar != null)
-            {
-                return;
-            }
+		/// <summary>
+		/// Refreshes the application bar.
+		/// </summary>
+		private void RefreshAppBar()
+		{
+			if (ApplicationBar != null)
+			{
+				return;
+			}
 
-            // Creates the app bar.
-            ApplicationBar = new ApplicationBar();
+			// Creates the app bar.
+			ApplicationBar = new ApplicationBar();
 
-            // Adds the savegame menu item.
-            ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
-        }
-    }
+			// Adds the savegame menu item.
+			ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
+		} 
+		#endregion
+	}
 }
