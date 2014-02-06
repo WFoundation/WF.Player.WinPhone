@@ -20,7 +20,7 @@
 		<StaticResource ResourceKey="PhoneForegroundBrush"/>
 	</UserControl.Foreground>
     
-    <ScrollViewer x:Name="LayoutRoot">
+    <ScrollViewer x:Name="LayoutRoot" Margin="0,10,0,0">
     
 		<StackPanel Margin="10,0,30,0">
 			<TextBlock TextWrapping="Wrap" Text="A new savegame has been created." Style="{StaticResource MessageBoxDefaultTextStyle}" Margin="0,0,0,15"/>

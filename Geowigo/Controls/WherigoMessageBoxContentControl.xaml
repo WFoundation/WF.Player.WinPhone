@@ -62,10 +62,10 @@
 		<StaticResource ResourceKey="PhoneForegroundBrush"/>
 	</UserControl.Foreground>
     
-    <ScrollViewer x:Name="LayoutRoot" Margin="10,0,30,0" >
+    <ScrollViewer x:Name="LayoutRoot" Margin="10,10,30,0" VerticalScrollBarVisibility="Visible" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" MaxHeight="580" >
 		<StackPanel>
-			<Image Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=This}" Stretch="None" Margin="0"/>
-			<TextBlock TextWrapping="Wrap" Text="{Binding MessageBox.Text, ElementName=This, FallbackValue=Description, Mode=OneWay}" Margin="0,40,0,0" Style="{StaticResource MessageBoxDefaultTextStyle}" />
+			<Image Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=This}" Stretch="None" Margin="0,0,0,40" Visibility="{Binding MessageBox.Image, ElementName=This, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+			<TextBlock TextWrapping="Wrap" Text="{Binding MessageBox.Text, ElementName=This, FallbackValue=Description, Mode=OneWay}" Margin="0" Style="{StaticResource MessageBoxDefaultTextStyle}" />
 		</StackPanel>
 	</ScrollViewer>
 </UserControl>
