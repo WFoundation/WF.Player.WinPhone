@@ -42,7 +42,9 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Matches a custom message box to its wherigo equivalent.
 		/// </summary>
-		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _WherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
+		private Dictionary<CustomMessageBox, WF.Player.Core.MessageBox> _wherigoMessageBoxes = new Dictionary<CustomMessageBox, WF.Player.Core.MessageBox>();
+
+		private List<CustomMessageBox> _otherMessageBoxes = new List<CustomMessageBox>();
 
 		private Timer _eventRaisingTimer;
 
@@ -52,8 +54,8 @@ namespace Geowigo.ViewModels
 
         #region Properties
 
-        #region Count
-        /// <summary>
+		#region HasMessageBox
+		/// <summary>
         /// Gets if this manager has an active message box.
         /// </summary>
         public bool HasMessageBox
@@ -62,7 +64,7 @@ namespace Geowigo.ViewModels
             {
                 lock (_syncRoot)
                 {
-                    return _WherigoMessageBoxes.Count > 0;
+                    return _wherigoMessageBoxes.Count + _otherMessageBoxes.Count > 0;
                 }
             }
         }
@@ -86,6 +88,46 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Takes control of a custom message box and display it.
+		/// </summary>
+		/// <remarks>This MessageBoxManager will from now on take care
+		/// of the lifetime of this custom message box, namely raising
+		/// HasMessageBoxChanged when this message box is shown or
+		/// hidden.</remarks>
+		/// <param name="cmb">A message box to display.</param>
+		public void AcceptAndShow(CustomMessageBox cmb)
+		{
+			if (cmb == null)
+			{
+				throw new ArgumentNullException("cmb");
+			}
+
+			Accept(cmb).Show();
+		}
+
+		private CustomMessageBox Accept(CustomMessageBox cmb)
+		{
+			// Registers event handlers for it.
+			RegisterEventHandlersForCustom(cmb);
+
+			// Remembers this message box.
+			bool hadMessageBoxes;
+			lock (_syncRoot)
+			{
+				hadMessageBoxes = HasMessageBox;
+				_otherMessageBoxes.Add(cmb);
+			}
+
+			// Raises an event if this has changed.
+			if (!hadMessageBoxes)
+			{
+				RaiseHasMessageBoxChanged();
+			}
+
+			return cmb;
+		}
+
+		/// <summary>
 		/// Makes sure a message box is managed by this manager.
 		/// </summary>
 		/// <param name="wmb"></param>
@@ -95,7 +137,7 @@ namespace Geowigo.ViewModels
 			
 			// Checks if this instance already manages this message box.
 			// If not, starts to manage the box.
-			KeyValuePair<CustomMessageBox, WF.Player.Core.MessageBox> pair = _WherigoMessageBoxes.SingleOrDefault(kv => kv.Value == wmb);
+			KeyValuePair<CustomMessageBox, WF.Player.Core.MessageBox> pair = _wherigoMessageBoxes.SingleOrDefault(kv => kv.Value == wmb);
 			if (pair.Value == wmb)
 			{
 				// The target message box exists already.
@@ -117,22 +159,29 @@ namespace Geowigo.ViewModels
 				RegisterEventHandlersForWig(cmb);
 
 				// Adds the pair to the dictionary.
-                lock (_syncRoot)
+				bool hadMessageBoxes;
+				lock (_syncRoot)
                 {
-                    _WherigoMessageBoxes.Add(cmb, wmb); 
+					hadMessageBoxes = HasMessageBox;
+					_wherigoMessageBoxes.Add(cmb, wmb); 
                 }
 
-                // Sends an event.
-                if (HasMessageBoxChanged != null)
-                {
-                    HasMessageBoxChanged(this, EventArgs.Empty);
-                }
+                // Sends an event if it changed.
+				if (!hadMessageBoxes)
+				{
+					RaiseHasMessageBoxChanged(); 
+				}
 			}
 
 			return cmb;
 		}
 
 		#region Event handling
+		private void RegisterEventHandlersForCustom(CustomMessageBox cmb)
+		{
+			cmb.Dismissed += new EventHandler<DismissedEventArgs>(OnCustomMessageBoxDismissed);
+		}
+
 		private void RegisterEventHandlersForWig(CustomMessageBox cmb)
 		{
             cmb.Dismissed += new EventHandler<DismissedEventArgs>(OnWigCustomMessageBoxDismissed);
@@ -141,6 +190,35 @@ namespace Geowigo.ViewModels
 		private void UnregisterEventHandlers(CustomMessageBox cmb)
 		{
             cmb.Dismissed -= new EventHandler<DismissedEventArgs>(OnWigCustomMessageBoxDismissed);
+			cmb.Dismissed -= new EventHandler<DismissedEventArgs>(OnCustomMessageBoxDismissed);
+		}
+
+		private void OnCustomMessageBoxDismissed(object sender, DismissedEventArgs e)
+		{
+			CustomMessageBox cmb = (CustomMessageBox)sender;
+
+			// Unregisters events.
+			UnregisterEventHandlers(cmb);
+
+			// Removes this message box if it is registered.
+			bool hasValue = false;
+			bool hasMoreBoxes = false;
+			lock (_syncRoot)
+			{
+				if (hasValue = _otherMessageBoxes.Contains(cmb))
+				{
+					_otherMessageBoxes.Remove(cmb);
+				}
+
+				hasMoreBoxes = HasMessageBox;
+			}
+
+			// Sends an event if it was registered.
+			if (hasValue && !hasMoreBoxes)
+			{
+				// If no more message box is managed, send an event.
+				BeginRaiseHasMessageBoxChanged();
+			}
 		}
 
 		private void OnWigCustomMessageBoxDismissed(object sender, DismissedEventArgs e)
@@ -153,7 +231,12 @@ namespace Geowigo.ViewModels
 			// Looks the corresponding wherigo message box up in the dictionary, and 
 			// gives it a result depending on the custom message box result.
 			WF.Player.Core.MessageBox wmb;
-			if (_WherigoMessageBoxes.TryGetValue(cmb, out wmb))
+			bool hasValue = false;
+			lock (_syncRoot)
+			{
+				hasValue = _wherigoMessageBoxes.TryGetValue(cmb, out wmb);
+			}
+			if (hasValue)
 			{
                 // Gives result to the Wherigo message box.
 				switch (e.Result)
@@ -178,17 +261,18 @@ namespace Geowigo.ViewModels
 				}
 
                 // Bye bye box.
+				bool hasMoreBoxes = false;
                 lock (_syncRoot)
                 {
-                    _WherigoMessageBoxes.Remove(cmb); 
+                    _wherigoMessageBoxes.Remove(cmb);
+					hasMoreBoxes = HasMessageBox;
                 }
 				
                 // If no more message box is managed, send an event.
-				//if (_WherigoMessageBoxes.Count == 0 && HasMessageBoxChanged != null)
-				//{
-				//    HasMessageBoxChanged(this, EventArgs.Empty);
-				//}
-				BeginRaiseHasMessageBoxChanged();
+				if (!hasMoreBoxes)
+				{
+					BeginRaiseHasMessageBoxChanged(); 
+				}
 			}
 
 		}
@@ -229,19 +313,27 @@ namespace Geowigo.ViewModels
 					_eventRaisingTimer = null;
 				}
 
-				messageBoxCount = _WherigoMessageBoxes.Count;
+				messageBoxCount = _wherigoMessageBoxes.Count + _otherMessageBoxes.Count;
 			}
 
 			// Sends the event.
 			Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
 			{
-				if (HasMessageBoxChanged != null && messageBoxCount == 0)
+				if (HasMessageBoxChanged != null)
 				{
 					HasMessageBoxChanged(this, EventArgs.Empty);
 				}
 			}));
 		}
 
+		private void RaiseHasMessageBoxChanged()
+		{
+			if (HasMessageBoxChanged != null)
+			{
+				HasMessageBoxChanged(this, EventArgs.Empty);
+			}
+		}
+
 		#endregion
-    }
+	}
 }

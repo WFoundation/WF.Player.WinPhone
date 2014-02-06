@@ -13,6 +13,7 @@ using Geowigo.Controls;
 using System.Windows.Navigation;
 using WF.Player.Core.Engines;
 using Microsoft.Phone.Shell;
+using System.ComponentModel;
 
 namespace Geowigo.ViewModels
 {
@@ -99,6 +100,10 @@ namespace Geowigo.ViewModels
 		
 		#region Fields
 		private Models.WherigoModel _Model;
+
+		private bool _hasMessageBoxOnScreen;
+
+		private object _syncRoot = new object();
 		#endregion
 
 		#region Dependency Properties
@@ -166,8 +171,12 @@ namespace Geowigo.ViewModels
 
 		// Using a DependencyProperty as the backing store for IsProgressBarVisible.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty IsProgressBarVisibleProperty =
-			DependencyProperty.Register("IsProgressBarVisible", typeof(bool), typeof(BaseViewModel), new PropertyMetadata(false));
+			DependencyProperty.Register("IsProgressBarVisible", typeof(bool), typeof(BaseViewModel), new PropertyMetadata(false, OnIsProgressBarVisiblePropertyChanged));
 
+		private static void OnIsProgressBarVisiblePropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+		{
+			((BaseViewModel)o).OnIsProgressBarVisibleChanged((bool)e.NewValue);
+		}
 
 		#endregion
 
@@ -273,16 +282,53 @@ namespace Geowigo.ViewModels
 		/// <param name="hasMessageBox"></param>
 		protected virtual void OnHasMessageBoxChanged(bool hasMessageBox)
 		{
+			// Remembers this value.
+			lock (_syncRoot)
+			{
+				_hasMessageBoxOnScreen = hasMessageBox;
+			}
+
 			// Hides or shows the application bar if there is any.
 			if (ApplicationBar != null)
 			{
-				ApplicationBar.IsVisible = !hasMessageBox;
+				ApplicationBar.IsVisible = !hasMessageBox && !IsProgressBarVisible;
+			}
+		}
+
+		#endregion
+
+		#region This View Model Properties Change
+
+		private void OnIsProgressBarVisibleChanged(bool newValue)
+		{
+			// Hides or shows the app bar if there is no message box and the
+			// progress bar is hidden.
+			if (ApplicationBar != null)
+			{
+				bool hasMessageBox;
+				lock (_syncRoot)
+				{
+					hasMessageBox = _hasMessageBoxOnScreen;
+				}
+
+				ApplicationBar.IsVisible = !hasMessageBox && !newValue;
 			}
 		}
 
 		#endregion
 
 		#region Core' Properties Change
+		
+		/// <summary>
+		/// Called when the state of the game engine has changed.
+		/// </summary>
+		/// <param name="oldState">State the engine had before the change occured.</param>
+		/// <param name="newState">State the engine has now.</param>
+		protected virtual void OnCoreGameStateChanged(EngineGameState oldState, EngineGameState newState)
+		{
+
+		} 
+		
 		/// <summary>
 		/// Called when a property of the Wherigo Core has changed.
 		/// </summary>
@@ -329,18 +375,28 @@ namespace Geowigo.ViewModels
 			OnModelChanging(oldValue, newValue);
 		}
 
-		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		private void Core_PropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			Engine es = (Engine)sender;
 			
+			// Relays the event if it contains important information about the
+			// engine's state.
+			if (e.PropertyName == "GameState")
+			{
+				PropertyChangedExtendedEventArgs<EngineGameState> eExtended = (PropertyChangedExtendedEventArgs<EngineGameState>)e;
+
+				OnCoreGameStateChanged(eExtended.OldValue, eExtended.NewValue);
+			}
+
 			// Discards if the engine is not ready.
 			if (!es.IsReady)
 			{
 				return;
 			}
 
+			// Relays the event.
 			OnCorePropertyChanged(e.PropertyName);
-		} 
+		}
 		#endregion
 
 		#region WherigoObject' Properties Change

@@ -292,8 +292,8 @@ namespace Geowigo.ViewModels
                 // Runs the action.
                 _cartridgeStartAction();
 
-                // Gives feedback.
-                IsProgressBarVisible = false;
+				//// Gives feedback.
+				//IsProgressBarVisible = false;
             });
         }
 
@@ -302,6 +302,13 @@ namespace Geowigo.ViewModels
 			// Refreshes all visibilities if the model is now ready. Otherwise tries our best
 			// with the prop name we get.
 			RefreshVisibilities("IsReady".Equals(propName) && Model.Core.IsReady ? null : propName);
+		}
+
+		protected override void OnCoreGameStateChanged(WF.Player.Core.Engines.EngineGameState oldState, WF.Player.Core.Engines.EngineGameState newState)
+		{
+			System.Diagnostics.Debug.WriteLine("!!!!!!!!!!!!!!!!! " + newState);
+
+			RefreshProgressBar(newState);
 		}
 
 		protected override void OnModelChanged(Models.WherigoModel newModel)
@@ -334,6 +341,10 @@ namespace Geowigo.ViewModels
 				return;
 			}
 
+			// We probably have a lot of things to do.
+			// Let's block the UI and show some progress bar.
+			RefreshProgressBar(Model.Core.GameState);
+
 			// Tries to get the filename to query for.
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
@@ -343,11 +354,13 @@ namespace Geowigo.ViewModels
                 // Restores the cartridge or starts a new game?
                 if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))
                 {
-                    // Starts restoring the game.
+					RefreshProgressBar(WF.Player.Core.Engines.EngineGameState.Restoring);
+					
+					// Starts restoring the game.
                     RunOrDeferIfNotReady(
                         new Action(() =>
-                        {
-                            // Restores the game.
+                        {							
+							// Restores the game.
                             Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
 
                             // Registers a history entry.
@@ -355,12 +368,13 @@ namespace Geowigo.ViewModels
                             Model.History.AddRestoredGame(
                                 cart,
                                 cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
-                        }),
-                        "Restoring cartridge...");
+                        }));
                 }
                 else
                 {
-                    // Starts a new game.
+					RefreshProgressBar(WF.Player.Core.Engines.EngineGameState.Starting);
+					
+					// Starts a new game.
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
@@ -369,8 +383,7 @@ namespace Geowigo.ViewModels
 
                             // Registers a history entry.
                             Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge));
-                        }),
-                        "Starting cartridge...");
+                        }));
                 }
 			}
 
@@ -384,23 +397,13 @@ namespace Geowigo.ViewModels
         /// </summary>
         /// <param name="action"></param>
         /// <param name="trayMessage"></param>
-        private void RunOrDeferIfNotReady(Action action, string trayMessage)
+        private void RunOrDeferIfNotReady(Action action)
         {
-            // Gives feeedback.
-            //App.Current.ViewModel.SetSystemTrayProgressIndicator(trayMessage);
-			ApplicationBar.IsVisible = false;
-            ProgressBarStatusText = trayMessage;
-            IsProgressBarVisible = true;
-
             // Runs the action later if the page is not ready yet.
             if (_isReady)
             {
                 // Runs the action.
 				action();
-
-				// When the action is done, removes the blocking screen.
-                IsProgressBarVisible = false;
-				ApplicationBar.IsVisible = true;
             }
             else
             {
@@ -414,7 +417,7 @@ namespace Geowigo.ViewModels
         /// </summary>
         private void StartSaveGame()
         {
-            // Saves the game!
+			// Saves the game!
             App.Current.ViewModel.SaveGame(false);
         }
 
@@ -503,6 +506,46 @@ namespace Geowigo.ViewModels
 			{
 				IsWorldEmpty = !AreZonesVisible && !AreObjectsVisible;
 			}
+		}
+
+		/// <summary>
+		/// Refreshes the progress bar depending on the game state.
+		/// </summary>
+		/// <param name="engineGameState"></param>
+		private void RefreshProgressBar(WF.Player.Core.Engines.EngineGameState gameState)
+		{
+			// Computes the message to display.
+			string message = null;
+			switch (gameState)
+			{
+				case WF.Player.Core.Engines.EngineGameState.Stopping:
+					message = "Stopping cartridge...";
+					break;
+
+				case WF.Player.Core.Engines.EngineGameState.Starting:
+					message = "Starting cartridge...";
+					break;
+
+				case WF.Player.Core.Engines.EngineGameState.Restoring:
+					message = "Restoring cartridge...";
+					break;
+
+				case WF.Player.Core.Engines.EngineGameState.Saving:
+					message = "Saving cartridge...";
+					break;
+
+				case WF.Player.Core.Engines.EngineGameState.Playing:
+					// message = null;
+					break;
+				
+				default:
+					message = ProgressBarStatusText ?? "";
+					break;
+			}
+
+			// If we need to display a progress message, do it.
+			ProgressBarStatusText = message;
+			IsProgressBarVisible = message != null;
 		}
 
         /// <summary>

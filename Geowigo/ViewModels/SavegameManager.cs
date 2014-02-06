@@ -50,14 +50,8 @@ namespace Geowigo.ViewModels
                 IsAutosave = isAutoSave
             };
 
-            // Shows progress to the user.
-            _appViewModel.SetSystemTrayProgressIndicator("Saving game...");
-
             // Performs the savegame.
             _appViewModel.Model.Core.Save(cs);
-
-            // Shows progress to the user.
-            _appViewModel.SetSystemTrayProgressIndicator(isVisible: false);
 
             // If this is a manual save, shows a message box.
             if (!isAutoSave)
@@ -94,7 +88,7 @@ namespace Geowigo.ViewModels
             cmb.Dismissed += new EventHandler<DismissedEventArgs>(OnSavegameCustomMessageBoxDismissed);
 
             // Shows the message box.
-            cmb.Show();
+			_appViewModel.MessageBoxManager.AcceptAndShow(cmb);
         }
 
         private void OnSavegameCustomMessageBoxDismissed(object sender, DismissedEventArgs e)
