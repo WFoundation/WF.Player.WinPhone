@@ -52,6 +52,7 @@ namespace Geowigo.Models
             }
         }
 
+
 		#endregion
 		
 		#region Properties
@@ -401,7 +402,6 @@ namespace Geowigo.Models
 		private void OnProviderSyncAborted(object sender, CartridgeProviderSyncAbortEventArgs e)
 		{
 			IsBusy = false;
-			System.Windows.MessageBox.Show("Plop");
 		}
 
 		private void OnProviderSyncCompleted(object sender, CartridgeProviderSyncEventArgs e)
