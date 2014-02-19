@@ -19,7 +19,7 @@ namespace Geowigo.Models.Providers
 
 		private static readonly string LiveConnectClientID = "000000004C10D95D";
 
-		private static readonly string[] _Scopes = new string[] { "wl.signin", "wl.basic", "wl.skydrive", "wl.offline_access" };
+		private static readonly string[] _Scopes = new string[] { "wl.basic", "wl.skydrive", "wl.offline_access" };
 
 		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
 
@@ -149,6 +149,7 @@ namespace Geowigo.Models.Providers
 			});
 		}
 
+		#region Timeout
 		private void StartTimeoutTimer(TimeSpan timeSpan)
 		{
 			Timer timer;
@@ -186,9 +187,13 @@ namespace Geowigo.Models.Providers
 			// Cancels the timer.
 			CancelTimeoutTimer();
 
+			// We are not syncing anymore.
+			IsSyncing = false;
+
 			// Raise the event.
 			RaiseSyncAbort(true);
-		}
+		} 
+		#endregion
 
 		#region LiveConnect Auth/Login
 
@@ -281,7 +286,7 @@ namespace Geowigo.Models.Providers
 			if (e.Status == LiveConnectSessionStatus.Connected)
 			{
 				// We're online, get the client.
-				_liveClient = new LiveConnectClient(e.Session);
+				MakeClientFromSession(e.Session);
 
 				// Notify we're linked.
 				IsLinked = true;
@@ -593,7 +598,7 @@ namespace Geowigo.Models.Providers
 
 		private void ParseDownloadEventArgs(AsyncCompletedEventArgs e, out string fileId, out string dlFilename, out string originalFilename)
 		{
-			string[] ustate = e.UserState.ToString().Split(new char[] { '|' });
+			string[] ustate = (e.UserState ?? "|").ToString().Split(new char[] { '|' });
 			fileId = ustate[0];
 			originalFilename = ustate[1];
 			dlFilename = originalFilename;
@@ -602,9 +607,11 @@ namespace Geowigo.Models.Providers
 			if (e is LiveOperationCompletedEventArgs)
 			{
 				object rawDlLoc;
-				if (((LiveOperationCompletedEventArgs)e).Result.TryGetValue("downloadLocation", out rawDlLoc))
+				var result = ((LiveOperationCompletedEventArgs)e).Result;
+				if (result != null && result.TryGetValue("downloadLocation", out rawDlLoc))
 				{
-					// The download location given by these event args can be corrupted.
+					// The download location given by these event args is corrupted by
+					// inappropriately inserted escape characters.
 					// So let's just hack our way through it and figure out the actual
 					// filename of the file that was saved in the isostore.
 					dlFilename = ((string)rawDlLoc)
