@@ -209,21 +209,8 @@ namespace Geowigo.Models
 
                 // Savegames
                 ImportSavegamesCache(isf);
-
-				//// TEMP
-				//BackgroundWorker bw = new BackgroundWorker();
-				//bw.DoWork += new DoWorkEventHandler(bw_DoWork);
-				//bw.RunWorkerAsync();
 			}
 		}
-
-		//void bw_DoWork(object sender, DoWorkEventArgs e)
-		//{
-		//    using (WF.Player.Core.Engines.Engine engine = WherigoHelper.CreateEngine())
-		//    {
-		//        //engine.Init(Cartridge);
-		//    }
-		//}
 
 		/// <summary>
 		/// Gets the path to the cached version of a media.

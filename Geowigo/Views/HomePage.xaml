@@ -15,7 +15,7 @@
     x:Class="Geowigo.Views.HomePage" x:Name="This"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     SupportedOrientations="Portrait"  Orientation="Portrait"
-	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False">
+	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False" ApplicationBar="{Binding ApplicationBar}">
 	<phone:PhoneApplicationPage.Resources>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<toolkit:RelativeTimeConverter x:Key="RelativeTimeConverter"/>

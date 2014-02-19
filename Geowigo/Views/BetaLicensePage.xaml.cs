@@ -11,7 +11,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 
-namespace Geowigo.Beta
+namespace Geowigo.Views
 {
     public partial class BetaLicensePage : PhoneApplicationPage
     {
@@ -20,22 +20,10 @@ namespace Geowigo.Beta
             InitializeComponent();
         }
 
-        protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
-        {
-            // Clears back entry.
-            int entriesToRemove = NavigationService.BackStack.Count();
-            for (int i = 0; i < entriesToRemove; i++)
-            {
-                NavigationService.RemoveBackEntry();
-            }
-
-            // Let the back key being performed: the app should quit.
-        }
-
         private void AcceptBtn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
         	// Go on!
-            NavigationService.GoBack();
+			App.Current.ViewModel.NavigateToAppHome();
         }
     }
 }

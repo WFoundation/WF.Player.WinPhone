@@ -462,6 +462,10 @@ namespace Geowigo.Models
 				IsBusy = true;
 				provider.BeginSync();
 			}
+			else if (e.PropertyName == "IsSyncing")
+			{
+				IsBusy = provider.IsSyncing;
+			}
 		}
 
 		#endregion

@@ -13,6 +13,9 @@ using Geowigo.Controls;
 using WF.Player.Core;
 using System.Windows.Data;
 using Geowigo.Models.Providers;
+using Microsoft.Phone.Shell;
+using Geowigo.Utils;
+using Microsoft.Phone.Tasks;
 
 namespace Geowigo.ViewModels
 {
@@ -72,6 +75,22 @@ namespace Geowigo.ViewModels
 		#region Model
 
 		public WherigoModel Model { get; private set; }
+
+		#endregion
+
+		#region ApplicationBar
+
+
+		public IApplicationBar ApplicationBar
+		{
+			get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
+			set { SetValue(ApplicationBarProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty ApplicationBarProperty =
+			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(HomeViewModel), new PropertyMetadata(null));
+
 
 		#endregion
 
@@ -149,6 +168,54 @@ namespace Geowigo.ViewModels
 		}
 		#endregion
 
+		#region SyncProvidersCommand
+
+		private ICommand _SyncProvidersCommand;
+
+		/// <summary>
+		/// Gets a command to sync all providers.
+		/// </summary>
+		public ICommand SyncProvidersCommand
+		{
+			get
+			{
+				return _SyncProvidersCommand ?? (_SyncProvidersCommand = new RelayCommand(SyncProviders));
+			}
+		}
+		#endregion
+
+		#region ClearHistoryCommand
+
+		private ICommand _ClearHistoryCommand;
+
+		/// <summary>
+		/// Gets a command to clear the history.
+		/// </summary>
+		public ICommand ClearHistoryCommand
+		{
+			get
+			{
+				return _ClearHistoryCommand ?? (_ClearHistoryCommand = new RelayCommand(ClearHistory));
+			}
+		}
+		#endregion
+
+		#region GetHelpCommand
+
+		private ICommand _GetHelpCommand;
+
+		/// <summary>
+		/// Gets a command to get some help.
+		/// </summary>
+		public ICommand GetHelpCommand
+		{
+			get
+			{
+				return _GetHelpCommand ?? (_GetHelpCommand = new RelayCommand(GoToForumThread));
+			}
+		}
+		#endregion
+
 		#endregion
 
 		public HomeViewModel()
@@ -168,6 +235,9 @@ namespace Geowigo.ViewModels
 
             // Monitors the history.
             Model.History.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnHistoryCollectionChanged);
+
+			// Inits the app bar.
+			RefreshAppBar();
 		}
         
         #region Menu Commands
@@ -267,7 +337,31 @@ namespace Geowigo.ViewModels
                 ShowCartridgeInfo(tag);
             }
 
-        } 
+        }
+
+		private void SyncProviders()
+		{
+			// Syncs providers that are not synced.
+			Model.CartridgeStore.SyncFromProviders();
+		}
+
+		private void ClearHistory()
+		{
+			// Asks for clearing the history.
+			if (System.Windows.MessageBox.Show("Do you want to delete all entries of the history?", "Clear history", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+			{
+				App.Current.ViewModel.ClearHistory();
+			}
+		}
+
+		private void GoToForumThread()
+		{
+			// Navigates to the forum thread.
+			WebBrowserTask task = new WebBrowserTask();
+			task.Uri = new Uri("http://forums.groundspeak.com/GC/index.php?showtopic=315741", UriKind.Absolute);
+			task.Show();
+		}
+
         #endregion
 
         #region Collection View Sources
@@ -295,5 +389,13 @@ namespace Geowigo.ViewModels
             AreCartridgesVisible = Model.CartridgeStore.Count > 0;
             IsHistoryVisible = Model.History.Count > 0;
         }
+
+		private void RefreshAppBar()
+		{
+			ApplicationBar = new ApplicationBar();
+			ApplicationBar.CreateAndAddMenuItem(ClearHistoryCommand, "clear history");
+			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
+			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
+		}
     }
 }

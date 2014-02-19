@@ -125,6 +125,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\BetaLicensePage.xaml.cs">
+      <DependentUpon>BetaLicensePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\BlockingContentPresenter.xaml.cs">
       <DependentUpon>BlockingContentPresenter.xaml</DependentUpon>
     </Compile>
@@ -212,6 +215,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <ApplicationDefinition Include="Views\BetaLicensePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
     <Page Include="Controls\BlockingContentPresenter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -293,10 +300,6 @@
     <ProjectReference Include="..\..\WF.Player.Core\Core\Core.WP7.csproj">
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Geowigo.Beta\Geowigo.Beta.csproj">
-      <Project>{86644A2C-6452-441D-AAA8-A1F693B6F1AB}</Project>
-      <Name>Geowigo.Beta</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

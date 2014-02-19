@@ -119,8 +119,7 @@ namespace Geowigo
         // Ce code ne s'exécute pas lorsque l'application est réactivée
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
-            // Starts the Beta-specific features.
-            this.ViewModel.GoBeta();
+            
         }
 
         // Code à exécuter lorsque l'application est activée (affichée au premier plan)
