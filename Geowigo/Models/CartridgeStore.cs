@@ -8,6 +8,7 @@ using System.Windows;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Geowigo.Models.Providers;
+using Geowigo.Utils;
 
 namespace Geowigo.Models
 {
@@ -18,8 +19,8 @@ namespace Geowigo.Models
 	{
 		#region Members
 
+		private ProgressAggregator _isBusyAggregator = new ProgressAggregator();
 		private List<ICartridgeProvider> _providers = new List<ICartridgeProvider>();
-		private bool _isBusy = false;
 		private object _syncRoot = new object();
 
 		#endregion
@@ -75,18 +76,7 @@ namespace Geowigo.Models
 		{
 			get
 			{
-				return _isBusy;
-			}
-
-			private set
-			{
-				if (value != _isBusy)
-				{
-					_isBusy = value;
-
-					//OnIsBusyChanged(EventArgs.Empty);
-					OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsBusy"));
-				}
+				return _isBusyAggregator.HasWorkingSource;
 			}
 		}
 
@@ -109,6 +99,10 @@ namespace Geowigo.Models
 		public CartridgeStore() 
 			: base(new ObservableCollection<CartridgeTag>())
 		{
+			// Registers event handlers.
+			_isBusyAggregator.PropertyChanged += new PropertyChangedEventHandler(OnIsBusyAggregatorPropertyChanged);
+
+			// Adds some cartridge providers.
 			AddDefaultProviders();
 		}
 
@@ -186,9 +180,6 @@ namespace Geowigo.Models
 				// Makes sure the folder exists.
 				isf.CreateDirectory(IsoStoreCartridgesPath);
 
-				// Business changes.
-				IsBusy = true;
-
 				// Goes through all the sub-directories and accepts the cartridge files.
 				IEnumerable<string> dirs = GetAllDirectoryNames(isf, IsoStoreCartridgesPath);
 				foreach (string dir in dirs)
@@ -210,9 +201,6 @@ namespace Geowigo.Models
 
 					}
 				}
-
-				// Business changes.
-				IsBusy = false;
 			}
 		}
 
@@ -254,20 +242,12 @@ namespace Geowigo.Models
 		/// </summary>
 		public void SyncFromProviders()
 		{
-			bool shouldBeBusy = false; 
-
 			foreach (ICartridgeProvider provider in _providers)
 			{
 				if (provider.IsLinked && !provider.IsSyncing)
 				{
 					provider.BeginSync();
-					shouldBeBusy = true;
 				}
-			}
-
-			if (shouldBeBusy)
-			{
-				IsBusy = true;
 			}
 		}
 
@@ -285,6 +265,10 @@ namespace Geowigo.Models
 		{
 			System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to reject cartridge " + filename);
 
+			// Updates the progress.
+			string businessTag = "reject" + filename;
+			_isBusyAggregator[businessTag] = true;
+
 			lock (_syncRoot)
 			{
 				// Gets the existing cartridge if it was found.
@@ -296,6 +280,9 @@ namespace Geowigo.Models
 					this.Items.Remove(existingTag); 
 				}
 			}
+
+			// Updates the progress.
+			_isBusyAggregator[businessTag] = false;
 		}
 
 		/// <summary>
@@ -319,6 +306,10 @@ namespace Geowigo.Models
 		{
             System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to accept cartridge " + filename);
             
+			// Refreshes the progress.
+			string businessTag = "accept:" + filename;
+			_isBusyAggregator[businessTag] = true;
+
             // Creates a cartridge object.
 			Cartridge cart = new Cartridge(filename);
 
@@ -330,7 +321,11 @@ namespace Geowigo.Models
                 if (!isf.FileExists(filename))
                 {
                     System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Cartridge file not found: " + filename);
-                    return null;
+					
+					// Refreshes the progress.
+					_isBusyAggregator[businessTag] = false;
+					
+					return null;
                 }
 
                 // Loads the metadata.
@@ -347,6 +342,9 @@ namespace Geowigo.Models
 			}
 			if (existingCC != null)
 			{
+				// Refreshes the progress.
+				_isBusyAggregator[businessTag] = false;
+
 				return existingCC;
 			}
 			
@@ -361,6 +359,9 @@ namespace Geowigo.Models
 
 			// Makes the cache.
 			newCC.ImportOrMakeCache();
+
+			// Refreshes the progress.
+			_isBusyAggregator[businessTag] = false;
 
 			// Returns the new cartridge context.
 			return newCC;
@@ -401,28 +402,25 @@ namespace Geowigo.Models
 
 		private void OnProviderSyncAborted(object sender, CartridgeProviderSyncAbortEventArgs e)
 		{
-			IsBusy = false;
+			_isBusyAggregator[sender] = false;
 		}
 
 		private void OnProviderSyncCompleted(object sender, CartridgeProviderSyncEventArgs e)
 		{
-			ProcessSyncEvent(e, true);
+			ProcessSyncEvent(e);
+
+			_isBusyAggregator[sender] = false;
 		}
 
 		private void OnProviderSyncProgress(object sender, CartridgeProviderSyncEventArgs e)
 		{
-			IsBusy = true;
-			ProcessSyncEvent(e, false);
+			_isBusyAggregator[sender] = true;
+
+			ProcessSyncEvent(e);
 		}
 
-		private void ProcessSyncEvent(CartridgeProviderSyncEventArgs e, bool busyStateChange)
+		private void ProcessSyncEvent(CartridgeProviderSyncEventArgs e)
 		{
-			// The sync is complete.
-			if (busyStateChange)
-			{
-				IsBusy = true; 
-			}
-
 			// Rejects the files marked to be removed.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
@@ -444,12 +442,6 @@ namespace Geowigo.Models
 			{
 				AcceptCartridge(filename);
 			}
-
-			// Finished.
-			if (busyStateChange)
-			{
-				IsBusy = false; 
-			}
 		}
 
 		private void OnProviderPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -459,12 +451,11 @@ namespace Geowigo.Models
 			if (e.PropertyName == "IsLinked" && provider.IsLinked)
 			{
 				// The provider is now linked. Start syncing.
-				IsBusy = true;
 				provider.BeginSync();
 			}
 			else if (e.PropertyName == "IsSyncing")
 			{
-				IsBusy = provider.IsSyncing;
+				_isBusyAggregator[provider] = provider.IsSyncing;
 			}
 		}
 
@@ -483,5 +474,14 @@ namespace Geowigo.Models
 		}
 
 		#endregion
+
+		private void OnIsBusyAggregatorPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == "HasWorkingSource")
+			{
+				// Relays the event.
+				OnPropertyChanged(new PropertyChangedEventArgs("IsBusy"));
+			}
+		}
 	}
 }

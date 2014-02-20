@@ -125,6 +125,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\ProgressAggregator.cs" />
     <Compile Include="Views\BetaLicensePage.xaml.cs">
       <DependentUpon>BetaLicensePage.xaml</DependentUpon>
     </Compile>
