@@ -70,7 +70,7 @@
         		<StackPanel>
         			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,10"/>
-        			<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}"/>
+        			<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, Converter={StaticResource UppercaseStringConverter}, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description, FallbackValue=Description, Mode=OneWay}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0" />
         			<StackPanel x:Name="CommandsPanel" Orientation="Vertical" Margin="0,40,0,20" Visibility="{Binding AreActionsVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Visible}">
         				<TextBlock TextWrapping="Wrap" Text="ACTIONS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15"/>
