@@ -53,30 +53,21 @@ namespace Geowigo.Utils
 			set
 			{
 				// Only keeps a reference to active sources of progress.
-				bool hadIndeterminateProgress;
-				bool hasIndeterminateProgress;
-				lock (_syncRoot)
+				if (value)
 				{
-					hadIndeterminateProgress = _indeterminateProgresses.Any();
-					
-					if (value)
+					lock (_syncRoot)
 					{
-						_indeterminateProgresses[key] = value;
-						QueueWorkingSource(key);
+						_indeterminateProgresses[key] = value; 
 					}
-					else if (_indeterminateProgresses.ContainsKey(key))
-					{
-						_indeterminateProgresses.Remove(key);
-						RemoveWorkingSource(key);
-					}
-
-					hasIndeterminateProgress = _indeterminateProgresses.Any();
+					EnsureWorkingSource(key);
 				}
-
-				// Checks if propeties have changed.
-				if (hadIndeterminateProgress != hasIndeterminateProgress)
+				else if (_indeterminateProgresses.ContainsKey(key))
 				{
-					RaisePropertyChanged("HasWorkingSource");
+					lock (_syncRoot)
+					{
+						_indeterminateProgresses.Remove(key); 
+					}
+					RemoveWorkingSource(key);
 				}
 			}
 		}
@@ -123,24 +114,53 @@ namespace Geowigo.Utils
 		private void RemoveWorkingSource(object key)
 		{
 			// Removes the source and determines if the top changed.
-			object currentTop = _workingSourcesQueue.FirstOrDefault();
-			_workingSourcesQueue.Remove(key);
-			object newTop = _workingSourcesQueue.FirstOrDefault();
+			object currentTop;
+			object newTop;
+			lock (_syncRoot)
+			{
+				currentTop = _workingSourcesQueue.FirstOrDefault();
+				_workingSourcesQueue.Remove(key);
+				newTop = _workingSourcesQueue.FirstOrDefault(); 
+			}
 
 			// Raises an event if the top changed.
 			if (currentTop != newTop)
 			{
 				RaisePropertyChanged("FirstWorkingSource");
+
+				if (currentTop == null || newTop == null)
+				{
+					RaisePropertyChanged("HasWorkingSource");
+				}
 			}
 		}
 
-		private void QueueWorkingSource(object key)
+		private void EnsureWorkingSource(object key)
 		{
-			// Adds the key and raises an event.
+			// Makes sure the key is only once in the list, and on top.
+			bool hadSource;
+			lock (_syncRoot)
+			{
+				hadSource = _workingSourcesQueue.Count > 0;
+				int index = _workingSourcesQueue.IndexOf(key);
+				if (index == 0)
+				{
+					// The working source is already top. Nothing to do.
+					return;
+				}
+				if (index > 0)
+				{
+					_workingSourcesQueue.Remove(key);
+				}
+				_workingSourcesQueue.Add(key);
+			}
 
-			_workingSourcesQueue.Add(key);
-
+			// Raises events.
 			RaisePropertyChanged("FirstWorkingSource");
+			if (!hadSource)
+			{
+				RaisePropertyChanged("HasWorkingSource");
+			}
 		}
 	}
 }

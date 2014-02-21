@@ -561,7 +561,6 @@ namespace Geowigo.ViewModels
 
 		private void Core_PlayAlertRequested(object sender, WherigoEventArgs e)
 		{
-			// Vibrate the phone!
 			Vibrate();
 		}
 
