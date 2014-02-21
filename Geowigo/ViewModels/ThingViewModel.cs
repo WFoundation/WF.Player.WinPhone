@@ -13,6 +13,7 @@ using WF.Player.Core;
 using Microsoft.Phone.Controls;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Geowigo.ViewModels
 {	
@@ -95,6 +96,22 @@ namespace Geowigo.ViewModels
 		
 		#endregion
 
+		#region StatusText
+
+
+		public string StatusText
+		{
+			get { return (string)GetValue(StatusTextProperty); }
+			set { SetValue(StatusTextProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for StatusText.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty StatusTextProperty =
+			DependencyProperty.Register("StatusText", typeof(string), typeof(ThingViewModel), new PropertyMetadata(null));
+
+
+		#endregion
+
 		#endregion
 
 		#region Properties
@@ -156,11 +173,11 @@ namespace Geowigo.ViewModels
 
 		private bool CanWherigoCommandExecute(Command command)
 		{
-			return true;
+			return command.Enabled;
 		} 
 		#endregion
 
-		#region Handling of ZThing.Commands change
+		#region Handling of ZThing properties change
 
 		protected override void OnWherigoObjectPropertyChanged(string propName)
 		{
@@ -177,11 +194,44 @@ namespace Geowigo.ViewModels
 					App.Current.ViewModel.NavigateBack();
 				}
 			}
+			else if ("Container".Equals(propName))
+			{
+				// If this thing is not in the Player or a visible Thing's inventory 
+				// anymore, return to previous page.
+				Thing cont = WherigoObject.Container;
+				if (cont == null || (cont != Model.Core.Player && !cont.Visible))
+				{
+					App.Current.ViewModel.NavigateBack();
+				}
+
+				// Refreshes the status text.
+				RefreshStatusText();
+			}
 		}
 
         protected override void OnWherigoObjectChanged(WherigoObject obj)
 		{
 			RefreshVisibilities();
+			RefreshStatusText();
+		}
+
+		private void RefreshStatusText()
+		{
+			Thing container = WherigoObject.Container;
+
+			// Updates the status text depending on the container.
+			if (container == null)
+			{
+				StatusText = "Unknown Location";
+			}
+			else if (container == Model.Core.Player)
+			{
+				StatusText = "In Player Inventory";
+			}
+			else
+			{
+				StatusText = "With " + container.Name ?? "Unnamed Thing";
+			}
 		}
 
 		private void RefreshVisibilities()

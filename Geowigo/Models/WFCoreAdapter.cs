@@ -306,6 +306,8 @@ namespace Geowigo.Models
 				{
 					Restore(fs);
 				}
+
+				ApplySensorData();
 			}
 
 			return cart;
@@ -347,7 +349,7 @@ namespace Geowigo.Models
 			}
 			if (shouldRefreshHeading)
 			{
-				this.RefreshHeading(deviceHeading.Value);
+				//this.RefreshHeading(deviceHeading.Value);
 			}
 			lock (_SyncRoot)
 			{
