@@ -509,6 +509,7 @@ namespace Geowigo.ViewModels
             model.Core.CartridgeCompleted += new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested += new EventHandler(Core_CompassCalibrationRequested);
 			model.Core.ShowStatusTextRequested += new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
+			model.Core.PlayAlertRequested += new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -524,6 +525,7 @@ namespace Geowigo.ViewModels
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested -= new EventHandler(Core_CompassCalibrationRequested);
 			model.Core.ShowStatusTextRequested -= new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
+			model.Core.PlayAlertRequested -= new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);
 		}
 
 		private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
@@ -555,6 +557,12 @@ namespace Geowigo.ViewModels
 		{
 			// Displays the message box.
 			ShowMessageBox(e.Descriptor);
+		}
+
+		private void Core_PlayAlertRequested(object sender, WherigoEventArgs e)
+		{
+			// Vibrate the phone!
+			Vibrate();
 		}
 
 		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
