@@ -40,7 +40,7 @@
 
         <!--TitlePanel contient le nom de l'application et le titre de la page-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, ElementName=ThisCC, Mode=OneWay}" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, Mode=OneWay}" Style="{StaticResource PhoneTextNormalStyle}"/>
             <TextBlock x:Name="PageTitle" Text="compass" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
@@ -48,12 +48,20 @@
 		<!--Calibration UI-->
 		<StackPanel x:Name="CalibrationStackPanel" Margin="0,8,0,0" Grid.Row="1">
 			<Image Source="/Images/calibrate_compass.png" HorizontalAlignment="Center"/>
-			<TextBlock TextWrapping="Wrap" TextAlignment="Center" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="8,0"><Run Text="The compass on your device needs to be calibrated. Hold the device in front of you and sweep it through a figure 8 pattern as shown until the calibration is complete."/></TextBlock>
+			<TextBlock TextWrapping="Wrap" TextAlignment="Center" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="8,15,8,0" Text="The compass on your device needs to be calibrated. Hold the device in front of you and sweep it through a figure 8 pattern as shown until your phone vibrates."/>
 			<TextBlock TextWrapping="Wrap" TextAlignment="Center" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="0,0,16,0" Visibility="Collapsed"><Run Text="Congratulations!"/><LineBreak/><Run Text="The compass is now calibrated."/></TextBlock>
-			<StackPanel Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center">
+			<TextBlock Text="Waiting for compass..." FontFamily="{StaticResource PhoneFontFamilySemiLight}" HorizontalAlignment="Center" Margin="0,10" Visibility="{Binding IsHeadingAccuracyAvailable, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+			<StackPanel Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center" Visibility="{Binding IsHeadingAccuracyAvailable, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}">
 				<TextBlock Margin="0,0,5,0" Text="Heading accuracy:" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
 				<TextBlock FontFamily="{StaticResource PhoneFontFamilySemiLight}" Text="{Binding HeadingAccuracy, StringFormat=N2}" Foreground="{StaticResource PhoneAccentBrush}"/>
-				<TextBlock TextWrapping="Wrap" Text="°" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+				<TextBlock TextWrapping="Wrap" Text="° (" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+				<TextBlock TextWrapping="Wrap" Text="OK" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}" Visibility="{Binding IsCompassCalibrated, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
+				<StackPanel Orientation="Horizontal" Visibility="{Binding IsCompassCalibrated, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}">
+					<TextBlock TextWrapping="Wrap" Text="&gt;" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+					<TextBlock FontFamily="{StaticResource PhoneFontFamilySemiLight}" Text="{Binding MaxHeadingAccuracy}" Foreground="{StaticResource PhoneAccentBrush}"/>
+					<TextBlock TextWrapping="Wrap" Text="°" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
+				</StackPanel>
+				<TextBlock TextWrapping="Wrap" Text=")" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Foreground="{StaticResource PhoneAccentBrush}"/>
 			</StackPanel>
 			<Button x:Name="CalibrationButton" Content="Done" Command="{Binding DoneCommand, Mode=OneWay}"/>
 		</StackPanel>

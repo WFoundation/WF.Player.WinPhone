@@ -216,6 +216,22 @@ namespace Geowigo.ViewModels
 		}
 		#endregion
 
+		#region CalibrateCompassCommand
+
+		private ICommand _CalibrateCompassCommand;
+
+		/// <summary>
+		/// Gets a command to start calibrating the compass.
+		/// </summary>
+		public ICommand CalibrateCompassCommand
+		{
+			get
+			{
+				return _CalibrateCompassCommand ?? (_CalibrateCompassCommand = new RelayCommand(CalibrateCompass, CanCalibrateCompassExecute));
+			}
+		}
+		#endregion
+
 		#endregion
 
 		public HomeViewModel()
@@ -362,6 +378,17 @@ namespace Geowigo.ViewModels
 			task.Show();
 		}
 
+		private void CalibrateCompass()
+		{
+			// Navigates to the right page.
+			App.Current.ViewModel.NavigateToCompassCalibration();			
+		}
+
+		private bool CanCalibrateCompassExecute()
+		{
+			return Model.Core.IsCompassSupported;
+		}
+
         #endregion
 
         #region Collection View Sources
@@ -395,6 +422,7 @@ namespace Geowigo.ViewModels
 			ApplicationBar = new ApplicationBar();
 			ApplicationBar.CreateAndAddMenuItem(ClearHistoryCommand, "clear history");
 			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
+			ApplicationBar.CreateAndAddMenuItem(CalibrateCompassCommand, "calibrate compass");
 			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
 		}
     }

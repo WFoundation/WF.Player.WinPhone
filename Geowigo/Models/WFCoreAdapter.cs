@@ -181,6 +181,51 @@ namespace Geowigo.Models
 			}
 		}
 
+		public bool IsCompassEnabled
+		{
+			get
+			{
+				lock (_SyncRoot)
+				{
+					return _IsCompassEnabled; 
+				}
+			}
+
+			set
+			{
+				// Discards the change if the compass is not supported.
+				if (value && !Compass.IsSupported)
+				{
+					return;
+				}
+				
+				// Changes the value.
+				bool hasValueChanged = false;
+				lock (_SyncRoot)
+				{
+					if (value != _IsCompassEnabled)
+					{
+						_IsCompassEnabled = value;
+						hasValueChanged = true;
+					}
+				}
+
+				// Relays the change.
+				if (hasValueChanged)
+				{
+					OnIsCompassEnabledChanged(value);
+				}
+			}
+		}
+
+		public bool IsCompassSupported
+		{
+			get
+			{
+				return Compass.IsSupported;
+			}
+		}
+
 		#endregion
 
 		#region Constructors
@@ -196,7 +241,6 @@ namespace Geowigo.Models
 			// Creates and starts the compass service.
 			if (Compass.IsSupported)
 			{
-				_IsCompassEnabled = true;
 				_Compass = new Compass();
 				_Compass.TimeBetweenUpdates = TimeSpan.FromMilliseconds(250);
 				_Compass.CurrentValueChanged += new EventHandler<SensorReadingEventArgs<CompassReading>>(Compass_CurrentValueChanged);
@@ -382,7 +426,7 @@ namespace Geowigo.Models
 			DeviceLocation = position.Location;
 
 			// Uses the location's course if the compass is not enabled.
-			if (!_IsCompassEnabled)
+			if (!Compass.IsSupported)
 			{
 				DeviceHeading = position.Location.Course;
 			}
@@ -391,6 +435,18 @@ namespace Geowigo.Models
 		#endregion
 
 		#region Compass Service Event Handlers
+
+		private void OnIsCompassEnabledChanged(bool value)
+		{
+			if (value)
+			{
+				_Compass.Start();
+			}
+			else
+			{
+				_Compass.Stop();
+			}
+		}
 
 		private void Compass_CurrentValueChanged(object sender, SensorReadingEventArgs<CompassReading> e)
 		{
@@ -464,11 +520,7 @@ namespace Geowigo.Models
 			{
 				if (GameState == EngineGameState.Playing)
 				{
-					_Compass.Start();
-				}
-				else
-				{
-					_Compass.Stop();
+					IsCompassEnabled = true;
 				}
 			}
 		}

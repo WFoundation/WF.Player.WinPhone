@@ -234,7 +234,16 @@ namespace Geowigo.ViewModels
 		/// </summary>
 		public void NavigateToCompassCalibration()
 		{
-			App.Current.RootFrame.Navigate(new Uri("/Views/CompassCalibrationPage.xaml", UriKind.Relative));
+			string pageUrl = "/Views/CompassCalibrationPage.xaml";
+			
+			// Discards the request if the current page is already the compass calibration.
+			if (App.Current.RootFrame.CurrentSource.OriginalString.StartsWith(pageUrl))
+			{
+				return;
+			}
+
+			// Navigates
+			App.Current.RootFrame.Navigate(new Uri(pageUrl, UriKind.Relative));
 		}
 
 		/// <summary>
@@ -395,22 +404,6 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		///// <summary>
-		///// Sets the system tray progress indicator.
-		///// </summary>
-		///// <param name="status"></param>
-		///// <param name="isIndeterminate"></param>
-		///// <param name="isVisible"></param>
-		//public void SetSystemTrayProgressIndicator(string status = null, bool isIndeterminate = true, bool isVisible = true)
-		//{
-		//    Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
-		//    {
-		//        IsIndeterminate = isIndeterminate,
-		//        IsVisible = isVisible,
-		//        Text = status
-		//    };
-		//}
-
 		/// <summary>
 		/// Plays a media sound.
 		/// </summary>
@@ -454,7 +447,7 @@ namespace Geowigo.ViewModels
 		/// </summary>
 		public void Vibrate()
 		{
-			Microsoft.Devices.VibrateController.Default.Start(TimeSpan.FromSeconds(1));
+			Microsoft.Devices.VibrateController.Default.Start(TimeSpan.FromSeconds(0.6));
 		}
 
 		#endregion
@@ -549,7 +542,7 @@ namespace Geowigo.ViewModels
 		private void Core_CompassCalibrationRequested(object sender, EventArgs e)
 		{
 			// Navigates to the compass calibration view.
-			NavigateToCompassCalibration();
+			BeginRunOnIdle(NavigateToCompassCalibration);
 		}
 
 		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)

@@ -60,6 +60,22 @@ namespace Geowigo.ViewModels
 				
 		#endregion
 
+		#region IsHeadingAccuracyAvailable
+
+
+		public bool IsHeadingAccuracyAvailable
+		{
+			get { return (bool)GetValue(IsHeadingAccuracyAvailableProperty); }
+			set { SetValue(IsHeadingAccuracyAvailableProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsHeadingAccuracyAvailable.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsHeadingAccuracyAvailableProperty =
+			DependencyProperty.Register("IsHeadingAccuracyAvailable", typeof(bool), typeof(CompassCalibrationViewModel), new PropertyMetadata(false));
+
+
+		#endregion
+
 		#endregion
 		
 		#region Commands
@@ -119,8 +135,21 @@ namespace Geowigo.ViewModels
 				// (OnCorePropertyChanged is not relayed until the Engine is ready.)
 				newValue.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
 
+				// Makes sure the compass is running.
+				newValue.Core.IsCompassEnabled = true;
+
 				// Refreshes the heading accuracy.
 				RefreshCalibrationFromCore(newValue.Core);
+			}
+		}
+
+		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
+		{
+			base.InitFromNavigation(nav);
+
+			if (Model != null)
+			{
+				RefreshCalibrationFromCore(Model.Core);
 			}
 		}
 
@@ -141,6 +170,7 @@ namespace Geowigo.ViewModels
 			}			
 
 			double? hAcc = engine.DeviceHeadingAccuracy;
+			IsHeadingAccuracyAvailable = hAcc.HasValue;
 			if (hAcc.HasValue)
 			{
 				RefreshCalibration(hAcc.Value);
