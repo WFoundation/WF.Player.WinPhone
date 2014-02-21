@@ -21,6 +21,7 @@ namespace Geowigo.Utils
 		#region Fields
 
 		private Dictionary<object, bool> _indeterminateProgresses = new Dictionary<object, bool>();
+		private List<object> _workingSourcesQueue = new List<object>();
 		private object _syncRoot = new object();
 
 		#endregion
@@ -61,10 +62,12 @@ namespace Geowigo.Utils
 					if (value)
 					{
 						_indeterminateProgresses[key] = value;
+						QueueWorkingSource(key);
 					}
 					else if (_indeterminateProgresses.ContainsKey(key))
 					{
 						_indeterminateProgresses.Remove(key);
+						RemoveWorkingSource(key);
 					}
 
 					hasIndeterminateProgress = _indeterminateProgresses.Any();
@@ -91,8 +94,19 @@ namespace Geowigo.Utils
 			{
 				lock (_syncRoot)
 				{
-					return _indeterminateProgresses.Any();
+					return _workingSourcesQueue.Count > 0;
 				}
+			}
+		}
+
+		/// <summary>
+		/// Gets the working source that is currently at the top of the queue.
+		/// </summary>
+		public object FirstWorkingSource
+		{
+			get
+			{
+				return _workingSourcesQueue.FirstOrDefault();
 			}
 		}
 
@@ -104,6 +118,29 @@ namespace Geowigo.Utils
 			{
 				PropertyChanged(this, new PropertyChangedEventArgs(propName));
 			}
+		}
+
+		private void RemoveWorkingSource(object key)
+		{
+			// Removes the source and determines if the top changed.
+			object currentTop = _workingSourcesQueue.FirstOrDefault();
+			_workingSourcesQueue.Remove(key);
+			object newTop = _workingSourcesQueue.FirstOrDefault();
+
+			// Raises an event if the top changed.
+			if (currentTop != newTop)
+			{
+				RaisePropertyChanged("FirstWorkingSource");
+			}
+		}
+
+		private void QueueWorkingSource(object key)
+		{
+			// Adds the key and raises an event.
+
+			_workingSourcesQueue.Add(key);
+
+			RaisePropertyChanged("FirstWorkingSource");
 		}
 	}
 }

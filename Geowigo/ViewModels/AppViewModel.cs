@@ -27,14 +27,15 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class AppViewModel
 	{
-
-		#region Members
+		#region Fields
 
 		private MessageBoxManager _MBManagerInstance;
 
 		private SoundManager _SoundManagerInstance;
 
         private SavegameManager _SavegameManagerInstance;
+
+		private SystemTrayManager _SystemTrayManagerInstance;
 
         private ActionPump _actionPump;
 
@@ -123,6 +124,9 @@ namespace Geowigo.ViewModels
 		#endregion
 
         #region SavegameManager
+		/// <summary>
+		/// Gets the manager of savegames.
+		/// </summary>
         public SavegameManager SavegameManager
         {
             get
@@ -131,6 +135,19 @@ namespace Geowigo.ViewModels
             }
         }
         #endregion
+
+		#region SystemTrayManager
+		/// <summary>
+		/// Gets the manager of the system tray.
+		/// </summary>
+		public SystemTrayManager SystemTrayManager
+		{
+			get
+			{
+				return _SystemTrayManagerInstance ?? (_SystemTrayManagerInstance = new SystemTrayManager());
+			}
+		}
+		#endregion
 
 		#region IsScreenLockEnabled
 		/// <summary>
@@ -378,21 +395,21 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		/// <summary>
-		/// Sets the system tray progress indicator.
-		/// </summary>
-		/// <param name="status"></param>
-		/// <param name="isIndeterminate"></param>
-		/// <param name="isVisible"></param>
-		public void SetSystemTrayProgressIndicator(string status = null, bool isIndeterminate = true, bool isVisible = true)
-		{
-			Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
-			{
-				IsIndeterminate = isIndeterminate,
-				IsVisible = isVisible,
-				Text = status
-			};
-		}
+		///// <summary>
+		///// Sets the system tray progress indicator.
+		///// </summary>
+		///// <param name="status"></param>
+		///// <param name="isIndeterminate"></param>
+		///// <param name="isVisible"></param>
+		//public void SetSystemTrayProgressIndicator(string status = null, bool isIndeterminate = true, bool isVisible = true)
+		//{
+		//    Microsoft.Phone.Shell.SystemTray.ProgressIndicator = new Microsoft.Phone.Shell.ProgressIndicator()
+		//    {
+		//        IsIndeterminate = isIndeterminate,
+		//        IsVisible = isVisible,
+		//        Text = status
+		//    };
+		//}
 
 		/// <summary>
 		/// Plays a media sound.
@@ -498,6 +515,7 @@ namespace Geowigo.ViewModels
 			model.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
             model.Core.CartridgeCompleted += new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested += new EventHandler(Core_CompassCalibrationRequested);
+			model.Core.ShowStatusTextRequested += new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -512,6 +530,14 @@ namespace Geowigo.ViewModels
             model.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested -= new EventHandler(Core_CompassCalibrationRequested);
+			model.Core.ShowStatusTextRequested -= new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
+		}
+
+		private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
+		{
+			// Show some debug info with attribute changes.
+			string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
+			System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
 		}
 
         private void Core_CartridgeCompleted(object sender, WherigoEventArgs e)
@@ -526,24 +552,41 @@ namespace Geowigo.ViewModels
 			NavigateToCompassCalibration();
 		}
 
+		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
+		{
+			// Navigates to the input view.
+			NavigateToView(e.Object);
+		}
+
+		private void Core_MessageBoxRequested(object sender, MessageBoxEventArgs e)
+		{
+			// Displays the message box.
+			ShowMessageBox(e.Descriptor);
+		}
+
+		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
+		{
+			PlayMediaSound(e.Object);
+		}
+
         private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "IsBusy")
             {
                 // Updates the tray progress indicator if the engine is busy.
                 bool isBusy = Model.Core.IsBusy;
-                SetSystemTrayProgressIndicator("Loading...", true, isBusy);
+				if (isBusy)
+				{
+					SystemTrayManager.BeginShowLoading();
+				}
+				else
+				{
+					SystemTrayManager.HideLoading();
+				}
 
                 // Relays the information.
                 OnCoreIsBusyChanged(isBusy);
             }
-        }
-
-        private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
-        {
-            // Show some debug info with attribute changes.
-            string name = e.Object is Thing ? ((Thing)e.Object).Name : e.Object.ToString();
-            System.Diagnostics.Debug.WriteLine("AttributeChanged: " + name + "." + e.PropertyName);
         }
 
         private void Core_SaveRequested(object sender, SavingEventArgs e)
@@ -565,18 +608,6 @@ namespace Geowigo.ViewModels
                 });
             }
         }
-
-		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
-		{
-			// Navigates to the input view.
-			NavigateToView(e.Object);
-		}
-
-		private void Core_MessageBoxRequested(object sender, MessageBoxEventArgs e)
-		{
-			// Displays the message box.
-			ShowMessageBox(e.Descriptor);
-		}
 
 		private void Core_ScreenRequested(object sender, ScreenEventArgs e)
 		{
@@ -609,16 +640,16 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		private void Core_PlaySoundRequested(object sender, ObjectEventArgs<Media> e)
+		private void Core_ShowStatusTextRequested(object sender, StatusTextEventArgs e)
 		{
-			PlayMediaSound(e.Object);
+			// Displays or hides the status text depending on its value.
+			SystemTrayManager.StatusText = e.Text;
 		}
 
 		private void Core_StopSoundsRequested(object sender, WherigoEventArgs e)
 		{
 			StopAllSounds();
 		}
-
 
 		#endregion
 
