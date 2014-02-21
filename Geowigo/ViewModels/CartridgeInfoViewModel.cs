@@ -126,6 +126,22 @@ namespace Geowigo.ViewModels
         
         #endregion
 
+		#region Author
+
+
+		public string Author
+		{
+			get { return (string)GetValue(AuthorProperty); }
+			set { SetValue(AuthorProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for Author.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty AuthorProperty =
+			DependencyProperty.Register("Author", typeof(string), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+
+		#endregion
+
 		#endregion
 
 		#region Commands
@@ -215,22 +231,6 @@ namespace Geowigo.ViewModels
 		}
 
         #region Savegames Long List
-
-        //public IEnumerable<SavegameKeyGroup> SavegameGroupsDEBUG
-        //{
-        //    get
-        //    {
-        //        CartridgeSavegame cs = new CartridgeSavegame(CartridgeTag);
-
-        //        SavegameKeyGroup skg = new SavegameKeyGroup(cs.Timestamp.Date);
-
-        //        skg.Add(cs);
-
-        //        return new SavegameKeyGroup[] { 
-        //            skg
-        //        };
-        //    }
-        //}
 
         private void RefreshSavegames()
         {
@@ -338,7 +338,28 @@ namespace Geowigo.ViewModels
                     Cartridge.StartingLocationLatitude,
                     Cartridge.StartingLocationLongitude,
                     Cartridge.StartingLocationAltitude);
-            
+
+			// Author name and company.
+			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			bool hasAuthor = !String.IsNullOrWhiteSpace(Cartridge.AuthorName);
+			bool hasCompany = !String.IsNullOrWhiteSpace(Cartridge.AuthorCompany) 
+				&& Cartridge.AuthorCompany != Cartridge.AuthorName;
+			if (hasAuthor || hasCompany)
+			{
+				if (hasAuthor)
+				{
+					sb.Append(Cartridge.AuthorName);
+					if (hasCompany)
+					{
+						sb.Append(" FROM ");
+					}
+				}
+				if (hasCompany)
+				{
+					sb.Append(Cartridge.AuthorCompany);
+				}
+				Author = sb.ToString();
+			}
         }
 	}
 }

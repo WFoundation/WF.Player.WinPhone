@@ -69,10 +69,11 @@
                 <ScrollViewer>
             		<StackPanel>
             			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            			<StackPanel Orientation="Horizontal" Margin="0">
+            			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Author, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}">
             				<TextBlock TextWrapping="Wrap" Text="by " Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.AuthorName, FallbackValue=unknown author, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Author}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
             			</StackPanel>
+            			<TextBlock TextWrapping="Wrap" Style="{StaticResource ListHeaderTextBlockStyle}" Visibility="{Binding Author, ConverterParameter=invert;strict, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="("/><Run Text="U"/><Run Text="nknown "/><Run Text="a"/><Run Text="uthor)"/></TextBlock>
             			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0"/>
             		</StackPanel>
             	</ScrollViewer>
