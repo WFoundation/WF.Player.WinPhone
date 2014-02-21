@@ -44,12 +44,12 @@ namespace Geowigo.Controls
 
 		// Using a DependencyProperty as the backing store for ArrowOrientation.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty BearingProperty =
-			DependencyProperty.Register("Bearing", typeof(double), typeof(DistanceControl), new PropertyMetadata(0d, OnBearingPropertyChanged));
+			DependencyProperty.Register("Bearing", typeof(double), typeof(DistanceControl), new PropertyMetadata(0d));//, OnBearingPropertyChanged));
 
-		private static void OnBearingPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
-		{
-			((DistanceControl)o).OnBearingChanged(e);
-		}
+		//private static void OnBearingPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+		//{
+		//    ((DistanceControl)o).OnBearingChanged(e);
+		//}
 
 		#endregion
 
@@ -130,8 +130,8 @@ namespace Geowigo.Controls
 
 		#region Members
 
-		private double _originalBearing;
-		private bool _isChangingBearingInternal;
+		private double _lastBearingFromNorth;
+		private double _lastDeviceHeading;
 
 		#endregion
 
@@ -155,22 +155,24 @@ namespace Geowigo.Controls
 			// If the heading of the device has changed, adjusts the bearing that is on-screen.
 			if (e.Heading.HasValue)
 			{
-				_isChangingBearingInternal = true;
-				Bearing = _originalBearing - e.Heading.Value % 360;
-				_isChangingBearingInternal = false;
+				//_isChangingBearingInternal = true;
+				//Bearing = (_originalBearing - e.Heading.Value) % 360;
+				//_isChangingBearingInternal = false;
+
+				RefreshBearing(deviceHeading: e.Heading);
 			}
 		}
 
-		private void OnBearingChanged(DependencyPropertyChangedEventArgs e)
-		{
-			if (_isChangingBearingInternal)
-			{
-				return;
-			}
+		//private void OnBearingChanged(DependencyPropertyChangedEventArgs e)
+		//{
+		//    //if (_isChangingBearingInternal)
+		//    //{
+		//    //    return;
+		//    //}
 
-			// Updates the original bearing.
-			_originalBearing = (double)e.NewValue;
-		}
+		//    //// Updates the original bearing.
+		//    //_originalBearing = (double)e.NewValue;
+		//}
 
 		private void OnDistanceChanged(DependencyPropertyChangedEventArgs e)
 		{
@@ -207,14 +209,30 @@ namespace Geowigo.Controls
 			{
 				// No distance to show.
 				Distance = null;
-				Bearing = 0;
+				RefreshBearing(bearingFromNorth: 0);
 			}
 			else
 			{
 				// A distance to show!
 				Distance = v.Distance;
-				Bearing = v.Bearing.GetValueOrDefault();
+				RefreshBearing(bearingFromNorth: v.Bearing);
 			}
+		}
+
+		private void RefreshBearing(double? bearingFromNorth = null, double? deviceHeading = null)
+		{
+			// Keeps track of the newest values.
+			if (bearingFromNorth.HasValue && !Double.IsNaN(bearingFromNorth.Value))
+			{
+				_lastBearingFromNorth = bearingFromNorth.Value;
+			}
+			if (deviceHeading.HasValue && !Double.IsNaN(deviceHeading.Value))
+			{
+				_lastDeviceHeading = deviceHeading.Value;
+			}
+
+			// Computes the bearing from actual device orientation.
+			Bearing = (_lastBearingFromNorth - _lastDeviceHeading) % 360;
 		}
 	}
 }
