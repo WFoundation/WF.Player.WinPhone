@@ -86,6 +86,14 @@ namespace Geowigo.Views
 
 		#region PhoneApplicationPage Event Handling
 
+		protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		{
+			base.OnBackKeyPress(e);
+
+			// Relays the event to the view model.
+			ViewModel.OnPageBackKeyPress(e);
+		}
+
 		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
 		{
 			base.OnNavigatedTo(e);

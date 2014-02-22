@@ -209,6 +209,35 @@ namespace Geowigo.ViewModels
 		}
 
 		#region Navigation
+
+		/// <summary>
+		/// Called by pages when the back key is pressed.
+		/// </summary>
+		/// <param name="e"></param>
+		public void OnPageBackKeyPress(CancelEventArgs e)
+		{
+			// Dismisses the current message box, if any.
+			if (App.Current.ViewModel.MessageBoxManager.HasMessageBox)
+			{
+				e.Cancel = true;
+
+				App.Current.ViewModel.MessageBoxManager.DismissAllMessageBoxes();
+			}
+			else
+			{
+				OnPageBackKeyPressOverride(e);
+			}
+		}
+
+		/// <summary>
+		/// Called when an allowed back key pressed event has occured.
+		/// </summary>
+		/// <param name="e"></param>
+		protected virtual void OnPageBackKeyPressOverride(CancelEventArgs e)
+		{
+			
+		}
+
 		/// <summary>
 		/// Called by pages when they are navigated to.
 		/// </summary>

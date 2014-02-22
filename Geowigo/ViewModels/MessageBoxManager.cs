@@ -176,6 +176,21 @@ namespace Geowigo.ViewModels
 			return cmb;
 		}
 
+		/// <summary>
+		/// Dismisses all active message boxes registered by this manager.
+		/// </summary>
+		public void DismissAllMessageBoxes()
+		{
+			foreach (var mb in _otherMessageBoxes.ToList())
+			{
+				mb.Dismiss();
+			}
+			foreach (var mb in _wherigoMessageBoxes.Keys.ToList())
+			{
+				mb.Dismiss();
+			}
+		}
+
 		#region Event handling
 		private void RegisterEventHandlersForCustom(CustomMessageBox cmb)
 		{

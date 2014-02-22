@@ -78,7 +78,7 @@ namespace Geowigo.ViewModels
 			Input.GiveResult(Answer);
 		}
 
-		public void OnPageBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		protected override void OnPageBackKeyPressOverride(System.ComponentModel.CancelEventArgs e)
 		{
 			// Dismisses the input.
 			Input.GiveResult(null);

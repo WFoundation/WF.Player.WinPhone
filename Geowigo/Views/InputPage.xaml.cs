@@ -36,12 +36,5 @@ namespace Geowigo.Views
 		{
 			InitializeComponent();
 		}
-
-		protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
-		{
-			ViewModel.OnPageBackKeyPress(e);
-
-			base.OnBackKeyPress(e);
-		}
 	}
 }

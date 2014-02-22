@@ -263,7 +263,7 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		public void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
+		protected override void OnPageBackKeyPressOverride(System.ComponentModel.CancelEventArgs e)
 		{
 			// Cancels the back key event.
 			e.Cancel = true;
