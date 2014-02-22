@@ -68,7 +68,7 @@
 		</Grid>
 	</DataTemplate>
 	<DataTemplate x:Key="WherigoObjectNameOnlyListItem">
-		<Grid>
+		<Grid Margin="0,0,0,10">
 			<TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeExtraLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}"/>
 		</Grid>
 	</DataTemplate>

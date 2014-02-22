@@ -66,7 +66,7 @@
     	</VisualStateManager.VisualStateGroups>
     	<Viewbox>
     		<Grid x:Name="IconsGrid" Height="80" Width="98">
-    			<es:BlockArrow x:Name="Arrow" Fill="{Binding Foreground, ElementName=ThisDC}" HorizontalAlignment="Center" Orientation="Up" Stroke="Black" UseLayoutRounding="False" Width="60" Margin="10,0" RenderTransformOrigin="0.5,0.5" ArrowheadAngle="73" ArrowBodySize="0.23" StrokeThickness="0" Height="60">
+    			<es:BlockArrow x:Name="Arrow" Fill="{Binding Foreground, ElementName=ThisDC}" HorizontalAlignment="Center" Orientation="Up" Stroke="Black" UseLayoutRounding="False" Width="48.454" Margin="10" RenderTransformOrigin="0.5,0.5" ArrowheadAngle="79" ArrowBodySize="0.23" StrokeThickness="0" Height="60">
     				<es:BlockArrow.RenderTransform>
     					<CompositeTransform Rotation="{Binding Bearing, ElementName=ThisDC}"/>
     				</es:BlockArrow.RenderTransform>

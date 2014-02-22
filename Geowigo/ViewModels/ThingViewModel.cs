@@ -96,6 +96,22 @@ namespace Geowigo.ViewModels
 		
 		#endregion
 
+		#region IsCompassVisible
+
+
+		public bool IsCompassVisible
+		{
+			get { return (bool)GetValue(IsCompassVisibleProperty); }
+			set { SetValue(IsCompassVisibleProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for IsCompassVisible.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty IsCompassVisibleProperty =
+			DependencyProperty.Register("IsCompassVisible", typeof(bool), typeof(ThingViewModel), new PropertyMetadata(false));
+
+		
+		#endregion
+
 		#region StatusText
 
 
@@ -184,7 +200,7 @@ namespace Geowigo.ViewModels
 			if ("ActiveCommands".Equals(propName))
 			{
 				// Refreshes the visibilities.
-				RefreshVisibilities();
+				RefreshActionVisibilities();
 			}
 			else if ("Visible".Equals(propName) || "Active".Equals(propName))
 			{
@@ -196,6 +212,9 @@ namespace Geowigo.ViewModels
 			}
 			else if ("Container".Equals(propName))
 			{
+				// Refreshes the visiblities.
+				RefreshContainerVisibilities();
+				
 				// If this thing is not in the Player or a visible Thing's inventory 
 				// anymore, return to previous page.
 				Thing cont = WherigoObject.Container;
@@ -207,36 +226,102 @@ namespace Geowigo.ViewModels
 				// Refreshes the status text.
 				RefreshStatusText();
 			}
+			else if ("VectorFromPlayer".Equals(propName))
+			{
+				RefreshStatusText();
+			}
 		}
 
         protected override void OnWherigoObjectChanged(WherigoObject obj)
 		{
-			RefreshVisibilities();
+			RefreshActionVisibilities();
+			RefreshContainerVisibilities();
 			RefreshStatusText();
 		}
 
 		private void RefreshStatusText()
 		{
-			Thing container = WherigoObject.Container;
+			// Updates the status text depending on the type of the object.
+			// Zone -> displays state of the zone regarding the player.
+			// Character -> displays if by a zone or with thing.
+			// Thing -> displays if in a zone or with thing.
 
-			// Updates the status text depending on the container.
-			if (container == null)
+			if (WherigoObject is Zone)
 			{
-				StatusText = "Unknown Location";
-			}
-			else if (container == Model.Core.Player)
-			{
-				StatusText = "In Player Inventory";
+				// Updates the status text depending on the zone state.
+				switch (((Zone)WherigoObject).State)
+				{
+					case PlayerZoneState.Inside:
+						StatusText = "Player is inside";
+						break;
+
+					case PlayerZoneState.Proximity:
+						StatusText = "In proximity";
+						break;
+
+					case PlayerZoneState.Distant:
+						StatusText = "Distant";
+						break;
+
+					case PlayerZoneState.NotInRange:
+						StatusText = "Too far away";
+						break;
+
+					default:
+						StatusText = "Unknown Location";
+						break;
+				}
 			}
 			else
 			{
-				StatusText = "With " + container.Name ?? "Unnamed Thing";
+				// Updates the status text depending on the container.
+				Thing container = WherigoObject.Container;
+				if (container == null)
+				{
+					StatusText = "Unknown Location";
+				}
+				else if (container == Model.Core.Player)
+				{
+					if (WherigoObject is Character)
+					{
+						StatusText = "With Player";
+					}
+					else
+					{
+						StatusText = "In Player Inventory";
+					}
+				}
+				else
+				{
+					string adverb;
+					string typeName = container.GetType().Name;
+					
+					if (container is Zone)
+					{
+						adverb = "By";
+					}
+					else if (container is Item)
+					{
+						adverb = "In";
+					}
+					else
+					{
+						adverb = "With";
+					}
+
+					StatusText = String.Format("{0} {1}", adverb, container.Name ?? String.Format("Unnamed {0}", typeName));
+				}
 			}
 		}
 
-		private void RefreshVisibilities()
+		private void RefreshActionVisibilities()
 		{
 			AreActionsVisible = WherigoObject.ActiveCommands.Count > 0;
+		}
+
+		private void RefreshContainerVisibilities()
+		{
+			IsCompassVisible = WherigoObject.Container != Model.Core.Player;
 		}
 
 		#endregion

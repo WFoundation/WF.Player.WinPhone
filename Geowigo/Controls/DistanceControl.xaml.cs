@@ -141,7 +141,13 @@ namespace Geowigo.Controls
 
 			VisualStateManager.GoToState(this, this.UnknownState.Name, true);
 
+			if (System.ComponentModel.DesignerProperties.IsInDesignTool)
+			{
+				return;	
+			}
+
 			Unloaded += new RoutedEventHandler(OnUnloaded);
+
 			App.Current.Model.Core.PlayerLocationChanged += new EventHandler<Models.PlayerLocationChangedEventArgs>(OnPlayerLocationChanged);
 		}
 

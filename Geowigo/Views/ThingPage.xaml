@@ -61,17 +61,18 @@
 
         <!--TitlePanel contient le nom de l'application et le titre de la page-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-        	<TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, FallbackValue=APP TITLE}" Style="{StaticResource PhoneTextNormalStyle}"/>
-        	<TextBlock x:Name="CartridgeTitle" Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}"/>
+        	<TextBlock x:Name="ApplicationTitle" Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, FallbackValue=APP TITLE}" Style="{StaticResource PhoneTextNormalStyle}" Margin="12,0,185,0"/>
+        	<TextBlock x:Name="CartridgeTitle" Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="12,0,185,0"/>
         	<TextBlock x:Name="PageTitle" Text="{Binding WherigoObject.Name, Converter={StaticResource LowercaseStringConverter}, FallbackValue=thing}" Margin="9,-10,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
+        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding WherigoObject.VectorFromPlayer, Mode=OneWay}" d:LayoutOverrides="VerticalAlignment" Orientation="Horizontal" Visibility="{Binding IsCompassVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
         <Grid x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<ScrollViewer>
         		<StackPanel>
         			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,10"/>
-        			<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, Converter={StaticResource UppercaseStringConverter}, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}"/>
-        			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description, FallbackValue=Description, Mode=OneWay}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0" />
+        			<TextBlock TextWrapping="Wrap" Margin="0" Text="{Binding StatusText, Converter={StaticResource UppercaseStringConverter}, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}"/>
+        			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description, FallbackValue=Description, Mode=OneWay}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,20,0,0" />
         			<StackPanel x:Name="CommandsPanel" Orientation="Vertical" Margin="0,40,0,20" Visibility="{Binding AreActionsVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Visible}">
         				<TextBlock TextWrapping="Wrap" Text="ACTIONS" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="{StaticResource PhoneFontSizeNormal}" Margin="0,0,0,15"/>
         				<Geowigo_Controls:NavigationListBox x:Name="CommandList" ItemsSource="{Binding WherigoObject.ActiveCommands}" ItemTemplate="{StaticResource WherigoObjectNameOnlyListItem}" NavigationCommand="{Binding ExecuteCommand}" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Width"/>
