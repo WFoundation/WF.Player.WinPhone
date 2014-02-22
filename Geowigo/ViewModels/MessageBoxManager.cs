@@ -27,7 +27,7 @@ namespace Geowigo.ViewModels
 		/// How much time to wait before a HasMessageBoxChanged event is
 		/// confirmed and raised.
 		/// </summary>
-		private const int MessageBoxChangeRaisingDelayMilliseconds = 100;
+		private const int MessageBoxChangeRaisingDelayMilliseconds = 150;
 
 		#endregion
 		

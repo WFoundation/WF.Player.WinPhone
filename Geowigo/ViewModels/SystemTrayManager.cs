@@ -16,7 +16,7 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Timespan to wait before showing indeterminate progress of a long task.
 		/// </summary>
-		private readonly TimeSpan LongProgressDisplayDelay = TimeSpan.FromSeconds(1);
+		private readonly TimeSpan LongProgressDisplayDelay = TimeSpan.FromSeconds(1.25);
 
 		private readonly TimeSpan TemporaryDisplay = TimeSpan.FromSeconds(2);
 
@@ -70,6 +70,28 @@ namespace Geowigo.ViewModels
 		{
 			_progressAggregator.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnProgressAggregatorPropertyChanged);
 		}
+
+		#region Generic Progress
+
+		/// <summary>
+		/// Shows an indeterminate progress.
+		/// </summary>
+		/// <param name="status"></param>
+		public void ShowProgress(string status)
+		{
+			_progressAggregator[status] = true;
+		}
+
+		/// <summary>
+		/// Hides an indeterminate progress that was previously shown.
+		/// </summary>
+		/// <param name="status"></param>
+		public void HideProgress(string status)
+		{
+			_progressAggregator[status] = false;
+		}
+
+		#endregion
 
 		#region Loading Progress
 

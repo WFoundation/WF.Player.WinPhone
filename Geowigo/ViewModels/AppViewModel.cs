@@ -343,8 +343,12 @@ namespace Geowigo.ViewModels
 		/// <remarks>
 		/// This method has no effect if the previous view in the stack is not a game view.
 		/// </remarks>
-		public void NavigateBack()
-		{
+		/// <param name="currentExpectedView">The name of the view source is expected
+		/// to be displayed. If non-null, and the current view is not the same as
+		/// the <paramref name="currentExpectedView"/>, the current expected view
+		/// is removed from the back stack, and the navigation is cancelled.</param>
+		public void NavigateBack(Uri currentExpectedView = null)
+		{			
 			// Returns if the previous view is not a game view.
 			JournalEntry previousPage = App.Current.RootFrame.BackStack.FirstOrDefault();
 			if (previousPage == null)
@@ -362,6 +366,29 @@ namespace Geowigo.ViewModels
 			{
 				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because previous page is no game!");
 				
+				return;
+			}
+
+			// Returns if the current view is not expected.
+			// This means that a navigation happened between this navigate back
+			// was originally triggered and now.
+			// When this happens, the back stack needs to be cleared of this expected
+			// view if possible, and then the method should return.
+			if (currentExpectedView != null && currentExpectedView != App.Current.RootFrame.CurrentSource)
+			{
+				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because a navigation occured after the call.");
+
+				return;
+			}
+
+			// Do not navigate back if a message box is on-screen.
+			// Instead, delay the navigation.
+			if (MessageBoxManager.HasMessageBox)
+			{
+				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() delayed because a message box is on-screen!");
+
+				BeginRunOnIdle(new Action(() => NavigateBack(currentExpectedView ?? App.Current.RootFrame.CurrentSource)));
+
 				return;
 			}
 

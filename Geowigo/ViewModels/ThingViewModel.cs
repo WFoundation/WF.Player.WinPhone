@@ -193,6 +193,24 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
+		public void OnPageNavigatedBackTo()
+		{
+			// Makes sure the page still should be shown.
+			CheckShouldNavigateBack();
+		}
+
+		private void CheckShouldNavigateBack()
+		{
+			Thing cont = WherigoObject.Container;
+			if (!WherigoObject.Visible 
+				|| (WherigoObject is Zone && !((Zone)WherigoObject).Active)
+				|| cont == null 
+				|| (cont != Model.Core.Player && !cont.Visible))
+			{
+				App.Current.ViewModel.NavigateBack();
+			}
+		}
+
 		#region Handling of ZThing properties change
 
 		protected override void OnWherigoObjectPropertyChanged(string propName)
@@ -205,10 +223,7 @@ namespace Geowigo.ViewModels
 			else if ("Visible".Equals(propName) || "Active".Equals(propName))
 			{
 				// If this Thing is not active-visible anymore, get back to previous screen.
-				if (!WherigoObject.Visible || (WherigoObject is Zone && !((Zone)WherigoObject).Active))
-				{
-					App.Current.ViewModel.NavigateBack();
-				}
+				CheckShouldNavigateBack();
 			}
 			else if ("Container".Equals(propName))
 			{
@@ -217,11 +232,7 @@ namespace Geowigo.ViewModels
 				
 				// If this thing is not in the Player or a visible Thing's inventory 
 				// anymore, return to previous page.
-				Thing cont = WherigoObject.Container;
-				if (cont == null || (cont != Model.Core.Player && !cont.Visible))
-				{
-					App.Current.ViewModel.NavigateBack();
-				}
+				CheckShouldNavigateBack();
 
 				// Refreshes the status text.
 				RefreshStatusText();
@@ -325,6 +336,5 @@ namespace Geowigo.ViewModels
 		}
 
 		#endregion
-
 	}
 }
