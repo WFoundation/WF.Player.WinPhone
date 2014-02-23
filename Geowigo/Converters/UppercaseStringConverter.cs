@@ -17,7 +17,7 @@ namespace Geowigo.Converters
 
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			return value.ToString().ToUpper();
+			return value == null ? null : value.ToString().ToUpper();
 		}
 
 		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

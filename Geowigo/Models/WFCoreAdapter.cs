@@ -329,6 +329,7 @@ namespace Geowigo.Models
 		} 
 		#endregion
 
+		#region Sensors
 		private void ApplySensorData()
 		{
 			if (!IsReady)
@@ -341,8 +342,8 @@ namespace Geowigo.Models
 			double? deviceHeading;
 			lock (_SyncRoot)
 			{
-				shouldRefreshHeading = 
-					_LastKnownHeading.HasValue 
+				shouldRefreshHeading =
+					_LastKnownHeading.HasValue
 					&& _HasLastKnownHeadingChanged;
 
 				deviceHeading = _LastKnownHeading;
@@ -362,8 +363,8 @@ namespace Geowigo.Models
 			GeoCoordinate deviceLoc;
 			lock (_SyncRoot)
 			{
-				shouldRefreshLoc = 
-					_LastKnownLocation != null 
+				shouldRefreshLoc =
+					_LastKnownLocation != null
 					&& _HasLastKnownLocationChanged;
 				deviceLoc = _LastKnownLocation;
 			}
@@ -382,20 +383,20 @@ namespace Geowigo.Models
 			{
 				RaisePlayerLocationChanged(DeviceLocation, DeviceHeading);
 			}
-		} 
+		}
 
 		#region Location Service Events Handlers
-		
+
 		private void GeoWatcher_PositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
 		{
 			ProcessPosition(e.Position);
 		}
 
 		private void GeoWatcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
-		{			
+		{
 			// Debug log.
 			LogDebug(String.Format("Location service status changed to {0}.", e.Status.ToString()));
-			
+
 			switch (e.Status)
 			{
 				case GeoPositionStatus.Disabled:
@@ -454,7 +455,7 @@ namespace Geowigo.Models
 		{
 			if (((Compass)sender).IsDataValid)
 			{
-				ProcessCompass(e.SensorReading); 
+				ProcessCompass(e.SensorReading);
 			}
 		}
 
@@ -477,12 +478,13 @@ namespace Geowigo.Models
 			{
 				return;
 			}
-			
+
 			// Stores the new valid heading.
 			DeviceHeading = compassReading.TrueHeading;
 			DeviceHeadingAccuracy = compassReading.HeadingAccuracy;
 		}
 
+		#endregion 
 		#endregion
 
 		#region Event Raisers
