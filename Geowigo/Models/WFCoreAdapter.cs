@@ -474,7 +474,7 @@ namespace Geowigo.Models
 		private void ProcessCompass(CompassReading compassReading)
 		{
 			// Ignores the value if it's not a number or is not valid.
-			if (Double.IsNaN(compassReading.TrueHeading))
+			if (Double.IsNaN(compassReading.TrueHeading) || Double.IsNaN(compassReading.HeadingAccuracy))
 			{
 				return;
 			}
