@@ -325,6 +325,11 @@ namespace Geowigo.ViewModels
 		protected override void InitFromNavigation(NavigationInfo nav)
 		{
 			base.InitFromNavigation(nav);
+
+			// We probably have a lot of things to do.
+			// Let's block the UI and show some progress bar.
+			RefreshProgressBar(Model.Core.GameState);
+
 			System.Windows.Navigation.NavigationContext navCtx = nav.NavigationContext;
 
 			// Tries to get a particular section to display.
@@ -346,10 +351,6 @@ namespace Geowigo.ViewModels
 			// Makes sure the screen lock is disabled.
 			App.Current.ViewModel.IsScreenLockEnabled = false;
 
-			// We probably have a lot of things to do.
-			// Let's block the UI and show some progress bar.
-			RefreshProgressBar(Model.Core.GameState);
-
 			// Tries to get the filename to query for.
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
@@ -359,35 +360,41 @@ namespace Geowigo.ViewModels
                 // Restores the cartridge or starts a new game?
                 if (navCtx.QueryString.TryGetValue(SavegameFilenameKey, out gwsFilename))
                 {
-					RefreshProgressBar(WF.Player.Core.Engines.EngineGameState.Restoring);
-					
 					// Starts restoring the game.
                     RunOrDeferIfNotReady(
                         new Action(() =>
-                        {							
+                        {
 							// Restores the game.
-                            Cartridge = Model.Core.InitAndRestoreCartridge(filename, gwsFilename);
+							Model.Core.InitAndRestoreCartridgeAsync(filename, gwsFilename)
+								.ContinueWith(t =>
+								{
+									// Keeps the cartridge.
+									Cartridge = t.Result;
 
-                            // Registers a history entry.
-                            CartridgeTag cart = Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge);
-                            Model.History.AddRestoredGame(
-                                cart,
-                                cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+									// Registers a history entry.
+									CartridgeTag cart = Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge);
+									Model.History.AddRestoredGame(
+										cart,
+										cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
                 else
                 {
-					RefreshProgressBar(WF.Player.Core.Engines.EngineGameState.Starting);
-					
 					// Starts a new game.
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
                             // Starts the game.
-                            Cartridge = Model.Core.InitAndStartCartridge(filename);
+							Model.Core.InitAndStartCartridgeAsync(filename)
+								.ContinueWith(t =>
+								{
+									// Stores the result of the cartridge.
+									Cartridge = t.Result;
 
-                            // Registers a history entry.
-                            Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge));
+									// Registers a history entry.
+									Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge));
+								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
 			}
@@ -397,11 +404,9 @@ namespace Geowigo.ViewModels
 		}
 
         /// <summary>
-        /// Displays a tray message, and runs an action now or defers it if
-        /// the page is not ready yet.
+        /// Runs an action now or defers it if the page is not ready yet.
         /// </summary>
         /// <param name="action"></param>
-        /// <param name="trayMessage"></param>
         private void RunOrDeferIfNotReady(Action action)
         {
             // Runs the action later if the page is not ready yet.
@@ -529,11 +534,11 @@ namespace Geowigo.ViewModels
 					break;
 
 				case WF.Player.Core.Engines.EngineGameState.Starting:
-					message = "Starting cartridge...";
+					message = "Starting game...";
 					break;
 
 				case WF.Player.Core.Engines.EngineGameState.Restoring:
-					message = "Restoring cartridge...";
+					message = "Restoring game...";
 					break;
 
 				case WF.Player.Core.Engines.EngineGameState.Saving:
@@ -542,6 +547,10 @@ namespace Geowigo.ViewModels
 
 				case WF.Player.Core.Engines.EngineGameState.Playing:
 					// message = null;
+					break;
+
+				case WF.Player.Core.Engines.EngineGameState.Initializing:
+					message = "Loading cartridge...";
 					break;
 
 				default:

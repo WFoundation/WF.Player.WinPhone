@@ -51,19 +51,21 @@ namespace Geowigo.ViewModels
             };
 
             // Performs the savegame.
-            _appViewModel.Model.Core.Save(cs);
-
-            // If this is a manual save, shows a message box.
-            if (!isAutoSave)
-            {
-                // What happens next depends on the result of this message box.
-                ShowNewSavegameMessageBox(cs);
-            }
-            else
-            {
-                // Adds the savegame to the tag.
-                tag.AddSavegame(cs);
-            }
+			_appViewModel.Model.Core.SaveAsync(cs)
+				.ContinueWith(t =>
+				{
+					// If this is a manual save, shows a message box.
+					if (!isAutoSave)
+					{
+						// What happens next depends on the result of this message box.
+						ShowNewSavegameMessageBox(cs);
+					}
+					else
+					{
+						// Adds the savegame to the tag.
+						tag.AddSavegame(cs);
+					}
+				}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         #region New Savegame Prompt

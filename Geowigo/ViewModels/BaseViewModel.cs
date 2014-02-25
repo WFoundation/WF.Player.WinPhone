@@ -155,8 +155,12 @@ namespace Geowigo.ViewModels
 
 		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
 		public static readonly DependencyProperty ApplicationBarProperty =
-			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(BaseViewModel), new PropertyMetadata(null));
+			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(BaseViewModel), new PropertyMetadata(null, OnApplicationBarPropertyChanged));
 
+		private static void OnApplicationBarPropertyChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
+		{
+			((BaseViewModel)o).OnApplicationBarChanged(e.NewValue as IApplicationBar);
+		}
 
 		#endregion
 
@@ -320,7 +324,7 @@ namespace Geowigo.ViewModels
 			// Hides or shows the application bar if there is any.
 			if (ApplicationBar != null)
 			{
-				ApplicationBar.IsVisible = !hasMessageBox && !IsProgressBarVisible;
+				RefreshApplicationBarIsVisible(hasMessageBox: hasMessageBox);
 			}
 		}
 
@@ -328,19 +332,43 @@ namespace Geowigo.ViewModels
 
 		#region This View Model Properties Change
 
+		private void RefreshApplicationBarIsVisible(bool? hasMessageBox = null, bool? isProgressBarVisible = null)
+		{
+			// Gets if there are message boxes.
+			if (!hasMessageBox.HasValue)
+			{
+				lock (_syncRoot)
+				{
+					hasMessageBox = _hasMessageBoxOnScreen;
+				}
+			}
+
+			// Gets if the progress bar is visible.
+			if (!isProgressBarVisible.HasValue)
+			{
+				isProgressBarVisible = IsProgressBarVisible;
+			}
+
+			// Applies the visiblity.
+			ApplicationBar.IsVisible = !hasMessageBox.Value && !isProgressBarVisible.Value;
+		}
+
+		private void OnApplicationBarChanged(IApplicationBar bar)
+		{
+			if (bar != null)
+			{
+				// Hides or shows the app
+				RefreshApplicationBarIsVisible();
+			}
+		}
+
 		private void OnIsProgressBarVisibleChanged(bool newValue)
 		{
 			// Hides or shows the app bar if there is no message box and the
 			// progress bar is hidden.
 			if (ApplicationBar != null)
 			{
-				bool hasMessageBox;
-				lock (_syncRoot)
-				{
-					hasMessageBox = _hasMessageBoxOnScreen;
-				}
-
-				ApplicationBar.IsVisible = !hasMessageBox && !newValue;
+				RefreshApplicationBarIsVisible(isProgressBarVisible: newValue);
 			}
 		}
 

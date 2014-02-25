@@ -200,10 +200,18 @@ namespace Geowigo.ViewModels
 			// Stops the current game if needed.
 			if (stopCurrentGame && Model.Core.Cartridge != null)
 			{
-				Model.Core.Stop();
-				Model.Core.Reset();
+				Model.Core.StopAndResetAsync().ContinueWith(
+					t => NavigateToAppHomeCore(), 
+					System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 			}
+			else
+			{
+				NavigateToAppHomeCore();
+			}
+		}
 
+		private void NavigateToAppHomeCore()
+		{
 			// Removes all back entries until the app home is found.
 			string prefix = "/Views/";
 			foreach (JournalEntry entry in App.Current.RootFrame.BackStack.ToList())

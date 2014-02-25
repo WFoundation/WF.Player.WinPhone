@@ -17,6 +17,7 @@ using WF.Player.Core.Engines;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Devices.Sensors;
+using System.Threading.Tasks;
 
 namespace Geowigo.Models
 {
@@ -255,6 +256,20 @@ namespace Geowigo.Models
 		#endregion
 
 		#region Engine
+
+		/// <summary>
+		/// Starts to play a Wherigo cartridge game asynchronously.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge in the isolated storage.</param>
+		/// <returns></returns>
+		public Task<Cartridge> InitAndStartCartridgeAsync(string filename)
+		{
+			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
+			{
+				return InitAndStartCartridge(filename);
+			});
+		}
+
 		/// <summary>
 		/// Starts to play a Wherigo cartridge game.
 		/// </summary>
@@ -279,6 +294,20 @@ namespace Geowigo.Models
 			ApplySensorData();
 
 			return cart;
+		}
+
+		/// <summary>
+		/// Resumes playing a Wherigo cartridge saved game asynchronously.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge in the isolated storage.</param>
+		/// <param name="gwsFilename">Filename of the savegame to restore.</param>
+		/// <returns></returns>
+		public Task<Cartridge> InitAndRestoreCartridgeAsync(string filename, string gwsFilename)
+		{
+			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
+			{
+				return InitAndRestoreCartridge(filename, gwsFilename);
+			});
 		}
 
 		/// <summary>
@@ -314,6 +343,25 @@ namespace Geowigo.Models
 		}
 
 		/// <summary>
+		/// Saves the game to a CartridgeSavegame object asynchronously.
+		/// </summary>
+		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
+		/// <returns></returns>
+		public System.Threading.Tasks.Task SaveAsync(CartridgeSavegame cs)
+		{
+			return System.Threading.Tasks.Task.Factory.StartNew(() =>
+			{
+				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+				{
+					using (System.IO.Stream fs = cs.CreateOrReplace(isf))
+					{
+						Save(fs);
+					}
+				}
+			});
+		} 
+
+		/// <summary>
 		/// Saves the game to a CartridgeSavegame object.
 		/// </summary>
 		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
@@ -326,7 +374,19 @@ namespace Geowigo.Models
 					Save(fs);
 				}
 			}
-		} 
+		}
+
+		/// <summary>
+		/// Stops the game and then resets the engine asynchronously.
+		/// </summary>
+		public System.Threading.Tasks.Task StopAndResetAsync()
+		{
+			return System.Threading.Tasks.Task.Factory.StartNew(() =>
+			{
+				Stop();
+				Reset();
+			});
+		}
 		#endregion
 
 		#region Sensors
