@@ -342,13 +342,16 @@ namespace Geowigo.Models.Providers
 			{
 				_dlFiles.Add(file);
 			}
+
+			// The emulator has no support for background download.
+			// Peform a direct download instead.
+			bool shouldDirectDownload = !IsBackgroundDownloadAllowed || Microsoft.Devices.Environment.DeviceType == Microsoft.Devices.DeviceType.Emulator;
 			
 			// Starts downloading the cartridge to the isostore.
 			string fileAttribute = file.Id + "/content";
-			if (!IsBackgroundDownloadAllowed || Microsoft.Devices.Environment.DeviceType == Microsoft.Devices.DeviceType.Emulator)
+			if (shouldDirectDownload)
 			{
-				// The emulator has no support for background download.
-				// Peform a direct download instead.
+				// Direct download.
 				_liveClient.DownloadAsync(fileAttribute, GetDownloadUserState(file));
 			}
 			else
