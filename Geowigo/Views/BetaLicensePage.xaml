@@ -95,18 +95,6 @@
         				</Run.Foreground>
         			</Run><Run Foreground="#FF9DD9FF" Text="sends"/><Run Text=" anonymous crash information to the developers."/></TextBlock>
         		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20" Text="You can also report a problem directly to the developers on the forums thread (see main menu)."/>
-        		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="Finally, every"/><Run Text=" "/><Run Text="time the app is starting, it will "/><Run Text="check on the internet for updates ">
-        				<Run.Foreground>
-        					<SolidColorBrush Color="#FF9DD9FF">
-        						<SolidColorBrush.RelativeTransform>
-        							<MatrixTransform Matrix="Identity"/>
-        						</SolidColorBrush.RelativeTransform>
-        						<SolidColorBrush.Transform>
-        							<MatrixTransform Matrix="Identity"/>
-        						</SolidColorBrush.Transform>
-        					</SolidColorBrush>
-        				</Run.Foreground>
-        			</Run><Run Text="and bug"/><Run Text="-"/><Run Text="fixes. If "/><Run Text="an update is available, a message"/><Run Text=" "/><Run Text="box will appear and give you further instructions"/><Run Text="."/></TextBlock>
         		<TextBlock TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20"><Run Text="This app is an "/><Run Text="open-source, free project">
         				<Run.Foreground>
         					<SolidColorBrush Color="#FF9DD9FF">
@@ -130,6 +118,7 @@
         					</SolidColorBrush>
         				</Run.Foreground>
         			</Run><Run Text="for testing this preview version, and thank you for your support."/></TextBlock>
+        		<TextBlock x:Name="VersionTextBlock" TextWrapping="Wrap" FontSize="{StaticResource PhoneFontSizeMediumLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" Margin="0,0,0,20" Text="{Binding VersionText}"/>
         		<Button x:Name="AcceptBtn" Content="Accept and continue" Click="AcceptBtn_Click"/>
         	</StackPanel>
         </ScrollViewer>
