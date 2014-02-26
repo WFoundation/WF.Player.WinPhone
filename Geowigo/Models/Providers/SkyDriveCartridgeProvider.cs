@@ -117,6 +117,16 @@ namespace Geowigo.Models.Providers
 				}
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets if this provider is allowed to perform
+		/// background download (if they are supported).
+		/// </summary>
+		public bool IsBackgroundDownloadAllowed
+		{
+			get;
+			set;
+		}
 		#endregion
 
 		#region Events
@@ -335,7 +345,7 @@ namespace Geowigo.Models.Providers
 			
 			// Starts downloading the cartridge to the isostore.
 			string fileAttribute = file.Id + "/content";
-			if (Microsoft.Devices.Environment.DeviceType == Microsoft.Devices.DeviceType.Emulator)
+			if (!IsBackgroundDownloadAllowed || Microsoft.Devices.Environment.DeviceType == Microsoft.Devices.DeviceType.Emulator)
 			{
 				// The emulator has no support for background download.
 				// Peform a direct download instead.
