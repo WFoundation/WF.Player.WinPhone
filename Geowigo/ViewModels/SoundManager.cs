@@ -66,9 +66,16 @@ namespace Geowigo.ViewModels
 		/// <param name="media"></param>
 		/// <returns>True if the sound type is supported by this sound 
 		/// manager.</returns>
-		public bool IsPlayableSound(Media media)
+		public static bool IsPlayableSound(Media media)
 		{
-			return media.Type == MediaType.MP3 || media.Type == MediaType.WAV;
+			if (media == null)
+			{
+				return false;
+			}
+
+			MediaType mt = media.Type;
+
+			return mt == MediaType.MP3 || mt == MediaType.WAV || mt == MediaType.FDL;
 		}
 
 		#endregion

@@ -331,7 +331,7 @@ namespace Geowigo.Models
                 // Loads the metadata.
                 using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
                 {
-					WF.Player.Core.Formats.FileFormats.Load(isfs, cart);
+					WF.Player.Core.Formats.CartridgeLoaders.Load(isfs, cart);
                 }
 			}
 			

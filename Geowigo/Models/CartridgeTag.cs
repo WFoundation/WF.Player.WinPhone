@@ -75,6 +75,16 @@ namespace Geowigo.Models
 		public string Title { get; private set; }
 
 		/// <summary>
+		/// Gets the description of the Cartridge.
+		/// </summary>
+		public string Description { get; private set; }
+
+		/// <summary>
+		/// Gets the start location description of the Cartridge.
+		/// </summary>
+		public string StartingDescription { get; private set; }
+
+		/// <summary>
 		/// Gets the Cartridge object.
 		/// </summary>
 		public Cartridge Cartridge { get; private set; }
@@ -161,13 +171,19 @@ namespace Geowigo.Models
 			Cartridge = cart;
 			Guid = cart.Guid;
 			Title = cart.Name;
+			Description = cart.LongDescription;
+			StartingDescription = cart.StartingDescription;
 			PathToCache = GlobalCachePath + "/" + Guid;
             PathToSavegames = String.Format("{0}/{1}_{2}",
                 GlobalSavegamePath,
                 Guid.Substring(0, 4),
                 System.IO.Path.GetFileNameWithoutExtension(Cartridge.Filename)
             );
+
+			// Event handlers.
+			//Cartridge.PropertyChanged += new PropertyChangedEventHandler(OnCartridgePropertyChanged);
 		}
+
 		#endregion
 
 		#region Cache
@@ -209,6 +225,9 @@ namespace Geowigo.Models
 
                 // Savegames
                 ImportSavegamesCache(isf);
+
+				// Cartridge internal description.
+				//ImportOrMakeMetadataCache(isf);
 			}
 		}
 
@@ -308,7 +327,7 @@ namespace Geowigo.Models
 
 		#endregion
 
-		#region Private Methods
+		#region Cache
 
 		private string GetCachePathCore(string filename)
 		{
@@ -317,14 +336,17 @@ namespace Geowigo.Models
 
 		private string GetCachePathCore(Media media)
 		{
-			return GetCachePathCore(String.Format("{0}.{1}", media.MediaId, media.Type.ToString()));
+			// FDL files are converted to WAV files.
+			string extension = media.Type == MediaType.FDL ? "WAV" : media.Type.ToString().ToUpper();
+
+			return GetCachePathCore(String.Format("{0}.{1}", media.MediaId, extension));
 		}
 
 		private void ImportOrMakeSoundsCache(IsolatedStorageFile isf)
 		{
 			_soundFiles = new Dictionary<int, string>();
 
-			foreach (var sound in Cartridge.Resources.Where(m => m.Type == MediaType.MP3 || m.Type == MediaType.WAV))
+			foreach (var sound in Cartridge.Resources.Where(m => ViewModels.SoundManager.IsPlayableSound(m)))
 			{
 				// Copies the sound file to the cache if it doesn't exist already.
 				string cacheFilename = GetCachePathCore(sound);
@@ -332,7 +354,16 @@ namespace Geowigo.Models
 				{
 					using (IsolatedStorageFileStream fs = isf.CreateFile(cacheFilename))
 					{
-						fs.Write(sound.Data, 0, sound.Data.Length);
+						if (sound.Type == MediaType.FDL)
+						{
+							// Converts the FDL to WAV and writes it.
+							ConvertAndWriteFDL(fs, sound);
+						}
+						else
+						{
+							// Dumps the bytes out!
+							fs.Write(sound.Data, 0, sound.Data.Length);
+						}
 					}
 				}
 
@@ -341,6 +372,17 @@ namespace Geowigo.Models
 			}
 
 			RaisePropertyChanged("Sounds");
+		}
+
+		private void ConvertAndWriteFDL(IsolatedStorageFileStream fs, Media sound)
+		{
+			using (MemoryStream inputFdlStream = new MemoryStream(sound.Data))
+			{
+				using (Stream outputWavStream = new WF.Player.Core.Formats.FDL().ConvertToWav(inputFdlStream))
+				{
+					outputWavStream.CopyTo(fs);
+				}
+			}
 		}
 
         private void ImportSavegamesCache(IsolatedStorageFile isf)
@@ -371,6 +413,46 @@ namespace Geowigo.Models
             RaisePropertyChanged("Savegames");
         }
 
+		//private void ImportOrMakeMetadataCache(IsolatedStorageFile isf)
+		//{
+		//    //if (Cartridge.Filename.Contains("dixieme"))
+		//    //{
+		//    //    Cartridge.BeginRefreshFromWebpage();
+		//    //}
+			
+			
+		//    //// Loads the internal properties of the cartridge.
+		//    //// They contain additional metadata.
+		//    //using (WF.Player.Core.Engines.Engine engine = WherigoHelper.CreateEngine())
+		//    //{
+		//    //    engine.Init(Cartridge);
+		//    //}
+		//    //Title = Cartridge.InternalName;
+		//    //Description = Cartridge.InternalDescription;
+		//    //StartingDescription = Cartridge.InternalStartingDescription;
+		//    //RaisePropertyChanged("Title");
+		//    //RaisePropertyChanged("Description");
+		//    //RaisePropertyChanged("StartingDescription");
+		//}
+
+		//private void MakeMetadataCache(IsolatedStorageFile isf)
+		//{
+		//    // TODO: For each problematic property, detect the presence of '?'
+		//    // character in the middle of words. If so, replace by corresponding
+		//    // property from the cartridge.
+
+		//    bool correctTitle = IsInvalidString(Cartridge.Name, false);
+		//    bool correctDesc = IsInvalidString(Cartridge.LongDescription, true);
+		//    bool correctStartDesc = IsInvalidString(Cartridge.StartingDescription, true);
+		//}
+
+		//private bool IsInvalidString(string str, bool ignoreFirstLast)
+		//{
+		//    return false;
+		//}
+
+		#endregion
+
 		private void RaisePropertyChanged(string propName)
 		{
 			Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -380,10 +462,22 @@ namespace Geowigo.Models
 					PropertyChanged(this, new PropertyChangedEventArgs(propName));
 				}
 			});
-		} 
+		}
 
-		#endregion
-
-
+		// private void OnCartridgePropertyChanged(object sender, PropertyChangedEventArgs e)
+		// {
+			// if ("Name".Equals(e.PropertyName))
+			// {
+				// Title = Cartridge.Name;
+			// }
+			// else if ("StartingDescription".Equals(e.PropertyName))
+			// {
+				// StartingDescription = Cartridge.StartingDescription;
+			// }
+			// else if ("LongDescription".Equals(e.PropertyName))
+			// {
+				// Description = Cartridge.LongDescription;
+			// }
+		// }
     }
 }
