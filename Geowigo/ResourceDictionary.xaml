@@ -84,7 +84,7 @@
 	
 	<ControlTemplate x:Key="AudioPlayerContentTemplate">
 		<Grid x:Name="MediaElementContainer">
-			<MediaElement x:Name="CommonMediaElement" Visibility="Collapsed" />
+			<MediaElement x:Name="CommonMediaElement" Visibility="Collapsed" AutoPlay="True" />
 			<Grid x:Name="ClientArea">
 				<ContentPresenter/>
 			</Grid>

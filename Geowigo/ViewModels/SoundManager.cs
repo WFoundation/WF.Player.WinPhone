@@ -84,7 +84,6 @@ namespace Geowigo.ViewModels
 				return true;
 			}
 
-			//MediaElement currentPlayer = App.Current.RootFrame.FindName("CommonMediaElement") as MediaElement;
 			MediaElement currentPlayer = App.Current.RootFrame.FindChild<MediaElement>("CommonMediaElement");
 
 			if (currentPlayer != _soundPlayer)
