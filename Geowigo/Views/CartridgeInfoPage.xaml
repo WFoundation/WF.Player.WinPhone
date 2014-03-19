@@ -10,7 +10,8 @@
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
     xmlns:JeffWilcox_Controls="clr-namespace:JeffWilcox.Controls;assembly=JeffWilcox.Maps" 
-    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" x:Name="This" 
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" 
+	x:Name="ThisCIP" 
     x:Class="Geowigo.Views.CartridgeInfoPage"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     SupportedOrientations="Portrait"  Orientation="Portrait"
@@ -27,7 +28,7 @@
 				<StackPanel Orientation="Horizontal">
 					<Grid Background="{Binding HashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62"/>
 					<StackPanel Orientation="Vertical">
-						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel>
 							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="Saved manually." Visibility="{Binding IsAutosave, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
 							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Visibility="{Binding IsAutosave, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Saved "/><Run Text="automatically"/><Run Text="."/></TextBlock>
@@ -40,7 +41,7 @@
 		<DataTemplate x:Key="SavegameListGroupItemTemplate">
 			<StackPanel d:DesignWidth="72" d:DesignHeight="65" Margin="0,0,0,40">
 				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=This}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=ThisCIP}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
 			</StackPanel>
 		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>

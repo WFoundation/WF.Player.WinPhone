@@ -3,7 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" x:Name="This" x:Class="Geowigo.Controls.SavegameMessageBoxContentControl"
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" 
+	x:Name="ThisSMBCC" 
+	x:Class="Geowigo.Controls.SavegameMessageBoxContentControl"
     mc:Ignorable="d"
     d:DesignHeight="480" d:DesignWidth="480">
     
@@ -29,9 +31,9 @@
 					<ColumnDefinition Width="0.184*"/>
 					<ColumnDefinition Width="0.816*"/>
 				</Grid.ColumnDefinitions>
-				<Rectangle Stroke="Black" Fill="{Binding HashColor, Converter={StaticResource ColorToBrushConverter}, ElementName=This}" Margin="0,1,11,1"/>
+				<Rectangle Stroke="Black" Fill="{Binding HashColor, Converter={StaticResource ColorToBrushConverter}, ElementName=ThisSMBCC}" Margin="0,1,11,1"/>
 				<StackPanel d:LayoutOverrides="Height" Grid.Column="2">
-					<TextBox TextWrapping="Wrap" Text="{Binding Name, ElementName=This, Mode=TwoWay}"/>
+					<TextBox TextWrapping="Wrap" Text="{Binding Name, ElementName=ThisSMBCC, Mode=TwoWay}"/>
 				</StackPanel>
 			</Grid>
 

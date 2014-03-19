@@ -12,7 +12,7 @@
     xmlns:Geowigo_Models="clr-namespace:Geowigo.Models"
     xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters"
     xmlns:Microsoft_Live_Controls="clr-namespace:Microsoft.Live.Controls;assembly=Microsoft.Live.Controls"
-    x:Class="Geowigo.Views.HomePage" x:Name="This"
+    x:Class="Geowigo.Views.HomePage" x:Name="ThisHP"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     SupportedOrientations="Portrait"  Orientation="Portrait"
 	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False" ApplicationBar="{Binding ApplicationBar}">
@@ -32,10 +32,10 @@
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
 					<Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
-						<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+						<Image Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
 					</Border>
 					<StackPanel Orientation="Vertical">
-						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You started playing."/>
 						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
 					</StackPanel>
@@ -46,11 +46,11 @@
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
                     <Grid Background="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62">
-						<Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}" />
+						<Image Stretch="UniformToFill" Source="{Binding Thumbnail}" />
 						<Rectangle Fill="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" HorizontalAlignment="Right" Height="29" VerticalAlignment="Bottom" Width="29"/>
 					</Grid>
 					<StackPanel Orientation="Vertical">
-						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">
 							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You saved the game:"/>
 							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
@@ -64,11 +64,11 @@
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
                     <Grid Background="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62">
-                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}" />
+                        <Image Stretch="UniformToFill" Source="{Binding Thumbnail}" />
                         <Rectangle Fill="{Binding RelatedSavegameHashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" HorizontalAlignment="Right" Height="29" VerticalAlignment="Bottom" Width="29"/>
                     </Grid>
                     <StackPanel Orientation="Vertical">
-						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">
 							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You resumed a savegame:"/>
 							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
@@ -82,10 +82,10 @@
 			<Grid d:LayoutOverrides="HorizontalAlignment">
 				<StackPanel Orientation="Horizontal">
                     <Border Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62" Background="{StaticResource PhoneAccentBrush}">
-                        <Image x:Name="Icon" Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+                        <Image Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
                     </Border>
                     <StackPanel Orientation="Vertical">
-						<TextBlock x:Name="Name" TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You completed the game!"/>
 						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
 					</StackPanel>
@@ -99,7 +99,7 @@
             </Grid>
 		</DataTemplate>
         
-        <CollectionViewSource x:Key="HistorySource" Source="{Binding DataContext.Model.History, ElementName=This}" />
+        <CollectionViewSource x:Key="HistorySource" Source="{Binding DataContext.Model.History, ElementName=ThisHP}" />
 		<DataTemplate x:Key="CartridgeProviderListItemTemplate">
 			<StackPanel d:DesignWidth="574" d:DesignHeight="45" Orientation="Horizontal">
 				<TextBlock TextWrapping="Wrap" Text="{Binding ServiceName, FallbackValue=Provider}" Style="{StaticResource EmptyListTextAccentStyle}"/>

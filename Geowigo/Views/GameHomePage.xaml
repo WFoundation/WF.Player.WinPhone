@@ -34,17 +34,7 @@
 	<Geowigo_Views:BasePage.Foreground>
 		<StaticResource ResourceKey="PhoneForegroundBrush"/>
 	</Geowigo_Views:BasePage.Foreground>
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton x:Name="appbar_button1" IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
-            <shell:ApplicationBarIconButton x:Name="appbar_button2" IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
-            <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem x:Name="menuItem1" Text="ÉlémentMenu 1"/>
-                <shell:ApplicationBarMenuItem x:Name="menuItem2" Text="ÉlémentMenu 2"/>
-            </shell:ApplicationBar.MenuItems>
-        </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
-    
+
 	<Geowigo_Views:BasePage.DataContext>
 		<Geowigo_ViewModels:GameHomeViewModel/>
 	</Geowigo_Views:BasePage.DataContext>
