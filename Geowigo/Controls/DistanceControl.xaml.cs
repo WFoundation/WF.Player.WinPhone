@@ -161,24 +161,9 @@ namespace Geowigo.Controls
 			// If the heading of the device has changed, adjusts the bearing that is on-screen.
 			if (e.Heading.HasValue)
 			{
-				//_isChangingBearingInternal = true;
-				//Bearing = (_originalBearing - e.Heading.Value) % 360;
-				//_isChangingBearingInternal = false;
-
 				RefreshBearing(deviceHeading: e.Heading);
 			}
 		}
-
-		//private void OnBearingChanged(DependencyPropertyChangedEventArgs e)
-		//{
-		//    //if (_isChangingBearingInternal)
-		//    //{
-		//    //    return;
-		//    //}
-
-		//    //// Updates the original bearing.
-		//    //_originalBearing = (double)e.NewValue;
-		//}
 
 		private void OnDistanceChanged(DependencyPropertyChangedEventArgs e)
 		{

@@ -284,6 +284,9 @@ namespace Geowigo.Models
 				Init(fs, cart);
 			}
 
+			// Adds info about the cartridge to the crash reporter.
+			Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
+
 			ApplySensorData();
 
 			// Run Time: the game starts.
@@ -326,6 +329,9 @@ namespace Geowigo.Models
 				{
 					Init(fs, cart);
 				}
+
+				// Adds info about the cartridge to the crash reporter.
+				Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
 
 				ApplySensorData();
 
@@ -385,6 +391,9 @@ namespace Geowigo.Models
 			{
 				Stop();
 				Reset();
+
+				// Clears info about the cartridge to the crash reporter.
+				Geowigo.Utils.DebugUtils.ClearBugSenseCrashExtraData();
 			});
 		}
 		#endregion

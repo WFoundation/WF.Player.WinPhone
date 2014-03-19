@@ -17,41 +17,42 @@ namespace Geowigo.Utils
 {
 	public class DebugUtils
 	{
-        /// <summary>
-        /// Dumps a message and data to the isolated storage.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="message"></param>
-        public static void DumpData(byte[] data, string message)
-        {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                // Ensures the folder exists.
-                isf.CreateDirectory("/Debug");
+		#region Dumps
+		/// <summary>
+		/// Dumps a message and data to the isolated storage.
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="message"></param>
+		public static void DumpData(byte[] data, string message)
+		{
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				// Ensures the folder exists.
+				isf.CreateDirectory("/Debug");
 
-                // Gets the filename prefix.
-                string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_msg_";
+				// Gets the filename prefix.
+				string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_msg_";
 
-                // Dumps the data.
-                using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "rawdata.txt"))
-                {
-                    stream.Write(data, 0, data.Length);
-                }
+				// Dumps the data.
+				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "rawdata.txt"))
+				{
+					stream.Write(data, 0, data.Length);
+				}
 
-                // Dumps the stack trace.
-                using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "msg_st.txt"))
-                {
-                    using (StreamWriter sw = new StreamWriter(stream))
-                    {
-                        sw.Write(message);
-                        sw.WriteLine("----");
-                        DumpStack(sw);
-                    }
-                }
-            }
-        }
-        
-        /// <summary>
+				// Dumps the stack trace.
+				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "msg_st.txt"))
+				{
+					using (StreamWriter sw = new StreamWriter(stream))
+					{
+						sw.Write(message);
+						sw.WriteLine("----");
+						DumpStack(sw);
+					}
+				}
+			}
+		}
+
+		/// <summary>
 		/// Dumps an exception and data to the isolated storage.
 		/// </summary>
 		/// <param name="data"></param>
@@ -62,9 +63,9 @@ namespace Geowigo.Utils
 			{
 				// Ensures the folder exists.
 				isf.CreateDirectory("/Debug");
-				
+
 				// Gets the filename prefix.
-				string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") +"_" + ex.GetHashCode() + "_";
+				string prefix = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_" + ex.GetHashCode() + "_";
 
 				// Dumps the data.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "ex_rawdata.txt"))
@@ -126,9 +127,9 @@ namespace Geowigo.Utils
 				{
 					sw.WriteLine("Custom header message:");
 					sw.WriteLine(header);
-					sw.WriteLine("---"); 
+					sw.WriteLine("---");
 				}
-				
+
 				sw.WriteLine("Main Exception: " + ex.GetType().FullName);
 				sw.WriteLine("---");
 				sw.WriteLine(ex);
@@ -145,14 +146,38 @@ namespace Geowigo.Utils
 			}
 		}
 
-        private static void DumpStack(StreamWriter sw)
-        {
-            sw.WriteLine("Stack trace:");
-            sw.WriteLine();
-            
-            StackTrace st = new StackTrace();
+		private static void DumpStack(StreamWriter sw)
+		{
+			sw.WriteLine("Stack trace:");
+			sw.WriteLine();
 
-            sw.WriteLine(st.ToString());
-        }
+			StackTrace st = new StackTrace();
+
+			sw.WriteLine(st.ToString());
+		} 
+		#endregion
+
+
+		#region BugSense Specific
+
+		/// <summary>
+		/// Adds an extra data to BugSense describing a cartridge.
+		/// </summary>
+		/// <param name="cart"></param>
+		public static void AddBugSenseCrashExtraData(WF.Player.Core.Cartridge cart)
+		{
+			var extraDataList = BugSenseHandler.Instance.CrashExtraData;
+			extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartGuid", cart.Guid));
+			extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", cart.Name));
+		}
+
+		/// <summary>
+		/// Removes all extra data currently associated to the BugSense instance.
+		/// </summary>
+		public static void ClearBugSenseCrashExtraData()
+		{
+			BugSenseHandler.Instance.ClearCrashExtraData();
+		} 
+		#endregion
 	}
 }
