@@ -85,7 +85,7 @@ namespace Geowigo
             UnhandledException += Application_UnhandledException;
 
             // Starting BugSense.
-            BugSense.BugSenseHandler.Instance.InitAndStartSession(new BugSense.Core.Model.ExceptionManager(this), "88834254");
+            BugSense.BugSenseHandler.Instance.InitAndStartSession(new BugSense.Core.Model.ExceptionManager(this), RootFrame, "88834254");
 
             // Initialisation Silverlight standard
             InitializeComponent();

@@ -50,9 +50,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BugSense-WP7, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="BugSense-WP7, Version=3.6.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\BugSense.WP7.3.6.3.0\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
+      <HintPath>..\packages\BugSense.WP7.3.6.5.0\lib\sl4-wp71\BugSense-WP7.dll</HintPath>
     </Reference>
     <Reference Include="ImageTools">
       <HintPath>..\libs\ImageTools.dll</HintPath>
