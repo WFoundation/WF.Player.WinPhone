@@ -177,8 +177,24 @@ namespace Geowigo.Controls
 			}
 			else
 			{
+				// Tries to retrieve the new distance value.
+				// In some rare cases this may fail.
+				double distanceValue = 0;
+				try
+				{
+					distanceValue = newDistance.Value;
+				}
+				catch (InvalidOperationException)
+				{
+					// This probably means that an error occurred while computing
+					// or retrieving the value. Let's display "Unknown" as a distance
+					// text.
+					DistanceText.Text = "Unknown";
+					return;
+				}
+				
 				// Are we inside or outside?
-				if (newDistance.Value == 0)
+				if (distanceValue == 0)
 				{
 					DistanceText.Text = "Here";
 					VisualStateManager.GoToState(this, this.InsideState.Name, true);
