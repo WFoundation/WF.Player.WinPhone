@@ -150,10 +150,18 @@ namespace Geowigo.Utils
 			
 			BitmapImage image = null;
 
-			using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Open, FileAccess.Read))
+			try
 			{
-				image = new BitmapImage();
-				image.SetSource(stream);
+				using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Open))
+				{
+					image = new BitmapImage();
+					image.SetSource(stream);
+				}
+			}
+			catch (Exception)
+			{
+				// The exception is ignored, and null is returned.
+				image = null;
 			}
 
 			return image;
@@ -200,7 +208,7 @@ namespace Geowigo.Utils
 			int targetHeight = (int) Math.Floor(targetWidth / sourcePixelRatio);
 			
 			// Saves the image.
-			using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Create))
+			using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Create, FileAccess.ReadWrite))
 			{
 				new WriteableBitmap(targetImage).SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
 			}
