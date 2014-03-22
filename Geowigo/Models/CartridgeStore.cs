@@ -305,7 +305,9 @@ namespace Geowigo.Models
 		private CartridgeTag AcceptCartridge(string filename)
 		{
             System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to accept cartridge " + filename);
-            
+
+			bool isAborted = false;
+
 			// Refreshes the progress.
 			string businessTag = "accept:" + filename;
 			_isBusyAggregator[businessTag] = true;
@@ -321,49 +323,65 @@ namespace Geowigo.Models
                 if (!isf.FileExists(filename))
                 {
                     System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Cartridge file not found: " + filename);
-					
-					// Refreshes the progress.
-					_isBusyAggregator[businessTag] = false;
-					
-					return null;
+
+					isAborted = true;
                 }
 
                 // Loads the metadata.
-                using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-                {
-					WF.Player.Core.Formats.CartridgeLoaders.Load(isfs, cart);
-                }
-			}
-			
-			// Returns the existing cartridge if it was found.
-			lock (_syncRoot)
-			{
-				existingCC = this.Items.SingleOrDefault(cc => cc.Guid == cart.Guid); 
-			}
-			if (existingCC != null)
-			{
-				// Refreshes the progress.
-				_isBusyAggregator[businessTag] = false;
-
-				return existingCC;
-			}
-			
-			// The cartridge does not exist in the store yet. Creates an entry for it.
-			CartridgeTag newCC = new CartridgeTag(cart);
-
-			// Adds the context to the store.
-			lock (_syncRoot)
-			{
-				this.Items.Add(newCC);
+				if (!isAborted)
+				{
+					using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+					{
+						try
+						{
+							WF.Player.Core.Formats.CartridgeLoaders.Load(isfs, cart);
+						}
+						catch (Exception ex)
+						{
+							// This cartridge seems improper to loading.
+							// Let's just dump the exception and return.
+							DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+							System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Loading failed, ignored : " + filename);
+							isAborted = true;
+						}
+					} 
+				}
 			}
 
-			// Makes the cache.
-			newCC.ImportOrMakeCache();
+			CartridgeTag newCC = null;
+			if (!isAborted)
+			{
+				// Returns the existing cartridge if it was found.
+				lock (_syncRoot)
+				{
+					existingCC = this.Items.SingleOrDefault(cc => cc.Guid == cart.Guid);
+				}
+				if (existingCC != null)
+				{
+					// Refreshes the progress.
+					_isBusyAggregator[businessTag] = false;
+
+					return existingCC;
+				}
+
+				// The cartridge does not exist in the store yet. Creates an entry for it.
+				newCC = new CartridgeTag(cart);
+
+				// Adds the context to the store.
+				lock (_syncRoot)
+				{
+					this.Items.Add(newCC);
+				}
+
+				// Makes the cache.
+				newCC.ImportOrMakeCache(); 
+			}
 
 			// Refreshes the progress.
 			_isBusyAggregator[businessTag] = false;
 
-			// Returns the new cartridge context.
+			// Returns the new cartridge context or null if the operation
+			// was aborted.
 			return newCC;
 		}
 
