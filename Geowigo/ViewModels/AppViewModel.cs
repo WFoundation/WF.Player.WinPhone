@@ -233,7 +233,18 @@ namespace Geowigo.ViewModels
 			}
 			else
 			{
-				App.Current.RootFrame.Navigate(new Uri(prefix + "HomePage.xaml", UriKind.Relative));
+				try
+				{
+					App.Current.RootFrame.Navigate(new Uri(prefix + "HomePage.xaml", UriKind.Relative));
+				}
+				catch (InvalidOperationException ex)
+				{
+					// This is probably due to a race condition between two navigation
+					// requests, one being this one, and the other likely to be an external
+					// task navigation (map task, etc.)
+					// There is nothing to do: the user will surely be luckier next time.
+					Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+				}
 			}
 		}
 
