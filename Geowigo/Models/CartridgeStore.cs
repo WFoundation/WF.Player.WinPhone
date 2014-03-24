@@ -391,7 +391,7 @@ namespace Geowigo.Models
 
 		private void AddDefaultProviders()
 		{
-			AddProvider(new SkyDriveCartridgeProvider());
+			AddProvider(new SkyDriveCartridgeProvider() { IsBackgroundDownloadAllowed = true });
 		}
 
 		private void AddProvider(ICartridgeProvider provider)

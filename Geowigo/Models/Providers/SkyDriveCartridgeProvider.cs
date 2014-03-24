@@ -63,7 +63,7 @@ namespace Geowigo.Models.Providers
 		#region Properties
 		public string ServiceName
 		{
-			get { return "SkyDrive"; }
+			get { return "OneDrive"; }
 		}
 
 		public bool IsLinked
