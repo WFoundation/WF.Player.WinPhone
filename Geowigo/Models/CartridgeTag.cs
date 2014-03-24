@@ -138,7 +138,7 @@ namespace Geowigo.Models
 		{
 			get
 			{
-				return _soundFiles;
+				return _soundFiles ?? (_soundFiles = new Dictionary<int,string>());
 			}
 		}
 
@@ -149,7 +149,7 @@ namespace Geowigo.Models
         {
             get
             {
-                return _savegames;
+				return _savegames ?? (_savegames = new List<CartridgeSavegame>());
             }
         }
 
