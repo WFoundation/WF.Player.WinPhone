@@ -197,7 +197,7 @@ namespace Geowigo.ViewModels
 
 			// If this ticks, the status text may have to disappear
 			// and the system tray should display some other progress instead.
-			RefreshProgressIndicator();
+			Deployment.Current.Dispatcher.BeginInvoke(RefreshProgressIndicator);
 		}
 
 		#endregion
