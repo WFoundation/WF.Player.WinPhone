@@ -346,17 +346,22 @@ namespace Geowigo.ViewModels
 				&& Cartridge.AuthorCompany != Cartridge.AuthorName;
 			if (hasAuthor || hasCompany)
 			{
+				sb.Append("by ");
 				if (hasAuthor)
 				{
 					sb.Append(Cartridge.AuthorName);
 					if (hasCompany)
 					{
-						sb.Append(" FROM ");
+						sb.Append(" (");
 					}
 				}
 				if (hasCompany)
 				{
 					sb.Append(Cartridge.AuthorCompany);
+					if (hasAuthor)
+					{
+						sb.Append(")");
+					}
 				}
 				Author = sb.ToString();
 			}

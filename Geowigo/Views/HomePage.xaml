@@ -36,8 +36,8 @@
 					</Border>
 					<StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
-						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You started playing."/>
-						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+						<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You started playing." Style="{StaticResource ListItemSubtitleTextStyle}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>
@@ -52,10 +52,10 @@
 					<StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">
-							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You saved the game:"/>
-							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
+							<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Text="You saved the game:" Style="{StaticResource ListItemSubtitleTextStyle}"/>
+							<TextBlock TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 						</StackPanel>
-						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>
@@ -70,10 +70,10 @@
                     <StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel Orientation="Horizontal">
-							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="You resumed a savegame:"/>
-							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" MaxHeight="25" TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap"/>
+							<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Text="You resumed a savegame:" Style="{StaticResource ListItemSubtitleTextStyle}"/>
+							<TextBlock TextTrimming="WordEllipsis" d:LayoutOverrides="Width" Margin="5,0,0,0" Text="{Binding RelatedSavegameName}" TextWrapping="Wrap" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 						</StackPanel>
-						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>
@@ -86,8 +86,8 @@
                     </Border>
                     <StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding RelatedCartridgeName, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
-						<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You completed the game!"/>
-						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}"/>
+						<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="You completed the game!" Style="{StaticResource ListItemSubtitleTextStyle}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource RelativeTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>

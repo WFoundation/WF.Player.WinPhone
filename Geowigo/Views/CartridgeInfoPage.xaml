@@ -30,10 +30,10 @@
 					<StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>
 						<StackPanel>
-							<TextBlock d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Text="Saved manually." Visibility="{Binding IsAutosave, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
-							<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneAccentBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Visibility="{Binding IsAutosave, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Saved "/><Run Text="automatically"/><Run Text="."/></TextBlock>
+							<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Text="Saved manually." Visibility="{Binding IsAutosave, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
+							<TextBlock Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Visibility="{Binding IsAutosave, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Style="{StaticResource ListItemSubtitleTextStyle}"><Run Text="Saved "/><Run Text="automatically"/><Run Text="."/></TextBlock>
 						</StackPanel>
-						<TextBlock FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeSmall}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="25" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource HourlyDateTimeConverter}}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource HourlyDateTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>
@@ -44,6 +44,14 @@
 				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=ThisCIP}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
 			</StackPanel>
 		</DataTemplate>
+		<Style x:Key="NormalTextStyle" TargetType="TextBlock">
+			<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+			<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
+		</Style>
+		<Style x:Key="BiggerTextStyle" TargetType="TextBlock">
+			<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+			<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+		</Style>
 	</Geowigo_Views:BasePage.Resources>
 	<Geowigo_Views:BasePage.FontFamily>
 		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
@@ -69,13 +77,10 @@
             <controls:PivotItem x:Name="InfoItem" Header="info">
                 <ScrollViewer>
             		<StackPanel>
-            			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Author, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}">
-            				<TextBlock TextWrapping="Wrap" Text="by " Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            				<TextBlock TextWrapping="Wrap" Text="{Binding Author}" Style="{StaticResource ListHeaderTextBlockStyle}"/>
-            			</StackPanel>
-            			<TextBlock TextWrapping="Wrap" Style="{StaticResource ListHeaderTextBlockStyle}" Visibility="{Binding Author, ConverterParameter=invert;strict, Converter={StaticResource ObjectToVisibilityConverter}}"><Run Text="("/><Run Text="U"/><Run Text="nknown "/><Run Text="a"/><Run Text="uthor)"/></TextBlock>
-            			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0"/>
+            			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource BiggerTextStyle}"/>
+            			<TextBlock TextWrapping="Wrap" Text="{Binding Author}" Style="{StaticResource BiggerTextStyle}" Visibility="{Binding Author, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
+            			<TextBlock TextWrapping="Wrap" Visibility="{Binding Author, ConverterParameter=invert;strict, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource BiggerTextStyle}"><Run Text="("/><Run Text="U"/><Run Text="nknown "/><Run Text="a"/><Run Text="uthor)"/></TextBlock>
+            			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0" Style="{StaticResource NormalTextStyle}"/>
             		</StackPanel>
             	</ScrollViewer>
             </controls:PivotItem>
@@ -88,8 +93,8 @@
                 	</Button>
             		<ScrollViewer Margin="0,0,0,-400">
             			<StackPanel Orientation="Vertical">
-            				<TextBlock x:Name="CoordinatesText" TextWrapping="Wrap" Text="{Binding StartingCoordinate}"/>
-            				<TextBlock x:Name="DescriptionText" TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}" d:LayoutOverrides="Width"/>
+            				<TextBlock x:Name="CoordinatesText" TextWrapping="Wrap" Text="{Binding StartingCoordinate}" Style="{StaticResource NormalTextStyle}"/>
+            				<TextBlock x:Name="DescriptionText" TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}" d:LayoutOverrides="Width" Style="{StaticResource NormalTextStyle}"/>
             			</StackPanel>
             		</ScrollViewer>
             	</StackPanel>
