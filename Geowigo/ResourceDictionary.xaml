@@ -53,7 +53,7 @@
 		</Grid>
 	</DataTemplate>
 	<DataTemplate x:Key="WherigoThingWithDistanceListItemTemplate">
-		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">
+		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="125">
 			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
 			<Grid>
 				<StackPanel Orientation="Horizontal">
@@ -98,6 +98,14 @@
 	<Style x:Key="ListItemSubtitleTextStyle" TargetType="TextBlock">
 		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
 		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
+	</Style>
+	<Style x:Key="ThingDescriptionTextStyle" TargetType="TextBlock">
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
+	</Style>
+	<Style x:Key="ThingTitleTextStyle" TargetType="TextBlock">
+		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
 	</Style>
 	
 </ResourceDictionary>
