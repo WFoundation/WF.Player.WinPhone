@@ -266,6 +266,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
 			{
+				WaitForLegalState();
 				return InitAndStartCartridge(filename);
 			});
 		}
@@ -309,6 +310,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
 			{
+				WaitForLegalState();
 				return InitAndRestoreCartridge(filename, gwsFilename);
 			});
 		}
@@ -357,13 +359,8 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew(() =>
 			{
-				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-				{
-					using (System.IO.Stream fs = cs.CreateOrReplace(isf))
-					{
-						Save(fs);
-					}
-				}
+				WaitForLegalState();
+				Save(cs);
 			});
 		} 
 
@@ -389,12 +386,65 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew(() =>
 			{
+				WaitForLegalState();
 				Stop();
 				Reset();
 
 				// Clears info about the cartridge to the crash reporter.
 				Geowigo.Utils.DebugUtils.ClearBugSenseCrashExtraData();
 			});
+		}
+
+		private void WaitForLegalState()
+		{
+			// Immediately returns if the engine is not in a concurrent
+			// state.
+			try
+			{
+				CheckStateIsNot(EngineGameState.Initializing, null);
+				CheckStateForConcurrentGameOperation();
+				
+				// If we get here, it means that the engine is not
+				// in a concurrent game operation.
+				return;
+			}
+			catch (InvalidOperationException)
+			{
+				// The engine is performing a concurrent operation.
+				// Let's keep on going.
+			}
+
+			// Sets up a manual reset event that is set when the engine state
+			// changes to a non-concurrent game state.
+			System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
+			PropertyChangedEventHandler handler = new PropertyChangedEventHandler((o, e) =>
+			{
+				if (e.PropertyName == "GameState")
+				{
+					try
+					{
+						CheckStateIsNot(EngineGameState.Initializing, null);
+						CheckStateForConcurrentGameOperation();
+
+						// The engine is not in a concurrent game operation.
+						// Let's signal the event.
+						resetEvent.Set();
+					}
+					catch (InvalidOperationException)
+					{
+						// The engine is performing a concurrent operation.
+						// Let's wait some more.
+						return;
+					}
+				}
+			});
+			PropertyChanged += handler;
+
+			// Waits on the event.
+			resetEvent.WaitOne();
+
+			// Removes the handler.
+			PropertyChanged -= handler;
 		}
 		#endregion
 
