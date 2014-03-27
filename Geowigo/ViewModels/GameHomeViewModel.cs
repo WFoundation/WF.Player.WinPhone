@@ -269,7 +269,24 @@ namespace Geowigo.ViewModels
 			e.Cancel = true;
 
 			// Ask if we really want to leave the game.
-			if (System.Windows.MessageBox.Show("Do you want to quit the game? (Your unsaved progress will be lost.)", "Exit to main menu?", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+			System.Windows.MessageBoxResult result = System.Windows.MessageBoxResult.None;
+			try
+			{
+				result = System.Windows.MessageBox.Show("Do you want to quit the game? (Your unsaved progress will be lost.)", "Exit to main menu?", MessageBoxButton.OKCancel);
+			}
+			catch (Exception ex)
+			{
+				// An exception with message "0x8000ffff" is thrown if this message box
+				// is requested to be shown a second time while the first request has 
+				// still not been processed. In this case, do nothing and hope that
+				// the user has better luck next time. In other cases, throw the exception
+				// back.
+				if (ex.Message == null || !ex.Message.Contains("0x8000ffff"))
+				{
+					throw;
+				}
+			}
+			if (result == System.Windows.MessageBoxResult.OK)
 			{
 				// Leaves to main menu and stops the game.
 				App.Current.ViewModel.NavigateToAppHome(true);
