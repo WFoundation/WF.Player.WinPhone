@@ -434,6 +434,12 @@ namespace Geowigo.Models.Providers
 					// Makes sure the directory exists.
 					isf.CreateDirectory(IsoStoreCartridgesPath);
 
+					// Removes the destination file if it exists.
+					if (isf.FileExists(filepath))
+					{
+						isf.DeleteFile(filepath);
+					}
+
 					// Moves the downloaded file to the right place.
 					try
 					{
@@ -443,7 +449,7 @@ namespace Geowigo.Models.Providers
 					{
 						// In case of exception here, do nothing.
 						// An attempt to load the file will be done anyway.
-						Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+						Geowigo.Utils.DebugUtils.DumpException(ex, string.Format("dlFilename={0};targetFilename={1}", dlFilename, filepath), true);
 					}
 				}
 			}
