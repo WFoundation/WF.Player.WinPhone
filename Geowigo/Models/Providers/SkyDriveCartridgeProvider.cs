@@ -365,11 +365,8 @@ namespace Geowigo.Models.Providers
 						GetDownloadUserState(file)
 						);
 				}
-				catch (Exception ex)
+				catch (Exception)
 				{
-					// Logs the exception.
-					Utils.DebugUtils.DumpException(ex, "SkyDriveCartridgeProvider, background download attempt on actual device.", true);
-
 					// Tries the direct download method.
 					_liveClient.DownloadAsync(fileAttribute, GetDownloadUserState(file));
 				}
