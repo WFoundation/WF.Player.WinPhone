@@ -212,6 +212,9 @@ namespace Geowigo.ViewModels
 
 		private void NavigateToAppHomeCore()
 		{
+			// Resets the custom system tray status.
+			SystemTrayManager.StatusText = null;
+			
 			// Removes all back entries until the app home is found.
 			string prefix = "/Views/";
 			foreach (JournalEntry entry in App.Current.RootFrame.BackStack.ToList())
@@ -376,12 +379,7 @@ namespace Geowigo.ViewModels
 				
 				return;
 			}
-			string previousPageName = previousPage.Source.ToString();
-			string prefix = "/Views/";
-			if (!(previousPageName.StartsWith(prefix + "GameHomePage.xaml") ||
-				previousPageName.StartsWith(prefix + "InputPage.xaml") ||
-				previousPageName.StartsWith(prefix + "TaskPage.xaml") ||
-				previousPageName.StartsWith(prefix + "ThingPage.xaml")))
+			if (!IsGameViewUri(previousPage.Source))
 			{
 				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because previous page is no game!");
 				
@@ -413,6 +411,21 @@ namespace Geowigo.ViewModels
 
 			// Goes back.
 			App.Current.RootFrame.GoBack();
+		}
+
+		/// <summary>
+		/// Determines if a page name corresponds to a view of the game.
+		/// </summary>
+		/// <param name="pageUri"></param>
+		/// <returns></returns>
+		public bool IsGameViewUri(Uri pageUri)
+		{
+			string pageName = pageUri.ToString();
+			string prefix = "/Views/";
+			return pageName.StartsWith(prefix + "GameHomePage.xaml") ||
+				pageName.StartsWith(prefix + "InputPage.xaml") ||
+				pageName.StartsWith(prefix + "TaskPage.xaml") ||
+				pageName.StartsWith(prefix + "ThingPage.xaml");
 		}
 
 		/// <summary>

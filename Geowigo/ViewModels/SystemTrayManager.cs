@@ -69,6 +69,8 @@ namespace Geowigo.ViewModels
 		public SystemTrayManager()
 		{
 			_progressAggregator.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnProgressAggregatorPropertyChanged);
+
+			App.Current.RootFrame.Navigated += new System.Windows.Navigation.NavigatedEventHandler(OnPageNavigated);
 		}
 
 		#region Generic Progress
@@ -263,5 +265,16 @@ namespace Geowigo.ViewModels
 				Deployment.Current.Dispatcher.BeginInvoke(RefreshProgressIndicator);
 			}
 		}
+
+		private void OnPageNavigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+		{
+			// When a new page is displayed, refresh the system tray only
+			// if the page corresponds to an in-game view.
+			if (App.Current.ViewModel.IsGameViewUri(e.Uri))
+			{
+				RefreshProgressIndicator(); 
+			}
+		}
+
 	}
 }

@@ -368,6 +368,9 @@ namespace Geowigo.ViewModels
 			// Makes sure the screen lock is disabled.
 			App.Current.ViewModel.IsScreenLockEnabled = false;
 
+			// Resets the custom status text.
+			App.Current.ViewModel.SystemTrayManager.StatusText = null;
+
 			// Tries to get the filename to query for.
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
