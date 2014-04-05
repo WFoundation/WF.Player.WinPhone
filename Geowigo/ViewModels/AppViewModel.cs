@@ -37,6 +37,8 @@ namespace Geowigo.ViewModels
 
 		private SystemTrayManager _SystemTrayManagerInstance;
 
+		private InputManager _InputManagerInstance;
+
         private ActionPump _actionPump;
 
 		#endregion
@@ -88,6 +90,21 @@ namespace Geowigo.ViewModels
 			get
 			{
 				return "Geowigo Wherigo Player";
+			}
+		}
+
+		#endregion
+
+		#region InputManager
+
+		/// <summary>
+		/// Gets the input manager for this view model.
+		/// </summary>
+		public InputManager InputManager
+		{
+			get
+			{
+				return _InputManagerInstance ?? (_InputManagerInstance = new InputManager());
 			}
 		}
 
@@ -608,6 +625,9 @@ namespace Geowigo.ViewModels
 
 		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
 		{
+			// Alerts the input manager of this request.
+			InputManager.HandleInputRequested(e.Object);
+			
 			// Navigates to the input view.
 			NavigateToView(e.Object);
 		}

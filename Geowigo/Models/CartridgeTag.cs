@@ -225,9 +225,6 @@ namespace Geowigo.Models
 
                 // Savegames
                 ImportSavegamesCache(isf);
-
-				// Cartridge internal description.
-				//ImportOrMakeMetadataCache(isf);
 			}
 		}
 
@@ -413,44 +410,6 @@ namespace Geowigo.Models
             RaisePropertyChanged("Savegames");
         }
 
-		//private void ImportOrMakeMetadataCache(IsolatedStorageFile isf)
-		//{
-		//    //if (Cartridge.Filename.Contains("dixieme"))
-		//    //{
-		//    //    Cartridge.BeginRefreshFromWebpage();
-		//    //}
-			
-			
-		//    //// Loads the internal properties of the cartridge.
-		//    //// They contain additional metadata.
-		//    //using (WF.Player.Core.Engines.Engine engine = WherigoHelper.CreateEngine())
-		//    //{
-		//    //    engine.Init(Cartridge);
-		//    //}
-		//    //Title = Cartridge.InternalName;
-		//    //Description = Cartridge.InternalDescription;
-		//    //StartingDescription = Cartridge.InternalStartingDescription;
-		//    //RaisePropertyChanged("Title");
-		//    //RaisePropertyChanged("Description");
-		//    //RaisePropertyChanged("StartingDescription");
-		//}
-
-		//private void MakeMetadataCache(IsolatedStorageFile isf)
-		//{
-		//    // TODO: For each problematic property, detect the presence of '?'
-		//    // character in the middle of words. If so, replace by corresponding
-		//    // property from the cartridge.
-
-		//    bool correctTitle = IsInvalidString(Cartridge.Name, false);
-		//    bool correctDesc = IsInvalidString(Cartridge.LongDescription, true);
-		//    bool correctStartDesc = IsInvalidString(Cartridge.StartingDescription, true);
-		//}
-
-		//private bool IsInvalidString(string str, bool ignoreFirstLast)
-		//{
-		//    return false;
-		//}
-
 		#endregion
 
 		private void RaisePropertyChanged(string propName)
@@ -463,21 +422,5 @@ namespace Geowigo.Models
 				}
 			});
 		}
-
-		// private void OnCartridgePropertyChanged(object sender, PropertyChangedEventArgs e)
-		// {
-			// if ("Name".Equals(e.PropertyName))
-			// {
-				// Title = Cartridge.Name;
-			// }
-			// else if ("StartingDescription".Equals(e.PropertyName))
-			// {
-				// StartingDescription = Cartridge.StartingDescription;
-			// }
-			// else if ("LongDescription".Equals(e.PropertyName))
-			// {
-				// Description = Cartridge.LongDescription;
-			// }
-		// }
     }
 }
