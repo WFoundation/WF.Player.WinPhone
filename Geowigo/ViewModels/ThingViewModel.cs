@@ -193,7 +193,7 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
-		public void OnPageNavigatedBackTo()
+		protected override void OnPageNavigatedBackToOverride()
 		{
 			// Makes sure the page still should be shown.
 			CheckShouldNavigateBack();
@@ -201,13 +201,26 @@ namespace Geowigo.ViewModels
 
 		private void CheckShouldNavigateBack()
 		{
-			Thing cont = WherigoObject.Container;
-			if (!WherigoObject.Visible 
-				|| (WherigoObject is Zone && !((Zone)WherigoObject).Active)
-				|| cont == null 
-				|| (cont != Model.Core.Player && !cont.Visible))
+			bool shouldGoBack = false;
+
+			if (WherigoObject == null)
 			{
-				App.Current.ViewModel.NavigateBack();
+				// Go back if this view has no associated wherigo object
+				// because this is an unexpected case.
+				shouldGoBack = true;
+			}
+			else
+			{
+				Thing cont = WherigoObject.Container;
+				shouldGoBack = !WherigoObject.Visible
+					|| (WherigoObject is Zone && !((Zone)WherigoObject).Active)
+					|| cont == null
+					|| (cont != Model.Core.Player && !cont.Visible);
+			}
+
+			if (shouldGoBack)
+			{
+				App.Current.ViewModel.NavigateBack(); 
 			}
 		}
 

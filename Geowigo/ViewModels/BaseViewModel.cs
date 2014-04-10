@@ -255,25 +255,37 @@ namespace Geowigo.ViewModels
 				// Navigates back home.
 				App.Current.ViewModel.NavigateToAppHome(true);
 			}
+
+			// Always perform the common initializations.
+			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode, false);
+			InitFromNavigationInternal(nav);
 			
 			// This view model needs to be init'ed only if the navigation 
 			// gets to the associated page for the first time, or if
 			// the app is recovering from being tombstoned.
 			if (e.NavigationMode == NavigationMode.New || e.NavigationMode == NavigationMode.Refresh)
 			{
-				InitFromNavigation(new NavigationInfo(navCtx, e.NavigationMode, false));
+				InitFromNavigation(nav);
 			}
+			else if (e.NavigationMode == NavigationMode.Back)
+			{
+				OnPageNavigatedBackToOverride();
+			}
+		}
+
+		/// <summary>
+		/// Called when the user navigated back to page.
+		/// </summary>
+		protected virtual void OnPageNavigatedBackToOverride()
+		{
 		}
 
 		/// <summary>
 		/// Initializes the view model from the navigation context.
 		/// </summary>
-		/// <remarks>The default behavior finds and binds to the right object depending
-		/// on the Id field.</remarks>
 		/// <param name="navCtx"></param>
 		protected virtual void InitFromNavigation(NavigationInfo nav)
 		{
-			InitFromNavigationInternal(nav);
 		}
 
 		private void InitFromNavigationInternal(NavigationInfo nav)
@@ -293,8 +305,6 @@ namespace Geowigo.ViewModels
 					}
 				}
 			}
-
-			// TODO: in case of nothing found, do something special ?
 		} 
 		#endregion
 

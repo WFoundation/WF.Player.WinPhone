@@ -55,16 +55,6 @@ namespace Geowigo.Views
 			ViewModel.CommandTargetRequested += new EventHandler<ThingViewModel.CommandTargetRequestedEventArgs>(ViewModel_CommandTargetRequested);
 		}
 
-		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-		{
-			base.OnNavigatedTo(e);
-
-			if (e.NavigationMode == System.Windows.Navigation.NavigationMode.Back)
-			{
-				ViewModel.OnPageNavigatedBackTo();
-			}
-		}
-
 		#region Command Target Selection
 		private void ViewModel_CommandTargetRequested(object sender, ThingViewModel.CommandTargetRequestedEventArgs e)
 		{
