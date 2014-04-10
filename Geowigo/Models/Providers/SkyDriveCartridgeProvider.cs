@@ -659,7 +659,7 @@ namespace Geowigo.Models.Providers
 				ParseDownloadEventArgs(e, out fileId, out dlFilename, out originalFilename);
 
 				// Removes the file if it is registered.
-				SkyDriveFile file = _dlFiles.SingleOrDefault(sd => sd.Id.Equals(fileId));
+				SkyDriveFile file = _dlFiles.FirstOrDefault(sd => sd.Id.Equals(fileId));
 				if (file != null)
 				{
 					_dlFiles.Remove(file);
