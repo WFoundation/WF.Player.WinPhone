@@ -52,5 +52,14 @@ namespace Geowigo.ViewModels
 		{
 			return input != null && input.ObjIndex == _lastInputObjIndex && _consecutiveRequests > MAX_IGNORED_CONSECUTIVE_REQUESTS;
 		}
+
+		/// <summary>
+		/// Resets this manager so that no Input is marked as looping.
+		/// </summary>
+		public void Reset()
+		{
+			_lastInputObjIndex = -1;
+			_consecutiveRequests = 0;
+		}
 	}
 }

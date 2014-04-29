@@ -212,15 +212,17 @@ namespace Geowigo.ViewModels
 			else
 			{
 				Thing cont = WherigoObject.Container;
-				shouldGoBack = !WherigoObject.Visible
-					|| (WherigoObject is Zone && !((Zone)WherigoObject).Active)
-					|| cont == null
-					|| (cont != Model.Core.Player && !cont.Visible);
+				shouldGoBack = IsPageVisible && // The page must be visible to be able to trigger a navigation.
+					(!WherigoObject.Visible // The object is not supposed to be visible.
+					|| (WherigoObject is Zone && !((Zone)WherigoObject).Active) // The zone is not active.
+					//|| (cont == null && !(WherigoObject is Zone)) // The item or character has no container.
+					|| (cont != null && cont != Model.Core.Player && !cont.Visible) // The container is invisible.
+					);
 			}
 
 			if (shouldGoBack)
 			{
-				App.Current.ViewModel.NavigateBack(); 
+				App.Current.ViewModel.NavigationManager.NavigateBack(); 
 			}
 		}
 

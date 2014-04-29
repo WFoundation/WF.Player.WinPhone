@@ -242,7 +242,7 @@ namespace Geowigo.ViewModels
 		public void InitFromNavigation(System.Windows.Navigation.NavigationEventArgs e)
 		{
 			// Removes the back entries, if any.
-			App.Current.ViewModel.ClearBackStack();
+			App.Current.ViewModel.NavigationManager.ClearBackStack();
 			
 			// Synchronizes the cartridge store.
             RefreshVisibilities();
@@ -261,13 +261,13 @@ namespace Geowigo.ViewModels
         private void StartCartridge(CartridgeTag cartTag)
         {
             // Starts the cartridge!
-            App.Current.ViewModel.NavigateToGameHome(cartTag.Cartridge.Filename);
+            App.Current.ViewModel.NavigationManager.NavigateToGameHome(cartTag.Cartridge.Filename);
         }
 
         private void ShowCartridgeInfo(CartridgeTag cartTag)
         {
             // Show the cartridge info!
-            App.Current.ViewModel.NavigateToCartridgeInfo(cartTag);
+            App.Current.ViewModel.NavigationManager.NavigateToCartridgeInfo(cartTag);
         }
 
 		private void RunProviderAction(ICartridgeProvider provider)
@@ -343,7 +343,7 @@ namespace Geowigo.ViewModels
                 else
                 {
                     // Restores the cartridge.
-                    App.Current.ViewModel.NavigateToGameHome(tag.Cartridge.Filename, savegame);
+                    App.Current.ViewModel.NavigationManager.NavigateToGameHome(tag.Cartridge.Filename, savegame);
                 }
             }
             else
@@ -381,7 +381,7 @@ namespace Geowigo.ViewModels
 		private void CalibrateCompass()
 		{
 			// Navigates to the right page.
-			App.Current.ViewModel.NavigateToCompassCalibration();			
+			App.Current.ViewModel.NavigationManager.NavigateToCompassCalibration();			
 		}
 
 		private bool CanCalibrateCompassExecute()

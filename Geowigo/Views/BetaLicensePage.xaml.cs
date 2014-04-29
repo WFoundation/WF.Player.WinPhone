@@ -34,7 +34,7 @@ namespace Geowigo.Views
         private void AcceptBtn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
         	// Go on!
-			App.Current.ViewModel.NavigateToAppHome();
+			App.Current.ViewModel.NavigationManager.NavigateToAppHome();
         }
     }
 }

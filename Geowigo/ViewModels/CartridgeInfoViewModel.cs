@@ -273,13 +273,13 @@ namespace Geowigo.ViewModels
 		private void StartNewGame()
 		{
 			// Starts a new game!
-			App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename);
+			App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename);
 		}
 
         private void ResumeGame(CartridgeSavegame savegame)
         {
             // Resumes the game!
-            App.Current.ViewModel.NavigateToGameHome(Cartridge.Filename, savegame);
+            App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename, savegame);
         }
 
         private void NavigateToStart()

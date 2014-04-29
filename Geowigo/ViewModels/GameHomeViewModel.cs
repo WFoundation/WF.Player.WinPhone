@@ -289,7 +289,7 @@ namespace Geowigo.ViewModels
 			if (result == System.Windows.MessageBoxResult.OK)
 			{
 				// Leaves to main menu and stops the game.
-				App.Current.ViewModel.NavigateToAppHome(true);
+				App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
 			}
 		}
 
@@ -332,7 +332,7 @@ namespace Geowigo.ViewModels
 
 		protected override void OnModelChanged(Models.WherigoModel newModel)
 		{
-			if (newModel.Core.IsReady)
+			if (newModel != null && newModel.Core.IsReady)
 			{
 				// Refreshes all visibilities.
 				RefreshVisibilities();
@@ -458,7 +458,7 @@ namespace Geowigo.ViewModels
         private void ShowDetails(UIObject t)
         {
             // Navigates to the appropriate view.
-            App.Current.ViewModel.NavigateToView(t);
+            App.Current.ViewModel.NavigationManager.NavigateToView(t);
         }
 
         /// <summary>

@@ -127,6 +127,7 @@
     </Compile>
     <Compile Include="Utils\ProgressAggregator.cs" />
     <Compile Include="ViewModels\InputManager.cs" />
+    <Compile Include="ViewModels\NavigationManager.cs" />
     <Compile Include="ViewModels\SystemTrayManager.cs" />
     <Compile Include="Views\BetaLicensePage.xaml.cs">
       <DependentUpon>BetaLicensePage.xaml</DependentUpon>

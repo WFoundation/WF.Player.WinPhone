@@ -98,8 +98,18 @@ namespace Geowigo.Views
 		{
 			base.OnNavigatedTo(e);
 
+			System.Diagnostics.Debug.WriteLine("BasePage: Now on air - " + e.Uri.ToString());
+
 			// Relays the event to the view model.
 			ViewModel.OnPageNavigatedTo(e, NavigationContext);
+		}
+
+		protected override void OnNavigatingFrom(System.Windows.Navigation.NavigatingCancelEventArgs e)
+		{
+			base.OnNavigatingFrom(e);
+			
+			// Relays the event to the view model.
+			ViewModel.OnPageNavigatingFrom(e, NavigationContext);
 		}
 
 		/// <summary>

@@ -127,9 +127,10 @@ namespace Geowigo.ViewModels
 		private void AcceptAnswer()
 		{
 			// Closes current page.
-			App.Current.ViewModel.NavigateBack();
+			App.Current.ViewModel.NavigationManager.NavigateBack();
 
-			// Calls back on the input.
+			// Calls back on the input in the Dispatcher thread,
+			// in order to make sure that any potential navigation 
 			Input.GiveResult(Answer);
 		}
 
@@ -141,7 +142,7 @@ namespace Geowigo.ViewModels
 
 			if (System.Windows.MessageBox.Show(message, caption, MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
 			{
-				App.Current.ViewModel.NavigateToAppHome(true);
+				App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
 			}
 		}
 		#endregion

@@ -96,6 +96,10 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
+		#region IsPageVisible
+		public bool IsPageVisible { get; private set; }
+		#endregion
+
 		#endregion
 		
 		#region Fields
@@ -253,8 +257,12 @@ namespace Geowigo.ViewModels
 			if (!e.IsNavigationInitiator)
 			{
 				// Navigates back home.
-				App.Current.ViewModel.NavigateToAppHome(true);
+				App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
+				return;
 			}
+
+			// Marks the page as visible.
+			IsPageVisible = true;
 
 			// Always perform the common initializations.
 			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode, false);
@@ -305,7 +313,19 @@ namespace Geowigo.ViewModels
 					}
 				}
 			}
-		} 
+		}
+
+		/// <summary>
+		/// Called by the page when the navigation is leaving it.
+		/// </summary>
+		/// <param name="e"></param>
+		/// <param name="navctx"></param>
+		public void OnPageNavigatingFrom(NavigatingCancelEventArgs e, NavigationContext navctx)
+		{
+			// Marks the page as invisible.
+			IsPageVisible = false;
+		}
+
 		#endregion
 
 		#region App View Model Event Handlers

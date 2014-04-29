@@ -270,7 +270,7 @@ namespace Geowigo.ViewModels
 		{
 			// When a new page is displayed, refresh the system tray only
 			// if the page corresponds to an in-game view.
-			if (App.Current.ViewModel.IsGameViewUri(e.Uri))
+			if (App.Current.ViewModel.NavigationManager.IsGameViewUri(e.Uri))
 			{
 				RefreshProgressIndicator(); 
 			}

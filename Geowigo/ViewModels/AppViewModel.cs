@@ -39,6 +39,8 @@ namespace Geowigo.ViewModels
 
 		private InputManager _InputManagerInstance;
 
+		private NavigationManager _NavigationManagerInstance;
+
         private ActionPump _actionPump;
 
 		#endregion
@@ -110,62 +112,6 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		#region MessageBoxManager
-
-		/// <summary>
-		/// Gets the message box manager for this view model.
-		/// </summary>
-		public MessageBoxManager MessageBoxManager
-		{
-			get
-			{
-				return _MBManagerInstance ?? (_MBManagerInstance = new MessageBoxManager());
-			}
-		}
-
-		#endregion
-
-		#region SoundManager
-
-		/// <summary>
-		/// Gets the sound manager for this view model.
-		/// </summary>
-		public SoundManager SoundManager
-		{
-			get
-			{
-				return _SoundManagerInstance ?? (_SoundManagerInstance = new SoundManager());
-			}
-		}
-
-		#endregion
-
-        #region SavegameManager
-		/// <summary>
-		/// Gets the manager of savegames.
-		/// </summary>
-        public SavegameManager SavegameManager
-        {
-            get
-            {
-                return _SavegameManagerInstance ?? (_SavegameManagerInstance = new SavegameManager(this));
-            }
-        }
-        #endregion
-
-		#region SystemTrayManager
-		/// <summary>
-		/// Gets the manager of the system tray.
-		/// </summary>
-		public SystemTrayManager SystemTrayManager
-		{
-			get
-			{
-				return _SystemTrayManagerInstance ?? (_SystemTrayManagerInstance = new SystemTrayManager());
-			}
-		}
-		#endregion
-
 		#region IsScreenLockEnabled
 		/// <summary>
 		/// Gets or sets if the screen should lock automatically if the user does
@@ -185,6 +131,74 @@ namespace Geowigo.ViewModels
 		}
 		#endregion
 
+		#region MessageBoxManager
+
+		/// <summary>
+		/// Gets the message box manager for this view model.
+		/// </summary>
+		public MessageBoxManager MessageBoxManager
+		{
+			get
+			{
+				return _MBManagerInstance ?? (_MBManagerInstance = new MessageBoxManager());
+			}
+		}
+
+		#endregion
+
+		#region NavigationManager
+		/// <summary>
+		/// Gets the navigation manager for this view model.
+		/// </summary>
+		public NavigationManager NavigationManager
+		{
+			get
+			{
+				return _NavigationManagerInstance ?? (_NavigationManagerInstance = new NavigationManager(this));
+			}
+		}
+		#endregion
+
+		#region SavegameManager
+		/// <summary>
+		/// Gets the manager of savegames.
+		/// </summary>
+		public SavegameManager SavegameManager
+		{
+			get
+			{
+				return _SavegameManagerInstance ?? (_SavegameManagerInstance = new SavegameManager(this));
+			}
+		}
+		#endregion
+
+		#region SoundManager
+
+		/// <summary>
+		/// Gets the sound manager for this view model.
+		/// </summary>
+		public SoundManager SoundManager
+		{
+			get
+			{
+				return _SoundManagerInstance ?? (_SoundManagerInstance = new SoundManager());
+			}
+		}
+
+		#endregion
+
+		#region SystemTrayManager
+		/// <summary>
+		/// Gets the manager of the system tray.
+		/// </summary>
+		public SystemTrayManager SystemTrayManager
+		{
+			get
+			{
+				return _SystemTrayManagerInstance ?? (_SystemTrayManagerInstance = new SystemTrayManager());
+			}
+		}
+		#endregion
 		#endregion
 
         #region Constructors
@@ -210,163 +224,6 @@ namespace Geowigo.ViewModels
         }
 
 		/// <summary>
-		/// Navigates the app to the main page of the app.
-		/// </summary>
-		public void NavigateToAppHome(bool stopCurrentGame = false)
-		{
-			// Stops the current game if needed.
-			if (stopCurrentGame && Model.Core.Cartridge != null)
-			{
-				Model.Core.StopAndResetAsync().ContinueWith(
-					t => NavigateToAppHomeCore(), 
-					System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
-			}
-			else
-			{
-				NavigateToAppHomeCore();
-			}
-		}
-
-		private void NavigateToAppHomeCore()
-		{
-			// Resets the custom system tray status.
-			SystemTrayManager.StatusText = null;
-			
-			// Removes all back entries until the app home is found.
-			string prefix = "/Views/";
-			foreach (JournalEntry entry in App.Current.RootFrame.BackStack.ToList())
-			{
-				if (entry.Source.ToString().StartsWith(prefix + "HomePage.xaml"))
-				{
-					break;
-				}
-
-				// Removes the current entry.
-				App.Current.RootFrame.RemoveBackEntry();
-			}
-
-			// If there is a back entry, goes back: it is the game home.
-			// Otherwise, navigates to the game home.
-			if (App.Current.RootFrame.BackStack.Count() > 0)
-			{
-				App.Current.RootFrame.GoBack();
-			}
-			else
-			{
-				try
-				{
-					App.Current.RootFrame.Navigate(new Uri(prefix + "HomePage.xaml", UriKind.Relative));
-				}
-				catch (InvalidOperationException ex)
-				{
-					// This is probably due to a race condition between two navigation
-					// requests, one being this one, and the other likely to be an external
-					// task navigation (map task, etc.)
-					// There is nothing to do: the user will surely be luckier next time.
-					Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Navigates the app to the page of compass calibration.
-		/// </summary>
-		public void NavigateToCompassCalibration()
-		{
-			string pageUrl = "/Views/CompassCalibrationPage.xaml";
-			
-			// Discards the request if the current page is already the compass calibration.
-			if (App.Current.RootFrame.CurrentSource.OriginalString.StartsWith(pageUrl))
-			{
-				return;
-			}
-
-			// Navigates
-			App.Current.RootFrame.Navigate(new Uri(pageUrl, UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the game main page of a cartridge.
-		/// </summary>
-		public void NavigateToGameHome(string filename)
-		{
-			App.Current.RootFrame.Navigate(new Uri(String.Format("/Views/GameHomePage.xaml?{0}={1}", GameHomeViewModel.CartridgeFilenameKey, filename), UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the game main page of a cartridge at a specific section.
-		/// </summary>
-		public void NavigateToGameHome(string filename, string section)
-		{
-			App.Current.RootFrame.Navigate(new Uri(String.Format("/Views/GameHomePage.xaml?{0}={1}&{2}={3}", GameHomeViewModel.CartridgeFilenameKey, filename, GameHomeViewModel.SectionKey, section), UriKind.Relative));
-		}
-
-        /// <summary>
-        /// Navigates the app to the game main page of a cartridge and restores a
-        /// savegame.
-        /// </summary>
-        public void NavigateToGameHome(string filename, CartridgeSavegame savegame)
-        {
-            App.Current.RootFrame.Navigate(new Uri(String.Format(
-                "/Views/GameHomePage.xaml?{0}={1}&{2}={3}", 
-                GameHomeViewModel.CartridgeFilenameKey, 
-                filename,
-                GameHomeViewModel.SavegameFilenameKey,
-                savegame.SavegameFile), UriKind.Relative));
-        }
-
-		/// <summary>
-		/// Navigates the app to the info page of a cartridge.
-		/// </summary>
-		public void NavigateToCartridgeInfo(CartridgeTag tag)
-		{
-			App.Current.RootFrame.Navigate(new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}&{2}={3}", CartridgeInfoViewModel.CartridgeFilenameKey, tag.Cartridge.Filename, CartridgeInfoViewModel.CartridgeIdKey, tag.Guid), UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the view that best fits an Input object.
-		/// </summary>
-		/// <param name="wherigoObj"></param>
-		public void NavigateToView(Input wherigoObj)
-		{
-			App.Current.RootFrame.Navigate(new Uri("/Views/InputPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the view that best fits a Thing object.
-		/// </summary>
-		/// <param name="wherigoObj"></param>
-		public void NavigateToView(Thing wherigoObj)
-		{
-			App.Current.RootFrame.Navigate(new Uri("/Views/ThingPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the view that best fits a Task object.
-		/// </summary>
-		/// <param name="wherigoObj"></param>
-		public void NavigateToView(Task wherigoObj)
-		{
-			App.Current.RootFrame.Navigate(new Uri("/Views/TaskPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
-		}
-
-		/// <summary>
-		/// Navigates the app to the view that best fits a UIObject object.
-		/// </summary>
-		/// <param name="wherigoObj"></param>
-		public void NavigateToView(UIObject wherigoObj)
-		{
-			if (wherigoObj is Thing)
-			{
-				NavigateToView((Thing)wherigoObj);
-			}
-			else if (wherigoObj is Task)
-			{
-				NavigateToView((Task)wherigoObj);
-			}
-		}
-
-		/// <summary>
 		/// Displays a message box. If a message box is currently on-screen, it will be cancelled.
 		/// </summary>
 		/// <param name="mbox"></param>
@@ -376,87 +233,7 @@ namespace Geowigo.ViewModels
 			MessageBoxManager.Show(mbox);
 		}
 
-		/// <summary>
-		/// Navigates one step back in the game activity.
-		/// </summary>
-		/// <remarks>
-		/// This method has no effect if the previous view in the stack is not a game view.
-		/// </remarks>
-		/// <param name="currentExpectedView">The name of the view source is expected
-		/// to be displayed. If non-null, and the current view is not the same as
-		/// the <paramref name="currentExpectedView"/>, the current expected view
-		/// is removed from the back stack, and the navigation is cancelled.</param>
-		public void NavigateBack(Uri currentExpectedView = null)
-		{			
-			// Returns if the previous view is not a game view.
-			JournalEntry previousPage = App.Current.RootFrame.BackStack.FirstOrDefault();
-			if (previousPage == null)
-			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because no page in the stack.");
-				
-				return;
-			}
-			if (!IsGameViewUri(previousPage.Source))
-			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because previous page is no game!");
-				
-				return;
-			}
-
-			// Returns if the current view is not expected.
-			// This means that a navigation happened between this navigate back
-			// was originally triggered and now.
-			// When this happens, the back stack needs to be cleared of this expected
-			// view if possible, and then the method should return.
-			if (currentExpectedView != null && currentExpectedView != App.Current.RootFrame.CurrentSource)
-			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because a navigation occured after the call.");
-
-				return;
-			}
-
-			// Do not navigate back if a message box is on-screen.
-			// Instead, delay the navigation.
-			if (MessageBoxManager.HasMessageBox)
-			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() delayed because a message box is on-screen!");
-
-				BeginRunOnIdle(new Action(() => NavigateBack(currentExpectedView ?? App.Current.RootFrame.CurrentSource)));
-
-				return;
-			}
-
-			// Goes back.
-			App.Current.RootFrame.GoBack();
-		}
-
-		/// <summary>
-		/// Determines if a page name corresponds to a view of the game.
-		/// </summary>
-		/// <param name="pageUri"></param>
-		/// <returns></returns>
-		public bool IsGameViewUri(Uri pageUri)
-		{
-			string pageName = pageUri.ToString();
-			string prefix = "/Views/";
-			return pageName.StartsWith(prefix + "GameHomePage.xaml") ||
-				pageName.StartsWith(prefix + "InputPage.xaml") ||
-				pageName.StartsWith(prefix + "TaskPage.xaml") ||
-				pageName.StartsWith(prefix + "ThingPage.xaml");
-		}
-
-		/// <summary>
-		/// Clears the navigation back stack, making the current view the first one.
-		/// </summary>
-		public void ClearBackStack()
-		{
-			int entriesToRemove = App.Current.RootFrame.BackStack.Count();
-			for (int i = 0; i < entriesToRemove; i++)
-			{
-				App.Current.RootFrame.RemoveBackEntry();
-			}
-		}
-
+		
 		/// <summary>
 		/// Called when the app is being deactivated.
 		/// </summary>
@@ -549,7 +326,7 @@ namespace Geowigo.ViewModels
         /// game message box is onscreen.
         /// </summary>
         /// <param name="action"></param>
-        private void BeginRunOnIdle(Action action)
+        internal void BeginRunOnIdle(Action action)
         {            
             // Wraps the action in a dispatcher action.
             Action wrapper = new Action(() =>
@@ -620,7 +397,7 @@ namespace Geowigo.ViewModels
 		private void Core_CompassCalibrationRequested(object sender, EventArgs e)
 		{
 			// Navigates to the compass calibration view.
-			BeginRunOnIdle(NavigateToCompassCalibration);
+			BeginRunOnIdle(NavigationManager.NavigateToCompassCalibration);
 		}
 
 		private void Core_InputRequested(object sender, ObjectEventArgs<Input> e)
@@ -629,7 +406,7 @@ namespace Geowigo.ViewModels
 			InputManager.HandleInputRequested(e.Object);
 			
 			// Navigates to the input view.
-			NavigateToView(e.Object);
+			NavigationManager.NavigateToView(e.Object);
 		}
 
 		private void Core_MessageBoxRequested(object sender, MessageBoxEventArgs e)
@@ -683,7 +460,7 @@ namespace Geowigo.ViewModels
                     System.Windows.MessageBox.Show("The cartridge has requested to be terminated. The game has been automatically saved, and you will now be taken back to the main menu of the app.", "The game is ending.", MessageBoxButton.OK);
 
                     // Back to app home.
-                    NavigateToAppHome(true);
+					NavigationManager.NavigateToAppHome(true);
                 });
             }
         }
@@ -694,24 +471,24 @@ namespace Geowigo.ViewModels
 			switch (e.Screen)
 			{
 				case ScreenType.Main:
-					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Overview);
+					NavigationManager.NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Overview);
 					break;
 
 				case ScreenType.Locations:
 				case ScreenType.Items:
-					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_World);
+					NavigationManager.NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_World);
 					break;
 
 				case ScreenType.Inventory:
-					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Inventory);
+					NavigationManager.NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Inventory);
 					break;
 
 				case ScreenType.Tasks:
-					NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Tasks);
+					NavigationManager.NavigateToGameHome(Model.Core.Cartridge.Filename, GameHomeViewModel.SectionValue_Tasks);
 					break;
 
 				case ScreenType.Details:
-					NavigateToView(e.Object);
+					NavigationManager.NavigateToView(e.Object);
 					break;
 
 				default:
