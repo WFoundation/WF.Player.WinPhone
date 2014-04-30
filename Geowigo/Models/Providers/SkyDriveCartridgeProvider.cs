@@ -242,7 +242,7 @@ namespace Geowigo.Models.Providers
 			catch (LiveAuthException ex)
 			{
 				// Ignores but dumps the exception.
-				Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+				Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: false);
 			}
 		}
 

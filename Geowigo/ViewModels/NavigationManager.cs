@@ -282,7 +282,7 @@ namespace Geowigo.ViewModels
 
 		private void GoBackCore()
 		{
-			RunInUIDispatcherFromPump(() => _rootFrame.GoBack());
+			RunInUIDispatcherFromPump(_rootFrame.GoBack);
 		}
 
 		private void RunInUIDispatcherFromPump(Action action)
