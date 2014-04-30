@@ -20,7 +20,34 @@ namespace Geowigo.ViewModels
 		private PhoneApplicationFrame _rootFrame;
 		private AppViewModel _parent;
 		private ActionPump _navigationPump;
+		private object _syncRoot = new object();
+		private Uri _lastNavigatedSource;
 
+		#endregion
+
+		#region Properties
+
+		#region LastNavigatedSource
+		private Uri LastNavigatedSource
+		{
+			get
+			{
+				lock (_syncRoot)
+				{
+					return _lastNavigatedSource;
+				}
+			}
+
+			set
+			{
+				lock (_syncRoot)
+				{
+					_lastNavigatedSource = value;
+				}
+			}
+		}
+		#endregion
+		
 		#endregion
 
 		#region Constructors
@@ -29,7 +56,10 @@ namespace Geowigo.ViewModels
 			_rootFrame = App.Current.RootFrame;
 			_parent = parent;
 			_navigationPump = new ActionPump();
-		} 
+			_rootFrame.Navigating += new NavigatingCancelEventHandler(OnRootFrameNavigating);
+			_rootFrame.Navigated += new NavigatedEventHandler(OnRootFrameNavigated);
+		}
+
 		#endregion
 
 		/// <summary>
@@ -209,13 +239,13 @@ namespace Geowigo.ViewModels
 			JournalEntry previousPage = _rootFrame.BackStack.FirstOrDefault();
 			if (previousPage == null)
 			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because no page is in the stack.");
+				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because no page is in the stack.");
 
 				return;
 			}
 			if (!IsGameViewUri(previousPage.Source))
 			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because previous page is no game!");
+				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because previous page is no game!");
 
 				return;
 			}
@@ -225,9 +255,15 @@ namespace Geowigo.ViewModels
 			// was originally triggered and now.
 			// When this happens, the back stack needs to be cleared of this expected
 			// view if possible, and then the method should return.
-			if (currentExpectedView != null && currentExpectedView != _rootFrame.CurrentSource)
+			if (currentExpectedView != null && currentExpectedView != LastNavigatedSource)
 			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() cancelled because a navigation occured after the call.");
+				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: Delayed NavigateBack() cancelled because a navigation occured after the first call.");
+
+				return;
+			}
+			else if (LastNavigatedSource == null)
+			{
+				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because of inconsistent state of navigation stack.");
 
 				return;
 			}
@@ -236,7 +272,7 @@ namespace Geowigo.ViewModels
 			// Instead, delay the navigation.
 			if (_parent.MessageBoxManager.HasMessageBox)
 			{
-				System.Diagnostics.Debug.WriteLine("AppViewModel: WARNING: NavigateBack() delayed because a message box is on-screen!");
+				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() delayed because a message box is on-screen!");
 
 				_parent.BeginRunOnIdle(new Action(() => NavigateBack(currentExpectedView ?? _rootFrame.CurrentSource)));
 
@@ -277,11 +313,13 @@ namespace Geowigo.ViewModels
 		#region Core Navigation Wrapper
 		private void NavigateCore(Uri source)
 		{
+			System.Diagnostics.Debug.WriteLine("NavigationManager: Scheduled nav to " + source.ToString());
 			RunInUIDispatcherFromPump(() => _rootFrame.Navigate(source));
 		}
 
 		private void GoBackCore()
 		{
+			System.Diagnostics.Debug.WriteLine("NavigationManager: Scheduled go back");	
 			RunInUIDispatcherFromPump(_rootFrame.GoBack);
 		}
 
@@ -300,6 +338,19 @@ namespace Geowigo.ViewModels
 
 			// Makes sure the pump is running.
 			_navigationPump.IsPumping = true;
+		}
+		
+		private void OnRootFrameNavigating(object sender, NavigatingCancelEventArgs e)
+		{
+			// Keeps track of the last navigated source before the navigation actually
+			// happens, in order to be quicker to react in NavigateBack() and thus
+			// avoid race conditions.
+			LastNavigatedSource = e.Uri;
+		}
+
+		private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
+		{
+			LastNavigatedSource = e.Uri;
 		}
 		#endregion
 
