@@ -77,11 +77,13 @@
 
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="InventoryPivotItem" Header="inventory" Margin="22,28,12,0">
-                <StackPanel>
-            		<TextBlock TextWrapping="Wrap" d:LayoutOverrides="Width" Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="This is your inventory. Usually, it displays the objects that you own and the characters that "/><Run Text="are "/><Run Text="accompanying "/><Run Text="you."/></TextBlock>
-            		<TextBlock TextWrapping="Wrap" Text="Unfortunately, your inventory is empty right now. Try to check the world for items to collect and characters to interact with." Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}" d:LayoutOverrides="Width" Margin="0,10,0,0"/>
-            		<Geowigo_Controls:NavigationListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" NavigationCommand="{Binding ShowDetailsCommand}" />
-            	</StackPanel>
+                <ScrollViewer>
+            		<StackPanel>
+            			<TextBlock TextWrapping="Wrap" d:LayoutOverrides="Width" Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}"><Run Text="This is your inventory. Usually, it displays the objects that you own and the characters that "/><Run Text="are "/><Run Text="accompanying "/><Run Text="you."/></TextBlock>
+            			<TextBlock TextWrapping="Wrap" Text="Unfortunately, your inventory is empty right now. Try to check the world for items to collect and characters to interact with." Visibility="{Binding IsInventoryEmpty, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource EmptyListTextStyle}" d:LayoutOverrides="Width" Margin="0,10,0,0"/>
+            			<Geowigo_Controls:NavigationListBox x:Name="InventoryList" ItemsSource="{Binding Model.Core.VisibleInventory}" ItemTemplate="{StaticResource WherigoObjectGenericListItemTemplate}" ScrollViewer.VerticalScrollBarVisibility="Disabled" NavigationCommand="{Binding ShowDetailsCommand}" />
+            		</StackPanel>
+            	</ScrollViewer>
             </controls:PivotItem>
             <controls:PivotItem x:Name="TasksPivotItem" Header="tasks" Margin="22,28,12,0">
             	<ScrollViewer>

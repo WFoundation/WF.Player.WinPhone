@@ -68,7 +68,7 @@
         <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding WherigoObject.VectorFromPlayer, Mode=OneWay}" d:LayoutOverrides="VerticalAlignment" Orientation="Horizontal" Visibility="{Binding IsCompassVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
         <Grid x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<ScrollViewer>
-        		<StackPanel>
+        		<StackPanel Margin="0,0,0,15">
         			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,5" Style="{StaticResource ThingTitleTextStyle}"/>
         			<TextBlock TextWrapping="Wrap" Margin="0" Text="{Binding StatusText, Converter={StaticResource UppercaseStringConverter}, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}" Style="{StaticResource ThingTitleTextStyle}"/>
