@@ -7,6 +7,8 @@ using Geowigo.Models;
 using WF.Player.Core;
 using System.Windows.Navigation;
 using WF.Player.Core.Threading;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Geowigo.ViewModels
 {
@@ -15,39 +17,420 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class NavigationManager
 	{
+		#region Nested Classes
+
+		private enum PageScope
+		{
+			/// <summary>
+			/// Scope of a page that is outside the game and that
+			/// stays in the navigation stack for the lifetime of the app.
+			/// </summary>
+			App,
+
+			/// <summary>
+			/// Scope of a page that is in game.
+			/// </summary>
+			Game,
+
+			/// <summary>
+			/// Scope of a page that is out of the game but can occur
+			/// during the game.
+			/// </summary>
+			GameExtra,
+
+			Unknown
+		}
+
+		private class NavigationQueue
+		{
+			#region Nested Classes
+
+			private class Job
+			{
+				/// <summary>
+				/// Gets or sets if this job represents a forward navigation.
+				/// </summary>
+				public bool IsForwardNavigation { get; set; }
+
+				/// <summary>
+				/// Gets or sets the Uri of this job (only used for forward
+				/// navigations).
+				/// </summary>
+				public Uri Uri { get; set; }
+
+				/// <summary>
+				/// Gets or sets if this job should be cancelled if its target
+				/// Uri is the same as the Uri of the page currently on-screen.
+				/// (Only used for forward navigations).
+				/// </summary>
+				public bool CancelIfDuplicate { get; set; }
+
+				/// <summary>
+				/// Gets or sets if this job should be executed preferredly
+				/// by going back to the page if it exists in the back stack.
+				/// (Only used for forward navigations).
+				/// </summary>
+				public bool PreferBackNavigation { get; set; }
+			}
+
+			#endregion
+			
+			#region Fields
+			private object _syncRoot = new object();
+			private bool _isNavigating = false;
+			private List<Job> _queue = new List<Job>();
+			private AppViewModel _appViewModel;
+			private NavigationManager _parent;
+			private PhoneApplicationFrame _rootFrame;
+			#endregion
+
+			#region Constructors
+			public NavigationQueue(NavigationManager parent)
+			{
+				_parent = parent;
+				_appViewModel = _parent._parent;
+				_rootFrame = _parent._rootFrame;
+
+				_rootFrame.Navigated += new NavigatedEventHandler(OnRootFrameNavigated);
+				_rootFrame.NavigationFailed += new NavigationFailedEventHandler(OnRootFrameNavigationFailed);
+				_appViewModel.MessageBoxManager.HasMessageBoxChanged += new EventHandler(OnHasMessageBoxChanged);
+			}
+
+			#endregion
+
+			#region Accept Jobs
+			public void AcceptNavigate(Uri uri, bool cancelIfAlreadyActive, bool preferBackNav)
+			{
+				AcceptJobAndRun(new Job() 
+				{ 
+					Uri = uri, 
+					IsForwardNavigation = true,
+					CancelIfDuplicate = cancelIfAlreadyActive
+				});
+			}
+
+			public void AcceptNavigateBack()
+			{
+				AcceptJobAndRun(new Job() { IsForwardNavigation = false });
+			}
+
+			private void AcceptJobAndRun(Job job)
+			{
+				// Queues the job.
+				lock (_syncRoot)
+				{
+					_queue.Add(job);
+				}
+
+				// Checks if the queue needs to be processed, and
+				// if so, processes the next item.
+				CheckAndRunNext();
+			}
+			#endregion
+
+			#region Job Processing
+			private void CheckAndRunNext()
+			{
+				// Do nothing if a message box is on-screen.
+				if (_appViewModel.MessageBoxManager.HasMessageBox)
+				{
+					return;
+				}
+
+				lock (_syncRoot)
+				{
+					// Do nothing for now if a navigation is in progress.
+					if (_isNavigating)
+					{
+						return;
+					}
+
+					// Gets the next job.
+					Job nextJob;
+					nextJob = _queue.FirstOrDefault();
+					if (nextJob == null)
+					{
+						// Nothing to do.
+						return;
+					}
+
+					// Is the job is possible to execute?
+					// YES -> Runs it and removes it.
+					// NO -> Cancels it.
+					if (CanJobRun(nextJob))
+					{
+						RunJob(nextJob);
+					}
+
+					// Removes this job.
+					RemoveJob(nextJob); 
+				}
+			}
+
+			private void RunJob(Job nextJob)
+			{
+				// We're going to navigate.
+				_isNavigating = true;
+				
+				// If the job allows it, checks if the back stack 
+				// already has a page with this Uri. If so, removes
+				// all back entries before and navigates back to it.
+				if (nextJob.PreferBackNavigation)
+				{
+					// Only navigates back if the back stack contains
+					// an entry with the same Uri. If so, clears the back
+					// stack to but not including this entry.
+					if (this.ClearBackStackFor(nextJob.Uri))
+					{
+						// Navigates back to the right page.
+						RunNavigateBack();
+						return;
+					}
+
+					// If we're here, no similar entry was found in
+					// the back stack. So let's fallback to a forward
+					// navigation.
+				}
+
+				// Back or Forward navigation.
+				if (nextJob.IsForwardNavigation || nextJob.PreferBackNavigation)
+				{
+					RunNavigateForward(nextJob.Uri);
+				}
+				else
+				{
+					RunNavigateBack();
+				}
+			}
+
+			private void RunNavigateForward(Uri uri)
+			{
+				Deployment.Current.Dispatcher.BeginInvoke(() =>
+				{
+					// Tries to navigate according to the job.
+					// Exceptions are caught and reported but ignored.
+					try
+					{
+						_rootFrame.Navigate(uri);
+					}
+					catch (Exception ex)
+					{
+						// Reports the exception.
+						Utils.DebugUtils.DumpException(ex, "Error on Navigation request, handled.", dumpOnBugSenseToo: true);
+					}
+				});
+			}
+
+			private void RunNavigateBack()
+			{
+				Deployment.Current.Dispatcher.BeginInvoke(() =>
+				{
+					// Tries to navigate according to the job.
+					// Exceptions are caught and reported but ignored.
+					try
+					{
+						_rootFrame.GoBack();
+					}
+					catch (Exception ex)
+					{
+						// Reports the exception.
+						Utils.DebugUtils.DumpException(ex, "Error on Navigation request, handled.", dumpOnBugSenseToo: true);
+					}
+				});
+			}
+
+			private void RemoveJob(Job nextJob)
+			{
+				lock (_syncRoot)
+				{
+					_queue.Remove(nextJob);
+				}
+			}
+
+			private bool CanJobRun(Job nextJob)
+			{
+				// Checks if the navigation target is already on screen.
+				if (nextJob.IsForwardNavigation
+					&& nextJob.CancelIfDuplicate
+					&& _rootFrame.CurrentSource.OriginalString == nextJob.Uri.OriginalString)
+				{
+					return false;
+				}
+
+				// Checks if the previous page is valid (Back navigation only).
+				if (!nextJob.IsForwardNavigation && !IsPreviousPageValid())
+				{
+					return false;
+				}
+
+				// Checks if another navigation was scheduled after this one.
+				// If so, this job cannot run because the last navigation
+				// will take over and lead to a back stack conforming.
+				// (This is because game pages should be left alone on the stack,
+				// per Wherigo specifications.)
+				bool isLastJobInQueue;
+				lock (_syncRoot)
+				{
+					isLastJobInQueue = _queue.LastOrDefault() == nextJob;
+				}
+				if (!isLastJobInQueue)
+				{
+					return false;
+				}
+
+				// Conditions are good for the job to run.
+				return true;
+			}
+
+			private bool IsPreviousPageValid()
+			{
+				// Checks if the previous view is not a game view.
+				JournalEntry previousPage = _rootFrame.BackStack.FirstOrDefault();
+				if (previousPage == null)
+				{
+					//System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because no page is in the stack.");
+
+					return false;
+				}
+				if (!_parent.IsGameViewUri(previousPage.Source))
+				{
+					//System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because previous page is no game!");
+
+					return false;
+				}
+
+				// Conditions are looking good for a back navigation.
+				return true;
+			}
+
+			#endregion
+
+			#region Back Stack Conforming
+
+			private bool ClearBackStackFor(Uri source)
+			{
+				// Checks if the back stack has a similar Uri.
+				List<JournalEntry> backStack = _rootFrame.BackStack.ToList();
+				bool hasSimilarUri = false;
+				foreach (JournalEntry item in backStack)
+				{
+					if (item.Source.OriginalString == source.OriginalString)
+					{
+						hasSimilarUri = true;
+						break;
+					}
+				}
+
+				// If needed, removes all back stack entries until this one.
+				if (hasSimilarUri)
+				{
+					// Removes the entries.
+					foreach (JournalEntry item in backStack)
+					{
+						if (item.Source.OriginalString == source.OriginalString)
+						{
+							// We hit the right page. Do nothing more.
+							break;
+						}
+						else
+						{
+							// Not at the right page yet, removes the entry.
+							_rootFrame.RemoveBackEntry();
+						}
+					}
+				}
+
+				return hasSimilarUri;
+			}
+
+			private void ConformBackStack(Uri latestNavigatedUri)
+			{
+				// What is the scope of the latest navigated Uri?
+				// Game -> Removes all non App entries before this one so that
+				//		the page is the only Game page in the stack. 
+				//		(Wherigo spec)
+				// GameExtra -> Do not change anything.
+				// App -> Removes all entries up to and including the previous
+				//		entry for this page only if the stack contains this
+				// Others -> Do not change anything.
+				PageScope latestPageScope = _parent.GetPageScope(latestNavigatedUri);
+
+				if (latestPageScope == PageScope.GameExtra || latestPageScope == PageScope.Unknown)
+				{
+					return;
+				}
+				else if (latestPageScope == PageScope.App)
+				{
+					// If the page Uri can be found in the back stack,
+					// clears entries up to and including the back stack.
+					if (ClearBackStackFor(latestNavigatedUri))
+					{
+						_rootFrame.RemoveBackEntry();
+					}
+				}
+				else if (latestPageScope == PageScope.Game)
+				{
+					foreach (JournalEntry entry in _rootFrame.BackStack.ToList())
+					{
+						// Removes the current entry if it is a game entry.
+						if (_parent.GetPageScope(entry.Source) == PageScope.Game)
+						{
+							// Removes the entry.
+							_rootFrame.RemoveBackEntry();
+						}
+						else
+						{
+							// Stop right here, we hit an App entry.
+							break;
+						}
+					}
+				}
+			} 
+
+			
+
+			#endregion
+
+			#region Root Frame Event Handlers
+
+			private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
+			{
+				// Conforms the back stack.
+				ConformBackStack(e.Uri);
+
+				// No more navigation.
+				lock (_syncRoot)
+				{
+					_isNavigating = false;
+				}
+
+				// Runs next job if any.
+				CheckAndRunNext();
+			}
+
+			private void OnRootFrameNavigationFailed(object sender, NavigationFailedEventArgs e)
+			{
+				// Runs next job if any.
+				CheckAndRunNext();
+			}
+
+			private void OnHasMessageBoxChanged(object sender, EventArgs e)
+			{
+				// Runs next job if any.
+				CheckAndRunNext();
+			}
+			#endregion
+		}
+
+		#endregion
+		
 		#region Fields
 
 		private PhoneApplicationFrame _rootFrame;
 		private AppViewModel _parent;
-		private ActionPump _navigationPump;
 		private object _syncRoot = new object();
-		private Uri _lastNavigatedSource;
+		private NavigationQueue _queue;
 
-		#endregion
-
-		#region Properties
-
-		#region LastNavigatedSource
-		private Uri LastNavigatedSource
-		{
-			get
-			{
-				lock (_syncRoot)
-				{
-					return _lastNavigatedSource;
-				}
-			}
-
-			set
-			{
-				lock (_syncRoot)
-				{
-					_lastNavigatedSource = value;
-				}
-			}
-		}
-		#endregion
-		
 		#endregion
 
 		#region Constructors
@@ -55,12 +438,49 @@ namespace Geowigo.ViewModels
 		{
 			_rootFrame = App.Current.RootFrame;
 			_parent = parent;
-			_navigationPump = new ActionPump();
-			_rootFrame.Navigating += new NavigatingCancelEventHandler(OnRootFrameNavigating);
-			_rootFrame.Navigated += new NavigatedEventHandler(OnRootFrameNavigated);
+			_queue = new NavigationQueue(this);
 		}
 
 		#endregion
+
+		private PageScope GetPageScope(Uri pageUri)
+		{
+			string pageName = pageUri.ToString();
+			string prefix = "/Views/";
+
+			PageScope scope = PageScope.Unknown;
+
+			if (pageName.StartsWith(prefix + "InputPage.xaml") ||
+				pageName.StartsWith(prefix + "TaskPage.xaml") ||
+				pageName.StartsWith(prefix + "ThingPage.xaml"))
+			{
+				scope = PageScope.Game;
+			}
+			else if (pageName.StartsWith(prefix + "BetaLicensePage.xaml") ||
+				pageName.StartsWith(prefix + "HomePage.xaml") ||
+				pageName.StartsWith(prefix + "CartridgeInfoPage.xaml"))
+			{
+				scope = PageScope.App;
+			}
+			else if (pageName.StartsWith(prefix + "CompassCalibrationPage.xaml")
+				|| pageName.StartsWith(prefix + "GameHomePage.xaml"))
+			{
+				scope = PageScope.GameExtra;
+			}
+
+			return scope;
+		}
+
+		/// <summary>
+		/// Determines if a page name corresponds to a view of the game.
+		/// </summary>
+		/// <param name="pageUri"></param>
+		/// <returns></returns>
+		public bool IsGameViewUri(Uri pageUri)
+		{
+			PageScope scope = GetPageScope(pageUri);
+			return scope == PageScope.Game || scope == PageScope.GameExtra;
+		}
 
 		/// <summary>
 		/// Navigates the app to the main page of the app.
@@ -88,41 +508,8 @@ namespace Geowigo.ViewModels
 			// Resets the input tracking.
 			_parent.InputManager.Reset();
 
-			// Removes all back entries until the app home is found.
-			string prefix = "/Views/";
-			foreach (JournalEntry entry in _rootFrame.BackStack.ToList())
-			{
-				if (entry.Source.ToString().StartsWith(prefix + "HomePage.xaml"))
-				{
-					break;
-				}
-
-				// Removes the current entry.
-				_rootFrame.RemoveBackEntry();
-			}
-
-			// If there is a back entry, goes back: it is the game home.
-			// Otherwise, navigates to the game home.
-			if (_rootFrame.BackStack.Count() > 0)
-			{
-				//_rootFrame.GoBack();
-				GoBackCore();
-			}
-			else
-			{
-				try
-				{
-					NavigateCore(new Uri(prefix + "HomePage.xaml", UriKind.Relative));
-				}
-				catch (InvalidOperationException ex)
-				{
-					// This is probably due to a race condition between two navigation
-					// requests, one being this one, and the other likely to be an external
-					// task navigation (map task, etc.)
-					// There is nothing to do: the user will surely be luckier next time.
-					Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
-				}
-			}
+			// Navigates now.
+			NavigateCore(new Uri("/Views/HomePage.xaml", UriKind.Relative), preferBackNav: true);
 		}
 
 		/// <summary>
@@ -132,14 +519,8 @@ namespace Geowigo.ViewModels
 		{
 			string pageUrl = "/Views/CompassCalibrationPage.xaml";
 
-			// Discards the request if the current page is already the compass calibration.
-			if (_rootFrame.CurrentSource.OriginalString.StartsWith(pageUrl))
-			{
-				return;
-			}
-
 			// Navigates
-			NavigateCore(new Uri(pageUrl, UriKind.Relative));
+			NavigateCore(new Uri(pageUrl, UriKind.Relative), cancelIfAlreadyActive: true);
 		}
 
 		/// <summary>
@@ -235,124 +616,14 @@ namespace Geowigo.ViewModels
 		/// is removed from the back stack, and the navigation is cancelled.</param>
 		public void NavigateBack(Uri currentExpectedView = null)
 		{
-			// Returns if the previous view is not a game view.
-			JournalEntry previousPage = _rootFrame.BackStack.FirstOrDefault();
-			if (previousPage == null)
-			{
-				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because no page is in the stack.");
-
-				return;
-			}
-			if (!IsGameViewUri(previousPage.Source))
-			{
-				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because previous page is no game!");
-
-				return;
-			}
-
-			// Returns if the current view is not expected.
-			// This means that a navigation happened between this navigate back
-			// was originally triggered and now.
-			// When this happens, the back stack needs to be cleared of this expected
-			// view if possible, and then the method should return.
-			if (currentExpectedView != null && currentExpectedView != LastNavigatedSource)
-			{
-				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: Delayed NavigateBack() cancelled because a navigation occured after the first call.");
-
-				return;
-			}
-			else if (LastNavigatedSource == null)
-			{
-				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() cancelled because of inconsistent state of navigation stack.");
-
-				return;
-			}
-
-			// Do not navigate back if a message box is on-screen.
-			// Instead, delay the navigation.
-			if (_parent.MessageBoxManager.HasMessageBox)
-			{
-				System.Diagnostics.Debug.WriteLine("NavigationManager: WARNING: NavigateBack() delayed because a message box is on-screen!");
-
-				_parent.BeginRunOnIdle(new Action(() => NavigateBack(currentExpectedView ?? _rootFrame.CurrentSource)));
-
-				return;
-			}
-
 			// Goes back.
-			GoBackCore();
+			_queue.AcceptNavigateBack();
 		}
 
-		/// <summary>
-		/// Determines if a page name corresponds to a view of the game.
-		/// </summary>
-		/// <param name="pageUri"></param>
-		/// <returns></returns>
-		public bool IsGameViewUri(Uri pageUri)
+		private void NavigateCore(Uri source, bool cancelIfAlreadyActive = false, bool preferBackNav = false)
 		{
-			string pageName = pageUri.ToString();
-			string prefix = "/Views/";
-			return pageName.StartsWith(prefix + "GameHomePage.xaml") ||
-				pageName.StartsWith(prefix + "InputPage.xaml") ||
-				pageName.StartsWith(prefix + "TaskPage.xaml") ||
-				pageName.StartsWith(prefix + "ThingPage.xaml");
+			_queue.AcceptNavigate(source, cancelIfAlreadyActive, preferBackNav);
 		}
-
-		/// <summary>
-		/// Clears the navigation back stack, making the current view the first one.
-		/// </summary>
-		public void ClearBackStack()
-		{
-			int entriesToRemove = _rootFrame.BackStack.Count();
-			for (int i = 0; i < entriesToRemove; i++)
-			{
-				_rootFrame.RemoveBackEntry();
-			}
-		}
-
-		#region Core Navigation Wrapper
-		private void NavigateCore(Uri source)
-		{
-			System.Diagnostics.Debug.WriteLine("NavigationManager: Scheduled nav to " + source.ToString());
-			RunInUIDispatcherFromPump(() => _rootFrame.Navigate(source));
-		}
-
-		private void GoBackCore()
-		{
-			System.Diagnostics.Debug.WriteLine("NavigationManager: Scheduled go back");	
-			RunInUIDispatcherFromPump(_rootFrame.GoBack);
-		}
-
-		private void RunInUIDispatcherFromPump(Action action)
-		{
-			// Adds a job to the action pump.
-			_navigationPump.AcceptAction(() =>
-			{
-				// This runs in the action pump thread.
-				// Triggers the navigation in the UI dispatcher.
-				Deployment.Current.Dispatcher.BeginInvoke(() =>
-				{
-					action();
-				});
-			});
-
-			// Makes sure the pump is running.
-			_navigationPump.IsPumping = true;
-		}
-		
-		private void OnRootFrameNavigating(object sender, NavigatingCancelEventArgs e)
-		{
-			// Keeps track of the last navigated source before the navigation actually
-			// happens, in order to be quicker to react in NavigateBack() and thus
-			// avoid race conditions.
-			LastNavigatedSource = e.Uri;
-		}
-
-		private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
-		{
-			LastNavigatedSource = e.Uri;
-		}
-		#endregion
 
 	}
 }
