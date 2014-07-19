@@ -463,7 +463,8 @@ namespace Geowigo.ViewModels
 				scope = PageScope.App;
 			}
 			else if (pageName.StartsWith(prefix + "CompassCalibrationPage.xaml")
-				|| pageName.StartsWith(prefix + "GameHomePage.xaml"))
+				|| pageName.StartsWith(prefix + "GameHomePage.xaml")
+				|| pageName.StartsWith(prefix + "GameMapPage.xaml"))
 			{
 				scope = PageScope.GameExtra;
 			}
@@ -551,6 +552,14 @@ namespace Geowigo.ViewModels
 				filename,
 				GameHomeViewModel.SavegameFilenameKey,
 				savegame.SavegameFile), UriKind.Relative));
+		}
+
+		/// <summary>
+		/// Navigates the app to the map of the game zone.
+		/// </summary>
+		public void NavigateToGameMap()
+		{
+			NavigateCore(new Uri("/Views/GameMapPage.xaml", UriKind.Relative), true);
 		}
 
 		/// <summary>

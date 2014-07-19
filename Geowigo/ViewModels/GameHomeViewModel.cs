@@ -230,6 +230,23 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+		#region ShowMapCommand
+
+		private ICommand _ShowMapCommand;
+
+		/// <summary>
+		/// Gets a command to show the details of a thing.
+		/// </summary>
+		public ICommand ShowMapCommand
+		{
+			get
+			{
+				return _ShowMapCommand ?? (_ShowMapCommand = new RelayCommand(ShowMap));
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Tasks Collection View Sources
@@ -493,7 +510,15 @@ namespace Geowigo.ViewModels
             }
 
             ShowSection(element.Tag as string);
-        } 
+        }
+
+		/// <summary>
+		/// Makes the app show a map of the game zone.
+		/// </summary>
+		private void ShowMap()
+		{
+			App.Current.ViewModel.NavigationManager.NavigateToGameMap();
+		}
         #endregion
 
 		#region UI Refresh
@@ -598,6 +623,9 @@ namespace Geowigo.ViewModels
 
 			// Adds the savegame menu item.
 			ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
+
+			// Adds the maps menu item.
+			ApplicationBar.CreateAndAddMenuItem(ShowMapCommand, "map");
 		} 
 		#endregion
 	}
