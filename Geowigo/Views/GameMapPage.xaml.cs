@@ -80,8 +80,19 @@ namespace Geowigo.Views
 					ZonesLayer.Children.Add(poly);
 				}
 			}
+			else if (e.PropertyName == "ZoneLabels")
+			{
+				// Removes all current zones.
+				ZoneLabelsLayer.Children.Clear();
+
+				// Adds all new zone polygons.
+				foreach (Pushpin pin in ViewModel.ZoneLabels)
+				{
+					ZoneLabelsLayer.Children.Add(pin);
+				}
+			}
 			else if (e.PropertyName == "PlayerPushpin")
-			{	
+			{
 				// Refreshes the pushpin of the player.
 				if (ViewModel.PlayerPushpin == null)
 				{

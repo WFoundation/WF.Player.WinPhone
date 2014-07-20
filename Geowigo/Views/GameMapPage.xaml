@@ -9,6 +9,8 @@
     xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
 	xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
 	xmlns:System_Device_Location="clr-namespace:System.Device.Location;assembly=System.Device"
+	xmlns:Microsoft_Phone_Controls_Maps_Overlays="clr-namespace:Microsoft.Phone.Controls.Maps.Overlays;assembly=Microsoft.Phone.Controls.Maps"
+	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" xmlns:System="clr-namespace:System;assembly=mscorlib"
 	x:Class="Geowigo.Views.GameMapPage"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
@@ -16,8 +18,7 @@
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="480">
  
-    <!--Exemple de code illustrant l'utilisation de l'ApplicationBar-->
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
+<!--Exemple de code illustrant l'utilisation de l'ApplicationBar--><!--<phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
             <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Bouton 1"/>
             <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Bouton 2"/>
@@ -35,21 +36,28 @@
     <!--LayoutRoot est la grille racine où tout le contenu de la page est placé-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+        	<RowDefinition Height="Auto"/>
+        	<RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!--TitlePanel contient le nom de l'application et le titre de la page-->
-
-        <!--ContentPanel - placez tout contenu supplémentaire ici-->
+<!--TitlePanel contient le nom de l'application et le titre de la page--><!--ContentPanel - placez tout contenu supplémentaire ici-->
         <Grid x:Name="ContentPanel" Grid.Row="1">
-        	<Microsoft_Phone_Controls_Maps:Map x:Name="MapControl" d:LayoutOverrides="Width" ZoomLevel="16" CredentialsProvider="Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW">
+			<Microsoft_Phone_Controls_Maps:Map x:Name="MapControl" d:LayoutOverrides="Width" ZoomLevel="16" CredentialsProvider="Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW">
         		<Microsoft_Phone_Controls_Maps:Map.Center>
         			<System_Device_Location:GeoCoordinate Altitude="NaN" Course="NaN" HorizontalAccuracy="NaN" Longitude="0" Latitude="49" Speed="NaN" VerticalAccuracy="NaN"/>
         		</Microsoft_Phone_Controls_Maps:Map.Center>
         		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ZonesLayer"/>
+        		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ZoneLabelsLayer"/>
         		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ItemsLayer"/>
-        		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="PlayerLayer"/>
+        		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="PlayerLayer">
+        			<Microsoft_Phone_Controls_Maps:Pushpin>
+        				<Geowigo_Controls:NavigationListBox Margin="0,0,0,-777" Width="480">
+        					<System:String>chaîne</System:String>
+        					<System:String>efewgfoiewjgfewgjlew</System:String>
+        					<System:String>feafaesfaewgasgregas</System:String>
+        				</Geowigo_Controls:NavigationListBox>
+        			</Microsoft_Phone_Controls_Maps:Pushpin>
+        		</Microsoft_Phone_Controls_Maps:MapLayer>
         	</Microsoft_Phone_Controls_Maps:Map>
         </Grid>
     </Grid>

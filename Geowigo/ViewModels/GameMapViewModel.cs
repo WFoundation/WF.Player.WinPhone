@@ -75,6 +75,34 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
+		#region ZoneLabels
+
+		private IEnumerable<Pushpin> _ZoneLabels;
+		public IEnumerable<Pushpin> ZoneLabels
+		{
+			get
+			{
+				if (_ZoneLabels == null)
+				{
+					_ZoneLabels = new List<Pushpin>();
+				}
+
+				return _ZoneLabels;
+			}
+
+			private set
+			{
+				if (value != _ZoneLabels)
+				{
+					_ZoneLabels = value;
+
+					RaisePropertyChanged("ZoneLabels");
+				}
+			}
+		} 
+
+		#endregion
+
 		#region PlayerPushpin
 
 		private Pushpin _PlayerPushpin;
@@ -166,6 +194,7 @@ namespace Geowigo.ViewModels
 		private Brush _polygonFillBrush;
 		private Brush _polygonBorderBrush;
 		private DataTemplate _thingPushpinContentTemplate;
+		private DataTemplate _landmarkPushpinContentTemplate;
 
 		#endregion
 
@@ -177,6 +206,7 @@ namespace Geowigo.ViewModels
 
 			// Inits the templates.
 			_thingPushpinContentTemplate = (DataTemplate)App.Current.Resources["WherigoThingPushpinContentTemplate"];
+			_landmarkPushpinContentTemplate = (DataTemplate)App.Current.Resources["LandmarkPushpinContentTemplate"];
 		}
 
 		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -197,6 +227,7 @@ namespace Geowigo.ViewModels
 			if (propName == "ActiveVisibleZones")
 			{
 				RefreshZones();
+				RefreshBounds();
 			}
 			else if (propName == "ActiveVisibleThings")
 			{
@@ -205,10 +236,6 @@ namespace Geowigo.ViewModels
 			else if (propName == "DeviceLocation")
 			{
 				RefreshPlayer();
-			}
-			else if (propName == "Bounds")
-			{
-				RefreshBounds();
 			}
 		}
 
@@ -292,27 +319,30 @@ namespace Geowigo.ViewModels
 			// Groups all active things by their location.
 			if (Model.Core.ActiveVisibleThings != null)
 			{
-				IEnumerable<IGrouping<ZonePoint, Thing>> thingsByLocation = Model.Core.ActiveVisibleThings
-						.Where(t => t.ObjectLocation != null)
-						.GroupBy(t => t.ObjectLocation);
+				// Creates a pushpin for each group of non-Zone things that share 
+				// a valid location.
+				IEnumerable<IGrouping<GeoCoordinate, Thing>> thingsByLocation = Model.Core.ActiveVisibleThings
+						.Where(t => t.ObjectLocation != null && !(t is Zone))
+						.GroupBy(t => t.ObjectLocation.ToGeoCoordinate());
 
-				foreach (IGrouping<ZonePoint, Thing> group in thingsByLocation)
+				foreach (IGrouping<GeoCoordinate, Thing> group in thingsByLocation)
 				{
 					// Creates a multiline content control for this group of things.
 					Geowigo.Controls.NavigationListBox control = new Controls.NavigationListBox()
 					{
 						ItemTemplate = _thingPushpinContentTemplate,
-						ItemsSource = group,
+						ItemsSource = group, // Zones are ignored
 						NavigationCommand = ShowThingDetailsCommand
 					};
+					control.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Disabled);
 
 					// Creates and adds a pushpin whose content is the control.
 					things.Add(new Pushpin()
 					{
 						Content = control,
-						Location = group.Key.ToGeoCoordinate()
+						Location = group.Key
 					});
-				} 
+				}
 			}
 
 			// This is the new list of pushpins.
@@ -322,6 +352,7 @@ namespace Geowigo.ViewModels
 		private void RefreshZones()
 		{
 			List<MapPolygon> polygons = new List<MapPolygon>();
+			List<Pushpin> labels = new List<Pushpin>();
 
 			// Creates a map polygon for each zone.
 			if (Model.Core.ActiveVisibleZones != null)
@@ -336,11 +367,21 @@ namespace Geowigo.ViewModels
 						Stroke = _polygonBorderBrush,
 						StrokeThickness = 2
 					});
+
+					// Creates a landmark pushpin.
+					labels.Add(new Pushpin()
+					{
+						Content = zone.Name,
+						Location = zone.Bounds.Center.ToGeoCoordinate(),
+						ContentTemplate = _landmarkPushpinContentTemplate,
+						Background = null
+					});
 				} 
 			}
 
 			// Refreshes the collection of polygons.
 			ZonePolygons = polygons;
+			ZoneLabels = labels;
 		}
 
 		private void RaisePropertyChanged(string propName)

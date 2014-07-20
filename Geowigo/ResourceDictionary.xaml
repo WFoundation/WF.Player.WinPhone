@@ -23,7 +23,7 @@
 		<Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
 	</Style>
 
-    <Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
+	<Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
 
     <Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
 	<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
@@ -108,10 +108,15 @@
 		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
 	</Style>
 	<DataTemplate x:Key="WherigoThingPushpinContentTemplate">
-		<StackPanel Orientation="Horizontal">
-			<Image Height="20" Width="20" Margin="0,0,8,0" Visibility="{Binding Icon, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}}" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="UniformToFill"/>
-			<TextBlock TextWrapping="Wrap" Text="{Binding Name}"/>
+		<StackPanel Orientation="Horizontal" Margin="8,3">
+			<Image Height="30" Width="30" Margin="0,0,8,0" Visibility="{Binding Icon, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}}" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="UniformToFill"/>
+			<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name}" FontSize="{StaticResource PhoneFontSizeMediumLarge}"/>
 		</StackPanel>
+	</DataTemplate>
+	<DataTemplate x:Key="LandmarkPushpinContentTemplate">
+		<Grid d:DesignWidth="144" d:DesignHeight="46">
+			<TextBlock TextWrapping="Wrap" Text="{Binding}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+		</Grid>
 	</DataTemplate>
 	
 </ResourceDictionary>
