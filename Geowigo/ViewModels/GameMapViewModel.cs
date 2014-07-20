@@ -16,6 +16,8 @@ using Geowigo.Utils;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Device.Location;
+using System.Linq;
+using Geowigo.Controls;
 
 namespace Geowigo.ViewModels
 {
@@ -73,7 +75,7 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
-		#region PlayerLocation
+		#region PlayerPushpin
 
 		private Pushpin _PlayerPushpin;
 		public Pushpin PlayerPushpin
@@ -93,6 +95,51 @@ namespace Geowigo.ViewModels
 				}
 			}
 		}
+
+		#endregion
+
+		#region ThingsPushpins
+		private IEnumerable<Pushpin> _ThingPushpins;
+		public IEnumerable<Pushpin> ThingPushpins
+		{
+			get
+			{
+				if (_ThingPushpins == null)
+				{
+					_ThingPushpins = new List<Pushpin>();
+				}
+
+				return _ThingPushpins;
+			}
+
+			private set
+			{
+				if (value != _ThingPushpins)
+				{
+					_ThingPushpins = value;
+
+					RaisePropertyChanged("ThingPushpins");
+				}
+			}
+		} 
+		#endregion
+
+		#endregion
+
+		#region Commands
+
+		#region ShowThingDetailsCommand
+
+		private ICommand _ShowThingDetailsCommand;
+
+		public ICommand ShowThingDetailsCommand
+		{
+			get 
+			{ 
+				return _ShowThingDetailsCommand ?? (_ShowThingDetailsCommand = new RelayCommand<Thing>(ShowThingDetails)); 
+			}
+		}
+
 
 		#endregion
 
@@ -118,6 +165,7 @@ namespace Geowigo.ViewModels
 
 		private Brush _polygonFillBrush;
 		private Brush _polygonBorderBrush;
+		private DataTemplate _thingPushpinContentTemplate;
 
 		#endregion
 
@@ -126,6 +174,9 @@ namespace Geowigo.ViewModels
 			// Inits the brushes.
 			_polygonFillBrush = new SolidColorBrush(Colors.Cyan) { Opacity = 0.25 };
 			_polygonBorderBrush = new SolidColorBrush(Colors.White);
+
+			// Inits the templates.
+			_thingPushpinContentTemplate = (DataTemplate)App.Current.Resources["WherigoThingPushpinContentTemplate"];
 		}
 
 		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -134,8 +185,7 @@ namespace Geowigo.ViewModels
 
 			// Refreshes the map content.
 			RefreshZones();
-
-			// Refreshes the player.
+			RefreshThings();
 			RefreshPlayer();
 
 			// Refreshes the bounds of the map.
@@ -148,9 +198,17 @@ namespace Geowigo.ViewModels
 			{
 				RefreshZones();
 			}
+			else if (propName == "ActiveVisibleThings")
+			{
+				RefreshThings();
+			}
 			else if (propName == "DeviceLocation")
 			{
 				RefreshPlayer();
+			}
+			else if (propName == "Bounds")
+			{
+				RefreshBounds();
 			}
 		}
 
@@ -172,8 +230,9 @@ namespace Geowigo.ViewModels
 				{
 					PlayerPushpin = new Pushpin()
 					{
-						Content = Model.Core.Player.Name,
-						Location = playerPos
+						Content = Model.Core.Player,
+						Location = playerPos,
+						ContentTemplate = _thingPushpinContentTemplate
 					};
 				}
 				else
@@ -195,9 +254,7 @@ namespace Geowigo.ViewModels
 			MapViewRequestedEventArgs e = null;
 			if (bounds != null && bounds.IsValid)
 			{
-				e = new MapViewRequestedEventArgs(
-					new LocationRect(bounds.Top, bounds.Left, bounds.Bottom, bounds.Right)
-					);
+				e = new MapViewRequestedEventArgs(bounds.ToLocationRect());
 			}
 			else
 			{
@@ -216,15 +273,8 @@ namespace Geowigo.ViewModels
 				}
 				else
 				{
-					// Gets the starting location.
-					Cartridge cart = Model.Core.Cartridge;
-					System.Device.Location.GeoCoordinate startLoc =
-						new System.Device.Location.GeoCoordinate(
-							cart.StartingLocationLatitude,
-							cart.StartingLocationLongitude);
-
 					// Makes the event.
-					e = new MapViewRequestedEventArgs(startLoc, DEFAULT_ZOOM_LEVEL);
+					e = new MapViewRequestedEventArgs(Model.Core.Cartridge.StartingLocation.ToGeoCoordinate(), DEFAULT_ZOOM_LEVEL);
 				}
 			}
 
@@ -235,27 +285,58 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+		private void RefreshThings()
+		{
+			List<Pushpin> things = new List<Pushpin>();
+			
+			// Groups all active things by their location.
+			if (Model.Core.ActiveVisibleThings != null)
+			{
+				IEnumerable<IGrouping<ZonePoint, Thing>> thingsByLocation = Model.Core.ActiveVisibleThings
+						.Where(t => t.ObjectLocation != null)
+						.GroupBy(t => t.ObjectLocation);
+
+				foreach (IGrouping<ZonePoint, Thing> group in thingsByLocation)
+				{
+					// Creates a multiline content control for this group of things.
+					Geowigo.Controls.NavigationListBox control = new Controls.NavigationListBox()
+					{
+						ItemTemplate = _thingPushpinContentTemplate,
+						ItemsSource = group,
+						NavigationCommand = ShowThingDetailsCommand
+					};
+
+					// Creates and adds a pushpin whose content is the control.
+					things.Add(new Pushpin()
+					{
+						Content = control,
+						Location = group.Key.ToGeoCoordinate()
+					});
+				} 
+			}
+
+			// This is the new list of pushpins.
+			ThingPushpins = things;
+		}
+
 		private void RefreshZones()
 		{
 			List<MapPolygon> polygons = new List<MapPolygon>();
 
 			// Creates a map polygon for each zone.
-			foreach (Zone zone in Model.Core.ActiveVisibleZones)
+			if (Model.Core.ActiveVisibleZones != null)
 			{
-				// Converts the zone points to a location collection.
-				LocationCollection locations = new LocationCollection();
-				foreach (ZonePoint point in zone.Points)
+				foreach (Zone zone in Model.Core.ActiveVisibleZones)
 				{
-					locations.Add(new System.Device.Location.GeoCoordinate(point.Latitude, point.Longitude, point.Altitude));
-				}
-
-				// Creates and adds the polygon.
-				polygons.Add(new MapPolygon() { 
-					Locations = locations, 
-					Fill = _polygonFillBrush,
-					Stroke = _polygonBorderBrush,
-					StrokeThickness = 2
-				});
+					// Creates and adds the polygon.
+					polygons.Add(new MapPolygon()
+					{
+						Locations = zone.ToLocationCollection(),
+						Fill = _polygonFillBrush,
+						Stroke = _polygonBorderBrush,
+						StrokeThickness = 2
+					});
+				} 
 			}
 
 			// Refreshes the collection of polygons.
@@ -269,5 +350,15 @@ namespace Geowigo.ViewModels
 				PropertyChanged(this, new PropertyChangedEventArgs(propName));
 			}
 		}
+
+		#region Commands Impl
+
+		private void ShowThingDetails(Thing thing)
+		{
+			// Navigates to the details of this thing.
+			App.Current.ViewModel.NavigationManager.NavigateToView(thing);
+		}
+
+		#endregion
 	}
 }

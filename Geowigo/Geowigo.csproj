@@ -128,6 +128,7 @@
     </Compile>
     <Compile Include="Utils\CollectionsExtensions.cs" />
     <Compile Include="Utils\ProgressAggregator.cs" />
+    <Compile Include="Utils\WherigoExtensions.cs" />
     <Compile Include="ViewModels\GameMapViewModel.cs" />
     <Compile Include="ViewModels\InputManager.cs" />
     <Compile Include="ViewModels\NavigationManager.cs" />

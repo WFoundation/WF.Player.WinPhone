@@ -107,5 +107,11 @@
 		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
 		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
 	</Style>
+	<DataTemplate x:Key="WherigoThingPushpinContentTemplate">
+		<StackPanel Orientation="Horizontal">
+			<Image Height="20" Width="20" Margin="0,0,8,0" Visibility="{Binding Icon, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}}" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="UniformToFill"/>
+			<TextBlock TextWrapping="Wrap" Text="{Binding Name}"/>
+		</StackPanel>
+	</DataTemplate>
 	
 </ResourceDictionary>

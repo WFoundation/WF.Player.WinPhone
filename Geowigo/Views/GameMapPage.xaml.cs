@@ -98,6 +98,17 @@ namespace Geowigo.Views
 					}
 				}
 			}
+			else if (e.PropertyName == "ThingPushpins")
+			{
+				// Removes all current things.
+				ItemsLayer.Children.Clear();
+
+				// Adds all new things.
+				foreach (Pushpin pin in ViewModel.ThingPushpins)
+				{
+					ItemsLayer.Children.Add(pin);
+				}
+			}
 		}
 	}
 }
