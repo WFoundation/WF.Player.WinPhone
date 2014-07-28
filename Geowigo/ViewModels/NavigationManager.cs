@@ -105,6 +105,7 @@ namespace Geowigo.ViewModels
 				{ 
 					Uri = uri, 
 					IsForwardNavigation = true,
+					PreferBackNavigation = preferBackNav,
 					CancelIfDuplicate = cancelIfAlreadyActive
 				});
 			}
@@ -129,6 +130,19 @@ namespace Geowigo.ViewModels
 			#endregion
 
 			#region Job Processing
+			/// <summary>
+			/// Informs this navigation queue that an external navigation
+			/// event is expected. Subsequent navigation jobs will be delayed
+			/// until this navigation has occured.
+			/// </summary>
+			public void ExpectNavigation()
+			{
+				lock (_syncRoot)
+				{
+					_isNavigating = true;
+				}
+			}
+
 			private void CheckAndRunNext()
 			{
 				// Do nothing if a message box is on-screen.
@@ -303,14 +317,27 @@ namespace Geowigo.ViewModels
 				return true;
 			}
 
+
 			#endregion
 
 			#region Back Stack Conforming
 
 			private bool ClearBackStackFor(Uri source)
 			{
+				// Makes a list of back stack journal entries.
+				List<JournalEntry> backStack = new List<JournalEntry>();
+				try
+				{
+					backStack.AddRange(_rootFrame.BackStack);
+				}
+				catch (NullReferenceException)
+				{
+					// When the app comes back from tombstone, an NullReferenceException
+					// is raised. If so, nothing more can be done.
+					return false;
+				}
+				
 				// Checks if the back stack has a similar Uri.
-				List<JournalEntry> backStack = _rootFrame.BackStack.ToList();
 				bool hasSimilarUri = false;
 				foreach (JournalEntry item in backStack)
 				{
@@ -486,22 +513,22 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Navigates the app to the main page of the app.
 		/// </summary>
-		public void NavigateToAppHome(bool stopCurrentGame = false)
+		public void NavigateToAppHome(bool stopCurrentGame = false, bool isTombstone = false)
 		{
 			// Stops the current game if needed.
 			if (stopCurrentGame && _parent.Model.Core.Cartridge != null)
 			{
 				_parent.Model.Core.StopAndResetAsync().ContinueWith(
-					t => NavigateToAppHomeCore(),
+					t => NavigateToAppHomeCore(isTombstone),
 					System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 			}
 			else
 			{
-				NavigateToAppHomeCore();
+				NavigateToAppHomeCore(isTombstone);
 			}
 		}
 
-		private void NavigateToAppHomeCore()
+		private void NavigateToAppHomeCore(bool isTombstone)
 		{
 			// Resets the custom system tray status.
 			_parent.SystemTrayManager.StatusText = null;
@@ -510,7 +537,7 @@ namespace Geowigo.ViewModels
 			_parent.InputManager.Reset();
 
 			// Navigates now.
-			NavigateCore(new Uri("/Views/HomePage.xaml", UriKind.Relative), preferBackNav: true);
+			NavigateCore(new Uri(String.Format("/Views/HomePage.xaml?{0}={1}", HomeViewModel.TombstoneKey, isTombstone), UriKind.Relative), preferBackNav: true);
 		}
 
 		/// <summary>
@@ -627,6 +654,15 @@ namespace Geowigo.ViewModels
 		{
 			// Goes back.
 			_queue.AcceptNavigateBack();
+		}
+
+		/// <summary>
+		/// Delays all navigation jobs until an external navigation
+		/// occurs.
+		/// </summary>
+		public void PauseUntilNextNavigation()
+		{
+			_queue.ExpectNavigation();
 		}
 
 		private void NavigateCore(Uri source, bool cancelIfAlreadyActive = false, bool preferBackNav = false)

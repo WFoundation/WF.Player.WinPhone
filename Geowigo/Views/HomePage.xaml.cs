@@ -15,13 +15,13 @@ using System.Windows.Data;
 
 namespace Geowigo.Views
 {
-	public partial class HomePage : PhoneApplicationPage
+	public partial class HomePage : BasePage
 	{
 		#region Properties
 
 		#region ViewModel
 
-		public HomeViewModel ViewModel
+		public new HomeViewModel ViewModel
 		{
 			get
 			{
@@ -44,13 +44,7 @@ namespace Geowigo.Views
 			InitializeComponent();
 
             _HistorySource = (CollectionViewSource)this.Resources["HistorySource"];
-		}
-
-		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-		{
-			ViewModel.InitFromNavigation(e);
-
-            ViewModel.InitCollectionViewSources(_HistorySource);
+			ViewModel.InitCollectionViewSources(_HistorySource);
 		}
 	}
 }

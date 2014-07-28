@@ -19,9 +19,14 @@ using Microsoft.Phone.Tasks;
 
 namespace Geowigo.ViewModels
 {
-	public class HomeViewModel : DependencyObject
+	public class HomeViewModel : BaseViewModel
 	{
+		#region Constants
 
+		public static readonly string TombstoneKey = "tombstone";
+
+		#endregion
+		
 		#region Dependency Properties
 
         #region AreCartridgesVisible
@@ -69,12 +74,6 @@ namespace Geowigo.ViewModels
 				return App.Current.ViewModel.AppTitle;
 			}
 		}
-
-		#endregion
-
-		#region Model
-
-		public WherigoModel Model { get; private set; }
 
 		#endregion
 
@@ -234,12 +233,7 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		public HomeViewModel()
-		{
-			Model = App.Current.Model;
-		}
-
-		public void InitFromNavigation(System.Windows.Navigation.NavigationEventArgs e)
+		protected override void InitFromNavigation(NavigationInfo nav)
 		{
 			// Synchronizes the cartridge store.
             RefreshVisibilities();
@@ -251,6 +245,15 @@ namespace Geowigo.ViewModels
 
 			// Inits the app bar.
 			RefreshAppBar();
+
+			// Shows a message if we are recovering from tombstone.
+			if (String.Equals(nav.GetQueryValueOrDefault(TombstoneKey), "True"))
+			{
+				System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was killed by Windows Phone.\n" +
+					"This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
+					"Cannot resume game",
+					MessageBoxButton.OK);
+			}
 		}
         
         #region Menu Commands

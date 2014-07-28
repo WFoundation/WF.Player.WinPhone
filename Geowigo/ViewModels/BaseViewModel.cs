@@ -51,6 +51,24 @@ namespace Geowigo.ViewModels
 				NavigationMode = mode;
 				IsTombstoneRecovery = isTombstoneRecovery;
 			}
+
+			/// <summary>
+			/// Gets the value corresponding to the NavigationContext's URI
+			/// query string, or null if it was not found. 
+			/// </summary>
+			/// <param name="key"></param>
+			/// <returns></returns>
+			public string GetQueryValueOrDefault(string key)
+			{
+				string val = null;
+
+				if (NavigationContext.QueryString.TryGetValue(key, out val))
+				{
+					return val;
+				}
+
+				return null;
+			}
 		}
 
 		#endregion
@@ -253,13 +271,13 @@ namespace Geowigo.ViewModels
 		/// <param name="navCtx"></param>
 		public void OnPageNavigatedTo(NavigationEventArgs e, NavigationContext navCtx)
 		{
-			// Discards the navigation if we are recovering from tombstone.
-			if (!e.IsNavigationInitiator)
-			{
-				// Navigates back home.
-				App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
-				return;
-			}
+			//// Discards the navigation if we are recovering from tombstone.
+			//if (!e.IsNavigationInitiator)
+			//{
+			//    // Navigates back home.
+			//    //App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
+			//    return;
+			//}
 
 			// Marks the page as visible.
 			IsPageVisible = true;

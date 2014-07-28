@@ -251,6 +251,21 @@ namespace Geowigo.ViewModels
 		/// <param name="isRecoveringFromTombstone"></param>
 		public void HandleAppActivated(bool isRecoveringFromTombstone)
 		{
+			// If the app was tombstoned, goes back to app's home and show
+			// a message.
+			if (isRecoveringFromTombstone)
+			{
+				//System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was killed by Windows Phone.\n" +
+				//    "This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
+				//    "Cannot resume game",
+				//    MessageBoxButton.OK);
+
+				NavigationManager.PauseUntilNextNavigation();
+				NavigationManager.NavigateToAppHome(true, true);
+				return;
+			}
+			
+			// Resume the engine if it was paused.
 			if (Model.Core.GameState == WF.Player.Core.Engines.EngineGameState.Paused)
 			{
 				Model.Core.Resume();
