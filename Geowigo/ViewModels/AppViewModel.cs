@@ -199,6 +199,14 @@ namespace Geowigo.ViewModels
 			}
 		}
 		#endregion
+
+		#region HasRecoveredFromTombstone
+		/// <summary>
+		/// Gets if the app has recovered from tombstone this session.
+		/// </summary>
+		public bool HasRecoveredFromTombstone { get; private set; } 
+		#endregion
+
 		#endregion
 
         #region Constructors
@@ -255,13 +263,25 @@ namespace Geowigo.ViewModels
 			// a message.
 			if (isRecoveringFromTombstone)
 			{
-				//System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was killed by Windows Phone.\n" +
-				//    "This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
-				//    "Cannot resume game",
-				//    MessageBoxButton.OK);
+				// Marks the session as being recovered from tombstone.
+				HasRecoveredFromTombstone = true;
+				
+				// Displays a message.
+				System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was tombstoned by Windows Phone.\n\n" +
+					"This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
+					"Cannot resume game",
+					MessageBoxButton.OK);
 
+				// When an app recovers from tombstone, an uncancellable 
+				// navigation occurs to display the last page on the stack.
+				// Let us therefore alert the navigation manager about this
+				// incoming navigation event.
 				NavigationManager.PauseUntilNextNavigation();
-				NavigationManager.NavigateToAppHome(true, true);
+
+				// Schedules the app to navigate towards the app home
+				// once the tombstone recovery is over.
+				NavigationManager.NavigateToAppHome(true);
+
 				return;
 			}
 			

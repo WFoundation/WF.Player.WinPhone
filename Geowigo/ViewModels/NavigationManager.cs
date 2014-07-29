@@ -28,6 +28,13 @@ namespace Geowigo.ViewModels
 			App,
 
 			/// <summary>
+			/// Scope of a page that is outside the game and is removed
+			/// of the navigation stack as soon as it is not on-screen
+			/// anymore.
+			/// </summary>
+			OneShot,
+
+			/// <summary>
 			/// Scope of a page that is in game.
 			/// </summary>
 			Game,
@@ -339,6 +346,7 @@ namespace Geowigo.ViewModels
 				
 				// Checks if the back stack has a similar Uri.
 				bool hasSimilarUri = false;
+				int entriesToRemove = 0;
 				foreach (JournalEntry item in backStack)
 				{
 					if (item.Source.OriginalString == source.OriginalString)
@@ -346,25 +354,22 @@ namespace Geowigo.ViewModels
 						hasSimilarUri = true;
 						break;
 					}
+
+					entriesToRemove++;
 				}
 
 				// If needed, removes all back stack entries until this one.
 				if (hasSimilarUri)
 				{
 					// Removes the entries.
-					foreach (JournalEntry item in backStack)
+					for (int i = 0; i < entriesToRemove; i++)
 					{
-						if (item.Source.OriginalString == source.OriginalString)
-						{
-							// We hit the right page. Do nothing more.
-							break;
-						}
-						else
-						{
-							// Not at the right page yet, removes the entry.
-							_rootFrame.RemoveBackEntry();
-						}
+						// Not at the right page yet, removes the entry.
+						_rootFrame.RemoveBackEntry();
 					}
+
+					// The page at the top of the stack is now similar
+					// to the source Uri. Do nothing more.
 				}
 
 				return hasSimilarUri;
@@ -378,15 +383,11 @@ namespace Geowigo.ViewModels
 				//		(Wherigo spec)
 				// GameExtra -> Do not change anything.
 				// App -> Removes all entries up to and including the previous
-				//		entry for this page only if the stack contains this
+				//		entry for this page only if the stack contains this.
 				// Others -> Do not change anything.
 				PageScope latestPageScope = _parent.GetPageScope(latestNavigatedUri);
 
-				if (latestPageScope == PageScope.GameExtra || latestPageScope == PageScope.Unknown)
-				{
-					return;
-				}
-				else if (latestPageScope == PageScope.App)
+				if (latestPageScope == PageScope.App)
 				{
 					// If the page Uri can be found in the back stack,
 					// clears entries up to and including the back stack.
@@ -412,9 +413,15 @@ namespace Geowigo.ViewModels
 						}
 					}
 				}
-			} 
 
-			
+				// If the top of the stack is a OneShot page, remove it
+				// now, since it may be the last time it's possible to do it.
+				JournalEntry topEntry = _rootFrame.BackStack.FirstOrDefault();
+				if (topEntry != null && _parent.GetPageScope(topEntry.Source) == PageScope.OneShot)
+				{
+					_rootFrame.RemoveBackEntry();
+				}
+			} 
 
 			#endregion
 
@@ -472,7 +479,7 @@ namespace Geowigo.ViewModels
 
 		private PageScope GetPageScope(Uri pageUri)
 		{
-			string pageName = pageUri.ToString();
+			string pageName = pageUri.ToString().Replace("//", "/");
 			string prefix = "/Views/";
 
 			PageScope scope = PageScope.Unknown;
@@ -483,8 +490,7 @@ namespace Geowigo.ViewModels
 			{
 				scope = PageScope.Game;
 			}
-			else if (pageName.StartsWith(prefix + "BetaLicensePage.xaml") ||
-				pageName.StartsWith(prefix + "HomePage.xaml") ||
+			else if (pageName.StartsWith(prefix + "HomePage.xaml") ||
 				pageName.StartsWith(prefix + "CartridgeInfoPage.xaml"))
 			{
 				scope = PageScope.App;
@@ -494,6 +500,10 @@ namespace Geowigo.ViewModels
 				|| pageName.StartsWith(prefix + "GameMapPage.xaml"))
 			{
 				scope = PageScope.GameExtra;
+			}
+			else if (pageName.StartsWith(prefix + "BetaLicensePage.xaml"))
+			{
+				scope = PageScope.OneShot;
 			}
 
 			return scope;
@@ -513,22 +523,22 @@ namespace Geowigo.ViewModels
 		/// <summary>
 		/// Navigates the app to the main page of the app.
 		/// </summary>
-		public void NavigateToAppHome(bool stopCurrentGame = false, bool isTombstone = false)
+		public void NavigateToAppHome(bool stopCurrentGame = false)
 		{
 			// Stops the current game if needed.
 			if (stopCurrentGame && _parent.Model.Core.Cartridge != null)
 			{
 				_parent.Model.Core.StopAndResetAsync().ContinueWith(
-					t => NavigateToAppHomeCore(isTombstone),
+					t => NavigateToAppHomeCore(),
 					System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
 			}
 			else
 			{
-				NavigateToAppHomeCore(isTombstone);
+				NavigateToAppHomeCore();
 			}
 		}
 
-		private void NavigateToAppHomeCore(bool isTombstone)
+		private void NavigateToAppHomeCore()
 		{
 			// Resets the custom system tray status.
 			_parent.SystemTrayManager.StatusText = null;
@@ -537,7 +547,7 @@ namespace Geowigo.ViewModels
 			_parent.InputManager.Reset();
 
 			// Navigates now.
-			NavigateCore(new Uri(String.Format("/Views/HomePage.xaml?{0}={1}", HomeViewModel.TombstoneKey, isTombstone), UriKind.Relative), preferBackNav: true);
+			NavigateCore(new Uri("/Views/HomePage.xaml", UriKind.Relative), preferBackNav: true);
 		}
 
 		/// <summary>

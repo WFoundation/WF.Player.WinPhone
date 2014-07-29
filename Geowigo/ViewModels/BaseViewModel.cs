@@ -35,21 +35,14 @@ namespace Geowigo.ViewModels
 			public NavigationContext NavigationContext { get; private set; }
 
 			/// <summary>
-			/// Gets if this navigation corresponds to a recovery from
-			/// tombstone.
-			/// </summary>
-			public bool IsTombstoneRecovery { get; private set; }
-
-			/// <summary>
 			/// Gets the navigation mode.
 			/// </summary>
 			public NavigationMode NavigationMode { get; private set; }
 
-			public NavigationInfo(NavigationContext ctx, NavigationMode mode, bool isTombstoneRecovery)
+			public NavigationInfo(NavigationContext ctx, NavigationMode mode)
 			{
 				NavigationContext = ctx;
 				NavigationMode = mode;
-				IsTombstoneRecovery = isTombstoneRecovery;
 			}
 
 			/// <summary>
@@ -271,19 +264,11 @@ namespace Geowigo.ViewModels
 		/// <param name="navCtx"></param>
 		public void OnPageNavigatedTo(NavigationEventArgs e, NavigationContext navCtx)
 		{
-			//// Discards the navigation if we are recovering from tombstone.
-			//if (!e.IsNavigationInitiator)
-			//{
-			//    // Navigates back home.
-			//    //App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
-			//    return;
-			//}
-
 			// Marks the page as visible.
 			IsPageVisible = true;
 
 			// Always perform the common initializations.
-			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode, false);
+			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode);
 			InitFromNavigationInternal(nav);
 			
 			// This view model needs to be init'ed only if the navigation 
@@ -295,7 +280,14 @@ namespace Geowigo.ViewModels
 			}
 			else if (e.NavigationMode == NavigationMode.Back)
 			{
-				OnPageNavigatedBackToOverride();
+				if (App.Current.ViewModel.HasRecoveredFromTombstone)
+				{
+					InitFromNavigation(nav);
+				}
+				else
+				{
+					OnPageNavigatedBackToOverride();
+				}
 			}
 		}
 

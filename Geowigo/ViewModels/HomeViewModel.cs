@@ -21,12 +21,6 @@ namespace Geowigo.ViewModels
 {
 	public class HomeViewModel : BaseViewModel
 	{
-		#region Constants
-
-		public static readonly string TombstoneKey = "tombstone";
-
-		#endregion
-		
 		#region Dependency Properties
 
         #region AreCartridgesVisible
@@ -245,15 +239,6 @@ namespace Geowigo.ViewModels
 
 			// Inits the app bar.
 			RefreshAppBar();
-
-			// Shows a message if we are recovering from tombstone.
-			if (String.Equals(nav.GetQueryValueOrDefault(TombstoneKey), "True"))
-			{
-				System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was killed by Windows Phone.\n" +
-					"This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
-					"Cannot resume game",
-					MessageBoxButton.OK);
-			}
 		}
         
         #region Menu Commands
