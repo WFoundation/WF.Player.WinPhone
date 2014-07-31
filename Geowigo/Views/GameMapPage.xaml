@@ -49,15 +49,7 @@
         		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ZonesLayer"/>
         		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ZoneLabelsLayer"/>
         		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="ItemsLayer"/>
-        		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="PlayerLayer">
-        			<Microsoft_Phone_Controls_Maps:Pushpin>
-        				<Geowigo_Controls:NavigationListBox Margin="0,0,0,-777" Width="480">
-        					<System:String>chaîne</System:String>
-        					<System:String>efewgfoiewjgfewgjlew</System:String>
-        					<System:String>feafaesfaewgasgregas</System:String>
-        				</Geowigo_Controls:NavigationListBox>
-        			</Microsoft_Phone_Controls_Maps:Pushpin>
-        		</Microsoft_Phone_Controls_Maps:MapLayer>
+        		<Microsoft_Phone_Controls_Maps:MapLayer x:Name="PlayerLayer"/>
         	</Microsoft_Phone_Controls_Maps:Map>
         </Grid>
     </Grid>

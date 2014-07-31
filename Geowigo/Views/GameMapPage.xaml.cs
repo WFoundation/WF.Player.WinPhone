@@ -93,21 +93,13 @@ namespace Geowigo.Views
 			}
 			else if (e.PropertyName == "PlayerPushpin")
 			{
-				// Refreshes the pushpin of the player.
-				if (ViewModel.PlayerPushpin == null)
-				{
-					PlayerLayer.Children.Clear();
-				}
-				else
-				{
-					// Syncs the current pushpin with the view model pushpin.
-					Pushpin playerPin = PlayerLayer.Children.OfType<Pushpin>().SingleOrDefault();
-					if (playerPin != ViewModel.PlayerPushpin)
-					{
-						PlayerLayer.Children.Remove(playerPin);
-						PlayerLayer.Children.Add(ViewModel.PlayerPushpin);
-					}
-				}
+				// Restores the player layer objects.
+				RestorePlayerLayerObjects();
+			}
+			else if (e.PropertyName == "PlayerAccuracyPolygon")
+			{
+				// Restores the player layer objects.
+				RestorePlayerLayerObjects();
 			}
 			else if (e.PropertyName == "ThingPushpins")
 			{
@@ -119,6 +111,22 @@ namespace Geowigo.Views
 				{
 					ItemsLayer.Children.Add(pin);
 				}
+			}
+		}
+
+		private void RestorePlayerLayerObjects()
+		{
+			// Remove all objects from the layer.
+			PlayerLayer.Children.Clear();
+
+			// Selectively adds the right objects.
+			if (ViewModel.PlayerAccuracyPolygon != null)
+			{
+				PlayerLayer.Children.Add(ViewModel.PlayerAccuracyPolygon);
+			}
+			if (ViewModel.PlayerPushpin != null)
+			{
+				PlayerLayer.Children.Add(ViewModel.PlayerPushpin);
 			}
 		}
 	}

@@ -126,6 +126,29 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region PlayerAccuracyPolygon
+
+		private MapPolygon _PlayerAccuracyPolygon;
+		public MapPolygon PlayerAccuracyPolygon
+		{
+			get
+			{
+				return _PlayerAccuracyPolygon;
+			}
+
+			private set
+			{
+				if (value != _PlayerAccuracyPolygon)
+				{
+					_PlayerAccuracyPolygon = value;
+
+					RaisePropertyChanged("PlayerAccuracyPolygon");
+				}
+			}
+		}
+
+		#endregion
+
 		#region ThingsPushpins
 		private IEnumerable<Pushpin> _ThingPushpins;
 		public IEnumerable<Pushpin> ThingPushpins
@@ -187,14 +210,19 @@ namespace Geowigo.ViewModels
 
 		public const double MAX_AUTO_ZOOM_LEVEL = 18d;
 
+		private const int ACCURACY_CIRCLE_SAMPLES = 50;
+
 		#endregion
 
 		#region Fields
 
 		private Brush _polygonFillBrush;
-		private Brush _polygonBorderBrush;
+		private Brush _polygonStrokeBrush;
+		private Brush _playerPolygonFillBrush;
+		private Brush _playerPolygonStrokeBrush;
 		private DataTemplate _thingPushpinContentTemplate;
 		private DataTemplate _landmarkPushpinContentTemplate;
+		private WF.Player.Core.Utils.GeoMathHelper _geoMathHelper;
 
 		#endregion
 
@@ -202,11 +230,16 @@ namespace Geowigo.ViewModels
 		{
 			// Inits the brushes.
 			_polygonFillBrush = new SolidColorBrush(Colors.Cyan) { Opacity = 0.25 };
-			_polygonBorderBrush = new SolidColorBrush(Colors.White);
+			_polygonStrokeBrush = new SolidColorBrush(Colors.White);
+			_playerPolygonFillBrush = new SolidColorBrush(Colors.White) { Opacity = 0.25 };
+			_playerPolygonStrokeBrush = new SolidColorBrush(Colors.Black);
 
 			// Inits the templates.
 			_thingPushpinContentTemplate = (DataTemplate)App.Current.Resources["WherigoThingPushpinContentTemplate"];
 			_landmarkPushpinContentTemplate = (DataTemplate)App.Current.Resources["LandmarkPushpinContentTemplate"];
+
+			// Inits resources.
+			_geoMathHelper = new WF.Player.Core.Utils.GeoMathHelper();
 		}
 
 		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -227,7 +260,6 @@ namespace Geowigo.ViewModels
 			if (propName == "ActiveVisibleZones")
 			{
 				RefreshZones();
-				RefreshBounds();
 			}
 			else if (propName == "ActiveVisibleThings")
 			{
@@ -246,9 +278,10 @@ namespace Geowigo.ViewModels
 
 			// Makes a pushpin if there is a position of the device,
 			// removes it otherwise.
-			if (playerPos == null)
+			if (playerPos == null || playerPos.IsUnknown)
 			{
 				PlayerPushpin = null;
+				PlayerAccuracyPolygon = null;
 			}
 			else
 			{
@@ -265,6 +298,29 @@ namespace Geowigo.ViewModels
 				else
 				{
 					PlayerPushpin.Location = playerPos;
+				}
+
+				// Creates or refreshes the accuracy polygon.
+				double acc = Math.Round(playerPos.HorizontalAccuracy);
+				if (PlayerAccuracyPolygon == null)
+				{					
+					// Creates the accuracy circle.
+					PlayerAccuracyPolygon = new MapPolygon()
+					{
+						Fill = _playerPolygonFillBrush,
+						Stroke = _playerPolygonStrokeBrush,
+						StrokeThickness = 2,
+						Locations = _geoMathHelper
+							.GetCircle(playerPos.ToZonePoint(), acc, ACCURACY_CIRCLE_SAMPLES)
+							.ToLocationCollection()
+					};
+				}
+				else
+				{
+					// Changes the points of the accuracy circle.
+					PlayerAccuracyPolygon.Locations = _geoMathHelper
+						.GetCircle(playerPos.ToZonePoint(), acc, ACCURACY_CIRCLE_SAMPLES)
+						.ToLocationCollection();
 				}
 			}
 		}
@@ -362,9 +418,9 @@ namespace Geowigo.ViewModels
 					// Creates and adds the polygon.
 					polygons.Add(new MapPolygon()
 					{
-						Locations = zone.ToLocationCollection(),
+						Locations = zone.Points.ToLocationCollection(),
 						Fill = _polygonFillBrush,
-						Stroke = _polygonBorderBrush,
+						Stroke = _polygonStrokeBrush,
 						StrokeThickness = 2
 					});
 
