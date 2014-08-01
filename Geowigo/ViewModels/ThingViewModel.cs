@@ -199,7 +199,7 @@ namespace Geowigo.ViewModels
 			CheckShouldNavigateBack();
 		}
 
-		private void CheckShouldNavigateBack()
+		private void CheckShouldNavigateBack(bool containerChanged = false)
 		{
 			bool shouldGoBack = false;
 
@@ -215,7 +215,7 @@ namespace Geowigo.ViewModels
 				shouldGoBack = IsPageVisible && // The page must be visible to be able to trigger a navigation.
 					(!WherigoObject.Visible // The object is not supposed to be visible.
 					|| (WherigoObject is Zone && !((Zone)WherigoObject).Active) // The zone is not active.
-					//|| (cont == null && !(WherigoObject is Zone)) // The item or character has no container.
+					|| (cont == null && containerChanged) // The item or character has no container.
 					|| (cont != null && cont != Model.Core.Player && !cont.Visible) // The container is invisible.
 					);
 			}
@@ -247,7 +247,7 @@ namespace Geowigo.ViewModels
 				
 				// If this thing is not in the Player or a visible Thing's inventory 
 				// anymore, return to previous page.
-				CheckShouldNavigateBack();
+				CheckShouldNavigateBack(containerChanged: true);
 
 				// Refreshes the status text.
 				RefreshStatusText();
