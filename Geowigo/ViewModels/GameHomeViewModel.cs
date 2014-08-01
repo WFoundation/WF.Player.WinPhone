@@ -625,7 +625,7 @@ namespace Geowigo.ViewModels
 			ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
 
 			// Adds the maps menu item.
-			ApplicationBar.CreateAndAddMenuItem(ShowMapCommand, "map");
+			ApplicationBar.CreateAndAddButton("appbar.map.treasure.png", ShowMapCommand, "map");
 		} 
 		#endregion
 	}
