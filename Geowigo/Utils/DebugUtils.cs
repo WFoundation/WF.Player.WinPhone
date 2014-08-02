@@ -167,8 +167,18 @@ namespace Geowigo.Utils
 		public static void AddBugSenseCrashExtraData(WF.Player.Core.Cartridge cart)
 		{
 			var extraDataList = BugSenseHandler.Instance.CrashExtraData;
-			extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartGuid", cart.Guid));
-			extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", cart.Name));
+
+			string guid = cart.Guid;
+			if (guid != null)
+			{
+				extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartGuid", guid)); 
+			}
+
+			string name = cart.Name;
+			if (name != null)
+			{
+				extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", name));
+			}
 		}
 
 		/// <summary>
