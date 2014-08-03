@@ -546,6 +546,9 @@ namespace Geowigo.ViewModels
 			// Resets the input tracking.
 			_parent.InputManager.Reset();
 
+			// Dismisses all message boxes.
+			_parent.MessageBoxManager.DismissAllMessageBoxes();
+
 			// Navigates now.
 			NavigateCore(new Uri("/Views/HomePage.xaml", UriKind.Relative), preferBackNav: true);
 		}
