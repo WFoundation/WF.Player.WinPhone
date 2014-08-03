@@ -68,9 +68,9 @@ namespace Geowigo.ViewModels
                 }
             }
         }
-        #endregion
+		#endregion
 
-        #endregion
+		#endregion
 
 		/// <summary>
 		/// Displays a message box from a Wherigo game. 
@@ -84,7 +84,11 @@ namespace Geowigo.ViewModels
 				throw new ArgumentNullException("mbox");
 			}
 
-            Accept(mbox).Show();
+			CustomMessageBox mb = Accept(mbox);
+			if (mb != null)
+			{
+				mb.Show();
+			}
 		}
 
 		/// <summary>
@@ -133,6 +137,13 @@ namespace Geowigo.ViewModels
 		/// <param name="wmb"></param>
 		private CustomMessageBox Accept(WF.Player.Core.MessageBox wmb)
 		{
+			// Ignore if the engine is not ready.
+			if (!App.Current.Model.Core.IsReady)
+			{
+				System.Diagnostics.Debug.WriteLine("MessageBoxManager: Ignored Wherigo message box because Engine is not ready.");
+				return null;
+			}
+			
 			CustomMessageBox cmb = null;
 			
 			// Checks if this instance already manages this message box.
