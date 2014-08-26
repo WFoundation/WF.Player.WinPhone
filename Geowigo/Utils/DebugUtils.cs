@@ -177,7 +177,7 @@ namespace Geowigo.Utils
 			string name = cart.Name;
 			if (name != null)
 			{
-				extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", name));
+				extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", name.Trim()));
 			}
 		}
 
