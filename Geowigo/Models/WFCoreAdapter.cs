@@ -81,6 +81,8 @@ namespace Geowigo.Models
 		private double? _LastKnownHeadingAccuracy;
 		private bool _HasLastKnownHeadingChanged;
 
+		private WF.Player.Core.Formats.GWL _Logger;
+
 		private object _SyncRoot = new Object();
 
 		#endregion
@@ -255,6 +257,18 @@ namespace Geowigo.Models
 
 		#endregion
 
+		#region Destructors and Disposing
+
+		protected override void DisposeOverride(bool disposeManagedResources)
+		{
+			if (disposeManagedResources)
+			{
+				DisposeLogger();
+			}
+		}
+		
+		#endregion
+
 		#region Engine
 
 		/// <summary>
@@ -266,7 +280,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
 			{
-				WaitForLegalState();
+				WaitForGameState(EngineGameState.Uninitialized);
 				return InitAndStartCartridge(filename);
 			});
 		}
@@ -310,7 +324,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew<Cartridge>(() =>
 			{
-				WaitForLegalState();
+				WaitForGameState(EngineGameState.Uninitialized);
 				return InitAndRestoreCartridge(filename, gwsFilename);
 			});
 		}
@@ -359,7 +373,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew(() =>
 			{
-				WaitForLegalState();
+				WaitForGameState(EngineGameState.Playing);
 				Save(cs);
 			});
 		} 
@@ -386,7 +400,7 @@ namespace Geowigo.Models
 		{
 			return System.Threading.Tasks.Task.Factory.StartNew(() =>
 			{
-				WaitForLegalState();
+				WaitForGameState(EngineGameState.Playing);
 				Stop();
 				Reset();
 
@@ -395,17 +409,14 @@ namespace Geowigo.Models
 			});
 		}
 
-		private void WaitForLegalState()
+		private void WaitForGameState(EngineGameState target)
 		{
-			// Immediately returns if the engine is not in a concurrent
-			// state.
+			// Immediately returns if the engine is not in the target state.
 			try
 			{
-				CheckStateIsNot(EngineGameState.Initializing, null);
-				CheckStateForConcurrentGameOperation();
+				CheckStateIs(target, null);
 				
-				// If we get here, it means that the engine is not
-				// in a concurrent game operation.
+				// If we get here, it means that the engine is in the target state.
 				return;
 			}
 			catch (InvalidOperationException)
@@ -415,7 +426,7 @@ namespace Geowigo.Models
 			}
 
 			// Sets up a manual reset event that is set when the engine state
-			// changes to a non-concurrent game state.
+			// changes to the target game state.
 			System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
 			PropertyChangedEventHandler handler = new PropertyChangedEventHandler((o, e) =>
 			{
@@ -423,8 +434,7 @@ namespace Geowigo.Models
 				{
 					try
 					{
-						CheckStateIsNot(EngineGameState.Initializing, null);
-						CheckStateForConcurrentGameOperation();
+						CheckStateIs(target, null);
 
 						// The engine is not in a concurrent game operation.
 						// Let's signal the event.
@@ -446,6 +456,54 @@ namespace Geowigo.Models
 			// Removes the handler.
 			PropertyChanged -= handler;
 		}
+		#endregion
+
+		#region Logging
+
+		/// <summary>
+		/// Associates a logger to this instance.
+		/// </summary>
+		/// <remarks>If a logger already is associated, it will be disposed.</remarks>
+		/// <param name="logger"></param>
+		public void StartLogging(WF.Player.Core.Formats.GWL logger)
+		{
+			lock (_SyncRoot)
+			{
+				if (_Logger != null)
+				{
+					DisposeLogger();
+				}
+
+				_Logger = logger;
+			}
+		}
+
+		private void DisposeLogger()
+		{
+			lock (_SyncRoot)
+			{
+				if (_Logger != null)
+				{
+					_Logger.Dispose();
+					_Logger = null;
+				}
+			}
+		}
+
+		private void LogDebug(string message, LogLevel level = LogLevel.Debug)
+		{
+			Debug.WriteLine("WFCoreAdapter: " + message);
+
+			lock (_SyncRoot)
+			{
+				if (_Logger != null)
+				{
+					_Logger.TryWriteLogEntry(level, message, this);
+				}
+			}
+		}
+
+
 		#endregion
 
 		#region Sensors
@@ -650,14 +708,9 @@ namespace Geowigo.Models
 
 		private void WFCoreAdapter_LogMessageRequested(object sender, LogMessageEventArgs e)
 		{
-			LogDebug(String.Format("[{0}]: {1}", e.Level, e.Message));
+			LogDebug(String.Format("[{0}]: {1}", e.Level, e.Message), e.Level);
 		}
 
 		#endregion
-
-		private void LogDebug(string message)
-		{
-			Debug.WriteLine("WFCoreAdapter: " + message);
-		}
     }
 }

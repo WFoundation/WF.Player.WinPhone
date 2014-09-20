@@ -131,7 +131,7 @@ namespace Geowigo.Models
 		/// its tag if the GUIDs match.</remarks>
 		/// <param name="filename">Filename of the cartridge.</param>
 		/// <param name="guid">Guid of the Cartridge to get.</param>
-		/// <returns>Null if the tag was not found.</returns>
+		/// <returns>Null if the tag was not found or the GUIDs didn't match.</returns>
 		public CartridgeTag GetCartridgeTagOrDefault(string filename, string guid)
 		{
 			CartridgeTag tag = null;
@@ -152,6 +152,17 @@ namespace Geowigo.Models
 
 			// Only returns the tag if both GUIDs match.
 			return tag == null || tag.Guid != guid ? null : tag;
+		}
+
+		/// <summary>
+		/// Gets the single tag for a cartridge filename.
+		/// </summary>
+		/// <param name="filename">Filename of the cartridge.</param>
+		/// <returns>The single cartridge tag to match this filename, or null if 
+		/// the cartridge was not found.</returns>
+		public CartridgeTag GetCartridgeTagOrDefault(string filename)
+		{
+			return AcceptCartridge(filename);
 		}
 
 		#endregion

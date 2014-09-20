@@ -391,7 +391,10 @@ namespace Geowigo.ViewModels
 			// Tries to get the filename to query for.
 			string filename;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
-			{	
+			{
+				// Gets the cartridge tag for this cartridge.
+				CartridgeTag cartTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filename);
+				
 				string gwsFilename;
 
                 // Restores the cartridge or starts a new game?
@@ -401,6 +404,9 @@ namespace Geowigo.ViewModels
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
+							// Starts logging.
+							Model.Core.StartLogging(cartTag.CreateLogFile());
+							
 							// Restores the game.
 							Model.Core.InitAndRestoreCartridgeAsync(filename, gwsFilename)
 								.ContinueWith(t =>
@@ -409,10 +415,9 @@ namespace Geowigo.ViewModels
 									Cartridge = t.Result;
 
 									// Registers a history entry.
-									CartridgeTag cart = Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge);
 									Model.History.AddRestoredGame(
-										cart,
-										cart.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+										cartTag,
+										cartTag.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
@@ -422,7 +427,10 @@ namespace Geowigo.ViewModels
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
-                            // Starts the game.
+							// Starts logging.
+							Model.Core.StartLogging(cartTag.CreateLogFile());
+							
+							// Starts the game.
 							Model.Core.InitAndStartCartridgeAsync(filename)
 								.ContinueWith(t =>
 								{
@@ -430,7 +438,7 @@ namespace Geowigo.ViewModels
 									Cartridge = t.Result;
 
 									// Registers a history entry.
-									Model.History.AddStartedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(Cartridge));
+									Model.History.AddStartedGame(cartTag);
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }

@@ -16,6 +16,7 @@ using Geowigo.Utils;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
+using WF.Player.Core.Formats;
 
 namespace Geowigo.Models
 {
@@ -33,7 +34,7 @@ namespace Geowigo.Models
 		#region Constants
 
 		public const string GlobalCachePath = "/Cache";
-        public const string GlobalSavegamePath = "/Savegames";
+        public const string GlobalSavegamePath = "/Savegames+Logs";
 
 		public const int SmallThumbnailMinWidth = 173;
 		public const int BigThumbnailMinWidth = 432;
@@ -63,6 +64,11 @@ namespace Geowigo.Models
         /// Gets the path to the savegames folder for the Catridge.
         /// </summary>
         public string PathToSavegames { get; private set; }
+		
+		/// <summary>
+		/// Gets the path to the logs folder for the Cartridge.
+		/// </summary>
+		public string PathToLogs { get; private set; }
 
 		/// <summary>
 		/// Gets the unique identifier for the Cartridge.
@@ -179,6 +185,7 @@ namespace Geowigo.Models
                 Guid.Substring(0, 4),
                 System.IO.Path.GetFileNameWithoutExtension(Cartridge.Filename)
             );
+			PathToLogs = PathToSavegames;
 
 			// Event handlers.
 			//Cartridge.PropertyChanged += new PropertyChangedEventHandler(OnCartridgePropertyChanged);
@@ -324,7 +331,7 @@ namespace Geowigo.Models
 
 		#endregion
 
-		#region Cache
+		#region Cache (Core)
 
 		private string GetCachePathCore(string filename)
 		{
@@ -409,6 +416,29 @@ namespace Geowigo.Models
             _savegames = cSavegames;
             RaisePropertyChanged("Savegames");
         }
+
+		#endregion
+
+		#region Logs
+
+		/// <summary>
+		/// Creates a new log file for this cartridge tag.
+		/// </summary>
+		/// <returns></returns>
+		public GWL CreateLogFile()
+		{
+			// Creates a file in the logs folder.
+			string filename = String.Format("/{0}/{1:yyyyMMddhhmmss}_{2}.gwl",
+				PathToLogs,
+				DateTime.Now.ToLocalTime(),
+				System.IO.Path.GetFileNameWithoutExtension(Cartridge.Filename));
+			IsolatedStorageFileStream fs = IsolatedStorageFile
+				.GetUserStoreForApplication()
+				.OpenFile(filename, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
+
+			// Creates a logger for this file.
+			return new GWL(fs);
+		}
 
 		#endregion
 
