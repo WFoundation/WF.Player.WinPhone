@@ -340,30 +340,10 @@ namespace Geowigo.ViewModels
                     Cartridge.StartingLocationAltitude);
 
 			// Author name and company.
-			System.Text.StringBuilder sb = new System.Text.StringBuilder();
-			bool hasAuthor = !String.IsNullOrWhiteSpace(Cartridge.AuthorName);
-			bool hasCompany = !String.IsNullOrWhiteSpace(Cartridge.AuthorCompany) 
-				&& Cartridge.AuthorCompany != Cartridge.AuthorName;
-			if (hasAuthor || hasCompany)
+			string fullAuthor = Cartridge.GetFullAuthor();
+			if (!String.IsNullOrWhiteSpace(fullAuthor))
 			{
-				sb.Append("by ");
-				if (hasAuthor)
-				{
-					sb.Append(Cartridge.AuthorName);
-					if (hasCompany)
-					{
-						sb.Append(" (");
-					}
-				}
-				if (hasCompany)
-				{
-					sb.Append(Cartridge.AuthorCompany);
-					if (hasAuthor)
-					{
-						sb.Append(")");
-					}
-				}
-				Author = sb.ToString();
+				Author = "by " + fullAuthor;
 			}
         }
 	}

@@ -9,6 +9,41 @@ namespace Geowigo.Utils
 	public static class WherigoExtensions
 	{
 		/// <summary>
+		/// Gets a displayable full name of the author of this Cartridge.
+		/// </summary>
+		/// <param name="c"></param>
+		/// <returns>The author name and company, aggregated in a presentable
+		/// way.</returns>
+		public static string GetFullAuthor(this Cartridge c)
+		{
+			System.Text.StringBuilder sb = new System.Text.StringBuilder();
+			bool hasAuthor = !String.IsNullOrWhiteSpace(c.AuthorName);
+			bool hasCompany = !String.IsNullOrWhiteSpace(c.AuthorCompany)
+				&& c.AuthorCompany != c.AuthorName;
+			if (hasAuthor || hasCompany)
+			{
+				if (hasAuthor)
+				{
+					sb.Append(c.AuthorName);
+					if (hasCompany)
+					{
+						sb.Append(" (");
+					}
+				}
+				if (hasCompany)
+				{
+					sb.Append(c.AuthorCompany);
+					if (hasAuthor)
+					{
+						sb.Append(")");
+					}
+				}
+			}
+
+			return sb.ToString();
+		}
+		
+		/// <summary>
 		/// Gets a GeoCoordinate representing this ZonePoint.
 		/// </summary>
 		/// <param name="zp"></param>

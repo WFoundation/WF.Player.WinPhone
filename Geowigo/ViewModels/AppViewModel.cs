@@ -293,6 +293,21 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Kills the current Wherigo Core instance and replaces it with a new one.
+		/// </summary>
+		public void HardResetCore()
+		{
+			// Unregisters the current core.
+			UnregisterModel(Model);
+			
+			// Performs a hard reset.
+			Model.HardResetCore();
+
+			// Registers the model again.
+			RegisterModel(Model);
+		}
+
+		/// <summary>
 		/// Plays a media sound.
 		/// </summary>
 		/// <param name="media">The sound to play.</param>
@@ -385,7 +400,7 @@ namespace Geowigo.ViewModels
         #region Model Event Handlers
         
         private void RegisterModel(WherigoModel model)
-		{
+		{		
 			model.Core.InputRequested += new EventHandler<ObjectEventArgs<Input>>(Core_InputRequested);
 			model.Core.ShowMessageBoxRequested += new EventHandler<MessageBoxEventArgs>(Core_MessageBoxRequested);
 			model.Core.ShowScreenRequested += new EventHandler<ScreenEventArgs>(Core_ScreenRequested);
@@ -413,8 +428,7 @@ namespace Geowigo.ViewModels
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested -= new EventHandler(Core_CompassCalibrationRequested);
 			model.Core.ShowStatusTextRequested -= new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
-			model.Core.PlayAlertRequested -= new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);
-		}
+			model.Core.PlayAlertRequested -= new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);		}
 
 		private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
 		{

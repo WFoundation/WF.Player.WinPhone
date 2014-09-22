@@ -20,6 +20,7 @@ using Geowigo.Utils;
 using Geowigo.Models;
 using System.IO.IsolatedStorage;
 using System.ComponentModel;
+using System.Text;
 
 namespace Geowigo.ViewModels
 {
@@ -412,7 +413,14 @@ namespace Geowigo.ViewModels
 								.ContinueWith(t =>
 								{
 									// Keeps the cartridge.
-									Cartridge = t.Result;
+									try
+									{
+										Cartridge = t.Result;
+									}
+									catch (AggregateException ex)
+									{
+										FailInit(ex, cartTag, true);
+									}
 
 									// Registers a history entry.
 									Model.History.AddRestoredGame(
@@ -435,7 +443,14 @@ namespace Geowigo.ViewModels
 								.ContinueWith(t =>
 								{
 									// Stores the result of the cartridge.
-									Cartridge = t.Result;
+									try
+									{
+										Cartridge = t.Result;
+									}
+									catch (AggregateException ex)
+									{
+										FailInit(ex, cartTag);
+									}
 
 									// Registers a history entry.
 									Model.History.AddStartedGame(cartTag);
@@ -446,6 +461,51 @@ namespace Geowigo.ViewModels
 
 			// TODO: Cancel nav if no cartridge in parameter?
 
+		}
+
+		/// <summary>
+		/// Displays a message when the async initialization failed,
+		/// and returns back to the main menu.
+		/// </summary>
+		/// <param name="ex"></param>
+		/// <param name="tag"></param>
+		/// <param name="isRestore"></param>
+		private void FailInit(AggregateException ex, CartridgeTag tag, bool isRestore = false)
+		{
+			// Prepares the message.
+			StringBuilder sb = new StringBuilder();
+			sb.Append("A problem occurred while ");
+			sb.Append(isRestore ? "restoring the saved game" : "starting a new game");
+			sb.Append(", therefore Geowigo cannot go on. This most likely happens because of a faulty cartridge");
+			if (isRestore)
+			{
+				sb.Append(" or savegame");
+			}
+			sb.Append(".\n\nIf the problem persists, you should contact the Cartridge owner, ");
+			sb.Append(tag.Cartridge.GetFullAuthor());
+			if (ex.InnerExceptions != null && ex.InnerExceptions.Count > 0)
+			{
+				sb.Append(", quoting the following error messages that prevented the game from starting:");
+				int i = ex.InnerExceptions.Count;
+				foreach (Exception e in ex.InnerExceptions)
+				{
+					sb.Append("\n" + i + "> " + e.Message);
+				}
+			}
+			else
+			{
+				sb.Append(".");
+			}
+			
+			// Shows a message box.
+			System.Windows.MessageBox.Show(
+				sb.ToString(),
+				"Cannot start game",
+				MessageBoxButton.OK
+			);
+
+			// Goes back!
+			App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
 		}
 
         /// <summary>

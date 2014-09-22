@@ -528,9 +528,32 @@ namespace Geowigo.ViewModels
 			// Stops the current game if needed.
 			if (stopCurrentGame && _parent.Model.Core.Cartridge != null)
 			{
-				_parent.Model.Core.StopAndResetAsync().ContinueWith(
-					t => NavigateToAppHomeCore(),
-					System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+				try
+				{
+					// Tries to stop the engine the nice way.
+					_parent.Model.Core.StopAndResetAsync().ContinueWith(
+						t => 
+							{
+								if (t.IsFaulted)
+								{
+									// The nice way didn't work.
+									// So hard reset the engine.
+									_parent.HardResetCore();
+								}
+								
+								NavigateToAppHomeCore();
+							},
+						System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
+				}
+				catch (Exception)
+				{
+					// The nice way didn't work.
+					// So hard reset the engine.
+					_parent.HardResetCore();
+
+					// Navigates.
+					NavigateToAppHomeCore();
+				}
 			}
 			else
 			{
@@ -659,11 +682,7 @@ namespace Geowigo.ViewModels
 		/// <remarks>
 		/// This method has no effect if the previous view in the stack is not a game view.
 		/// </remarks>
-		/// <param name="currentExpectedView">The name of the view source is expected
-		/// to be displayed. If non-null, and the current view is not the same as
-		/// the <paramref name="currentExpectedView"/>, the current expected view
-		/// is removed from the back stack, and the navigation is cancelled.</param>
-		public void NavigateBack(Uri currentExpectedView = null)
+		public void NavigateBack()
 		{
 			// Goes back.
 			_queue.AcceptNavigateBack();

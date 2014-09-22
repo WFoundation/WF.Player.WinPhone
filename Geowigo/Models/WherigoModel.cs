@@ -10,6 +10,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using WF.Player.Core;
 using System.IO.IsolatedStorage;
+using Geowigo.Utils;
 
 namespace Geowigo.Models
 {
@@ -50,9 +51,33 @@ namespace Geowigo.Models
 
 		#endregion
 
-		#region Public Methods
+		/// <summary>
+		/// When all hope died, as a last resort, this method kills the
+		/// current Wherigo Core instance and replaces it with a new one.
+		/// </summary>
+		/// <remarks>
+		/// As with all last resorts, potential side-effects are numerous and
+		/// unpredictable.
+		/// </remarks>
+		internal void HardResetCore()
+		{
+			// Immediately disposes the current instance, if any.
+			if (Core != null)
+			{
+				try
+				{
+					Core.Dispose();
+				}
+				catch (Exception ex)
+				{
+					// Not good: the engine wouldn't let itself be disposed.
+					// Signal this.
+					DebugUtils.DumpException(ex, "hard reset, failed Engine disposal", true);
+				}
+			}
 
-
-		#endregion
+			// A new Core for X-mas.
+			Core = new WFCoreAdapter();
+		}
 	}
 }

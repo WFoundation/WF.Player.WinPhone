@@ -83,6 +83,8 @@ namespace Geowigo.Models
 
 		private WF.Player.Core.Formats.GWL _Logger;
 
+		private bool _IsInCrash;
+
 		private object _SyncRoot = new Object();
 
 		#endregion
@@ -264,6 +266,20 @@ namespace Geowigo.Models
 			if (disposeManagedResources)
 			{
 				DisposeLogger();
+
+				if (_Compass != null)
+				{
+					_Compass.Dispose();
+
+					_Compass = null;
+				}
+
+				if (_GeoWatcher != null)
+				{
+					_GeoWatcher.Dispose();
+
+					_GeoWatcher = null;
+				}
 			}
 		}
 		
@@ -294,22 +310,33 @@ namespace Geowigo.Models
 			// Boot Time: inits the cartridge and process position.
 			Cartridge cart = new Cartridge(filename);
 
-			using (IsolatedStorageFileStream fs = IsolatedStorageFile.GetUserStoreForApplication().OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+			try
 			{
-				Init(fs, cart);
+				using (IsolatedStorageFileStream fs = IsolatedStorageFile.GetUserStoreForApplication().OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+				{
+					Init(fs, cart);
+				}
+
+				// Adds info about the cartridge to the crash reporter.
+				Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
+
+				ApplySensorData();
+
+				// Run Time: the game starts.
+
+				Start();
+
+				// TEMP DEBUG
+				ApplySensorData();
 			}
-
-			// Adds info about the cartridge to the crash reporter.
-			Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
-
-			ApplySensorData();
-
-			// Run Time: the game starts.
-
-			Start();
-
-			// TEMP DEBUG
-			ApplySensorData();
+			catch (Exception)
+			{
+				lock (_SyncRoot)
+				{
+					_IsInCrash = true;
+				}
+				throw;
+			}
 
 			return cart;
 		}
@@ -339,26 +366,38 @@ namespace Geowigo.Models
 			// Boot Time: inits the cartridge and process position.
 			Cartridge cart = new Cartridge(filename);
 
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			try
 			{
-				using (IsolatedStorageFileStream fs = isf.OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
-					Init(fs, cart);
+					using (IsolatedStorageFileStream fs = isf.OpenFile(cart.Filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+					{
+						Init(fs, cart);
+					}
+
+					// Adds info about the cartridge to the crash reporter.
+					Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
+
+					ApplySensorData();
+
+					// Run Time: the game starts.
+
+					using (IsolatedStorageFileStream fs = isf.OpenFile(gwsFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+					{
+						Restore(fs);
+					}
+
+					ApplySensorData();
 				}
-
-				// Adds info about the cartridge to the crash reporter.
-				Geowigo.Utils.DebugUtils.AddBugSenseCrashExtraData(cart);
-
-				ApplySensorData();
-
-				// Run Time: the game starts.
-
-				using (IsolatedStorageFileStream fs = isf.OpenFile(gwsFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+			}
+			catch (Exception)
+			{
+				// Re-throw any exception.
+				lock (_SyncRoot)
 				{
-					Restore(fs);
+					_IsInCrash = true;
 				}
-
-				ApplySensorData();
+				throw;
 			}
 
 			return cart;
@@ -384,12 +423,23 @@ namespace Geowigo.Models
 		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
 		public void Save(CartridgeSavegame cs)
 		{
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			try
 			{
-				using (System.IO.Stream fs = cs.CreateOrReplace(isf))
+				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
-					Save(fs);
+					using (System.IO.Stream fs = cs.CreateOrReplace(isf))
+					{
+						Save(fs);
+					}
 				}
+			}
+			catch (Exception)
+			{
+				lock (_SyncRoot)
+				{
+					_IsInCrash = true;
+				}
+				throw;
 			}
 		}
 
@@ -411,7 +461,15 @@ namespace Geowigo.Models
 
 		private void WaitForGameState(EngineGameState target)
 		{
-			// Immediately returns if the engine is not in the target state.
+			// Immediately returns if the engine is in the target state,
+			// or if the engine has previously crashed.
+			lock (_SyncRoot)
+			{
+				if (_IsInCrash)
+				{
+					return;
+				}
+			}
 			try
 			{
 				CheckStateIs(target, null);
@@ -509,7 +567,9 @@ namespace Geowigo.Models
 		#region Sensors
 		private void ApplySensorData()
 		{
-			if (!IsReady)
+			// Do not apply sensor data if the engine is not ready yet,
+			// or if it is still busy.
+			if (!IsReady || IsBusy)
 			{
 				return;
 			}
@@ -524,10 +584,6 @@ namespace Geowigo.Models
 					&& _HasLastKnownHeadingChanged;
 
 				deviceHeading = _LastKnownHeading;
-			}
-			if (shouldRefreshHeading)
-			{
-				//this.RefreshHeading(deviceHeading.Value);
 			}
 			lock (_SyncRoot)
 			{
