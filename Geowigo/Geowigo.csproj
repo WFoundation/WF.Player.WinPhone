@@ -126,6 +126,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\CollectionsExtensions.cs" />
+    <Compile Include="Utils\IsolatedStorageExtensions.cs" />
     <Compile Include="Utils\ProgressAggregator.cs" />
     <Compile Include="Utils\WherigoExtensions.cs" />
     <Compile Include="ViewModels\GameMapViewModel.cs" />

@@ -40,12 +40,12 @@ namespace Geowigo.Models
         public Color HashColor { get; set; }
 
         /// <summary>
-        /// Gets or sets the file path of the savegame.
+        /// Gets the file path of the savegame.
         /// </summary>
         public string SavegameFile { get; private set; }
 
         /// <summary>
-        /// Gets or sets the file path of the metadata file.
+        /// Gets the file path of the metadata file.
         /// </summary>
         public string MetadataFile { get; private set; }
 
@@ -69,6 +69,20 @@ namespace Geowigo.Models
             HashColor = GetHashColor(Name);
             SetFileProperties(tag);
         }
+
+		/// <summary>
+		/// Constructs a new savegame metadata container for a Cartridge, using metadata
+		/// from a GWS metadata container.
+		/// </summary>
+		/// <param name="tag">Cartridge to save.</param>
+		/// <param name="gwsMetadata">Metadata of a GWS file.</param>
+		public CartridgeSavegame(CartridgeTag tag, WF.Player.Core.Formats.GWS.Metadata gwsMetadata, string gwsFilename)
+		{
+			Timestamp = gwsMetadata.SaveCreateDate;
+			Name = gwsMetadata.SaveName;
+			HashColor = GetHashColor(Name);
+			SetFileProperties(tag, gwsFilename);
+		}
 
         #endregion
 
@@ -189,14 +203,25 @@ namespace Geowigo.Models
                 Timestamp.Second);
         }
 
-        private void SetFileProperties(CartridgeTag tag)
+        private void SetFileProperties(CartridgeTag tag, string saveFilename = null)
         {
-            string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
-            SavegameFile = String.Format("/{0}/{1}_{2}.gws",
-                tag.PathToSavegames,
-                Name,
-                fname
-            );
+			if (saveFilename == null)
+			{
+				string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
+				SavegameFile = String.Format("/{0}/{1}_{2}.gws",
+					tag.PathToSavegames,
+					Name,
+					fname
+				);
+			}
+			else
+			{
+				SavegameFile = String.Format("/{0}/{1}", tag.PathToSavegames, saveFilename);
+				if (!SavegameFile.EndsWith(".gws", StringComparison.InvariantCultureIgnoreCase))
+				{
+					SavegameFile += ".gws";
+				}
+			}
             MetadataFile = SavegameFile + ".mf";
         }
     }

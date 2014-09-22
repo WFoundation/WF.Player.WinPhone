@@ -7,6 +7,7 @@ using System.IO;
 using System.ComponentModel;
 using System.Windows;
 using System.Threading;
+using Geowigo.Utils;
 
 namespace Geowigo.Models.Providers
 {
@@ -29,14 +30,17 @@ namespace Geowigo.Models.Providers
 
 		private class SkyDriveFile
 		{
-			public SkyDriveFile(string id, string name)
+			public SkyDriveFile(string id, string name, string dlDirectory)
 			{
 				Id = id;
 				Name = name;
+				DownloadDirectory = dlDirectory;
 			}
 			public string Id { get; set; }
 
 			public string Name { get; set; }
+
+			public string DownloadDirectory { get; set; }
 		}
 
 		#endregion
@@ -95,6 +99,12 @@ namespace Geowigo.Models.Providers
 			set;
 		}
 
+		public string IsoStoreCartridgeContentPath
+		{
+			get;
+			set;
+		}
+
 		public bool IsSyncing
 		{
 			get
@@ -120,7 +130,7 @@ namespace Geowigo.Models.Providers
 
 		/// <summary>
 		/// Gets or sets if this provider is allowed to perform
-		/// background download (if they are supported).
+		/// background downloads (if they are supported).
 		/// </summary>
 		public bool IsBackgroundDownloadAllowed
 		{
@@ -326,6 +336,7 @@ namespace Geowigo.Models.Providers
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
 				isf.CreateDirectory(IsoStoreCartridgesPath);
+				isf.CreateDirectory(IsoStoreCartridgeContentPath);
 			}
 
 			// Sync Step 1: Ask for the list of files from root folder.
@@ -335,7 +346,7 @@ namespace Geowigo.Models.Providers
 			StartTimeoutTimer(GetRequestTimeoutTimeSpan);
 		}
 
-		private void BeginDownloadCartridge(SkyDriveFile file)
+		private void BeginDownloadFile(SkyDriveFile file)
 		{
 			// Adds the file id to the list of currently downloading files.
 			lock (_syncRoot)
@@ -398,12 +409,12 @@ namespace Geowigo.Models.Providers
 
 		private string GetDownloadUserState(SkyDriveFile file)
 		{
-			return file.Id + "|" + file.Name;
+			return file.Id + "|" + file.Name + "|" + file.DownloadDirectory;
 		}
 
-		private string GetIsoStorePath(string filename)
+		private string GetIsoStorePath(string filename, string directory)
 		{
-			return String.Format("{0}/{1}", IsoStoreCartridgesPath, filename);
+			return String.Format("{0}/{1}", directory, filename);
 		}
 
 		private string GetTempIsoStorePath(string filename)
@@ -420,16 +431,17 @@ namespace Geowigo.Models.Providers
 			int filesLeft;
 			string dlFilename;
 			string originalFilename;
-			PreProcessDownload(e, out filesLeft, out dlFilename, out originalFilename);
+			string dlTargetPath;
+			PreProcessDownload(e, out filesLeft, out dlFilename, out originalFilename, out dlTargetPath);
 
-			string filepath = GetIsoStorePath(originalFilename);
+			string filepath = GetIsoStorePath(originalFilename, dlTargetPath);
 			if (e.Result != null)
 			{
 				// Moves the file.
 				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
 					// Makes sure the directory exists.
-					isf.CreateDirectory(IsoStoreCartridgesPath);
+					isf.CreateDirectory(dlTargetPath);
 
 					// Removes the destination file if it exists.
 					if (isf.FileExists(filepath))
@@ -464,15 +476,16 @@ namespace Geowigo.Models.Providers
 			int filesLeft;
 			string dlFilename;
 			string originalFilename;
-			PreProcessDownload(e, out filesLeft, out dlFilename, out originalFilename);
+			string dlTargetPath;
+			PreProcessDownload(e, out filesLeft, out dlFilename, out originalFilename, out dlTargetPath);
 
-			string filepath = GetIsoStorePath(dlFilename);
+			string filepath = GetIsoStorePath(dlFilename, dlTargetPath);
 			if (e.Result != null)
 			{
 				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
 					// Makes sure the directory exists.
-					isf.CreateDirectory(IsoStoreCartridgesPath);
+					isf.CreateDirectory(dlTargetPath);
 
 					// Creates a file at the right place.
 					using (IsolatedStorageFileStream fs = isf.OpenFile(filepath, FileMode.Create))
@@ -526,7 +539,7 @@ namespace Geowigo.Models.Providers
 						}
 					}
 				}
-
+				
 				// If we are here, it means that the Geowigo folder was not found.
 				// The sync ends.
 				EndSync();
@@ -536,35 +549,46 @@ namespace Geowigo.Models.Providers
 			{
 				// Sync Step 4: We are getting results for the Geowigo folder.
 				// We need to enumerate through all files and download each GWC
-				// file in the background.
+				// or GWS file in the background.
 
 				// Enumerates through all the file entries.
 				List<SkyDriveFile> cartFiles = new List<SkyDriveFile>();
+				List<SkyDriveFile> extraFiles = new List<SkyDriveFile>();
 				List<object> data = (List<object>)e.Result["data"];
 				foreach (IDictionary<string, object> content in data)
 				{
 					// Is it a cartridge file?
 					string name = (string)content["name"];
-					if ("file".Equals(content["type"]) && name.ToLower().EndsWith(".gwc"))
+					string lname = name.ToLower();
+					if ("file".Equals(content["type"]))
 					{
-						// Adds the file to the list.
-						string id = (string)content["id"];
-						lock (_syncRoot)
+						if (lname.EndsWith(".gwc"))
 						{
-							cartFiles.Add(new SkyDriveFile(id, name));
+							// Adds the file to the list of cartridges.
+							cartFiles.Add(new SkyDriveFile((string)content["id"], name, IsoStoreCartridgesPath));
+						}
+						else if (lname.EndsWith(".gws"))
+						{
+							// Adds the file to the list of extra files.
+							extraFiles.Add(new SkyDriveFile((string)content["id"], name, IsoStoreCartridgeContentPath));
 						}
 					}
 				}
 
-				// Creates the list of files in the isostore that do not exist 
+				// Creates the list of cartridges in the isostore that do not exist 
+				// on SkyDrive anymore.
+				// These will be removed. Extra files are not removed even if they are not
 				// on SkyDrive anymore.
 				List<string> isoStoreFiles;
 				List<string> toRemoveFiles;
+				List<string> isoStoreExtraFiles;
 				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
+					isoStoreExtraFiles = isf.GetAllFiles(IsoStoreCartridgeContentPath + "/*.gws");
+					
 					isoStoreFiles =
 						isf
-						.GetFileNames(GetIsoStorePath("*.gwc"))
+						.GetFileNames(GetIsoStorePath("*.gwc", IsoStoreCartridgesPath))
 						.Select(s => IsoStoreCartridgesPath + "/" + s)
 						.ToList();
 
@@ -574,10 +598,22 @@ namespace Geowigo.Models.Providers
 						.ToList();
 				}
 
-				// Creates the list of cartridges that are on SkyDrive but
+				// Clears from the list of extra files to download those which
+				// are already somewhere in the isolated storage.
+				foreach (SkyDriveFile ef in extraFiles.ToList())
+				{
+					if (isoStoreExtraFiles.Any(s => s.EndsWith("/" + ef.Name, StringComparison.InvariantCultureIgnoreCase)))
+					{
+						// The file needn't be downloaded.
+						extraFiles.Remove(ef);
+					}
+				} 
+
+				// Creates the list of cartridges and extra files that are on SkyDrive but
 				// not in the isolated storage.
 				List<SkyDriveFile> toDlFiles = cartFiles
-					.Where(sd => !isoStoreFiles.Contains(GetIsoStorePath(sd.Name)))
+					.Where(sd => !isoStoreFiles.Contains(GetIsoStorePath(sd.Name, sd.DownloadDirectory)))
+					.Union(extraFiles)
 					.ToList();
 
 				// Bakes an event for when the sync will be over.
@@ -586,7 +622,7 @@ namespace Geowigo.Models.Providers
 					_syncEventArgs = new CartridgeProviderSyncEventArgs()
 					{
 						AddedFiles = toDlFiles
-							.Select(sd => GetIsoStorePath(sd.Name))
+							.Select(sd => GetIsoStorePath(sd.Name, sd.DownloadDirectory))
 							.ToList(),
 						ToRemoveFiles = toRemoveFiles
 					};
@@ -603,7 +639,7 @@ namespace Geowigo.Models.Providers
 				// the sync if no new file is to be downloaded.
 				if (toDlFiles.Count > 0)
 				{
-					toDlFiles.ForEach(sd => BeginDownloadCartridge(sd));
+					toDlFiles.ForEach(sd => BeginDownloadFile(sd));
 				}
 				else
 				{
@@ -612,11 +648,12 @@ namespace Geowigo.Models.Providers
 			}
 		}
 
-		private void ParseDownloadEventArgs(AsyncCompletedEventArgs e, out string fileId, out string dlFilename, out string originalFilename)
+		private void ParseDownloadEventArgs(AsyncCompletedEventArgs e, out string fileId, out string dlFilename, out string originalFilename, out string dlTargetPath)
 		{
 			string[] ustate = (e.UserState ?? "|").ToString().Split(new char[] { '|' });
 			fileId = ustate[0];
 			originalFilename = ustate[1];
+			dlTargetPath = ustate[2];
 			dlFilename = originalFilename;
 
 			// Gets the downloaded filename from the event args if they support it.
@@ -649,14 +686,14 @@ namespace Geowigo.Models.Providers
 			}
 		}
 
-		private void PreProcessDownload(AsyncCompletedEventArgs e, out int filesLeft, out string dlFilename, out string originalFilename)
+		private void PreProcessDownload(AsyncCompletedEventArgs e, out int filesLeft, out string dlFilename, out string originalFilename, out string dlTargetPath)
 		{
 			// Removes the file from the queue of files to download.
 			lock (_syncRoot)
 			{
 				// Parses the user state.
 				string fileId;
-				ParseDownloadEventArgs(e, out fileId, out dlFilename, out originalFilename);
+				ParseDownloadEventArgs(e, out fileId, out dlFilename, out originalFilename, out dlTargetPath);
 
 				// Removes the file if it is registered.
 				SkyDriveFile file = _dlFiles.FirstOrDefault(sd => sd.Id.Equals(fileId));

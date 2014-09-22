@@ -34,7 +34,7 @@ namespace Geowigo.Models
 		#region Constants
 
 		public const string GlobalCachePath = "/Cache";
-        public const string GlobalSavegamePath = "/Savegames+Logs";
+        public const string GlobalSavegamePath = "/Savegames_and_Logs";
 
 		public const int SmallThumbnailMinWidth = 173;
 		public const int BigThumbnailMinWidth = 432;
@@ -285,11 +285,15 @@ namespace Geowigo.Models
         /// <param name="cs">The savegame to add.</param>
         public void AddSavegame(CartridgeSavegame cs)
         {
-            // Sanity check: a cartridge with similar name should
+            // Sanity check: a savegame with similar name should
             // not exist.
-            if (Savegames.Any(c => c.Name == cs.Name))
+			CartridgeSavegame sameNameCS;
+            if ((sameNameCS = Savegames.SingleOrDefault(c => c.Name == cs.Name)) != null)
             {
-                throw new InvalidOperationException("A savegame with the same name already exists for this savegame.");
+				System.Diagnostics.Debug.WriteLine("CartridgeTag: Removing savegame to make room for new one: " + sameNameCS.Name);
+				
+				// Removes the previous savegame that bears the same name.
+				RemoveSavegame(sameNameCS);
             }
             
             // Makes sure the savegame is exported to the cache.

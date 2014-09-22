@@ -35,6 +35,12 @@ namespace Geowigo.Models.Providers
 		string IsoStoreCartridgesPath { get; set; }
 
 		/// <summary>
+		/// Gets or sets the path to isolated storage where extra cartridge
+		/// content download by this provider is being stored.
+		/// </summary>
+		string IsoStoreCartridgeContentPath { get; set; }
+
+		/// <summary>
 		/// Raised when a synchronization has completed.
 		/// </summary>
 		/// <remarks>The event arguments recapitulate all the
@@ -60,7 +66,7 @@ namespace Geowigo.Models.Providers
 		/// the contents of the remote storage.
 		/// </summary>
 		/// <remarks>
-		/// This method only download new files and removes all files.
+		/// This method only downloads new files and removes old files.
 		/// No change is performed on the remote storage.
 		/// </remarks>
 		void BeginSync();

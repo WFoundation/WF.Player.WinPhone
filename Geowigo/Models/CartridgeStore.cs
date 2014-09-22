@@ -396,6 +396,67 @@ namespace Geowigo.Models
 			return newCC;
 		}
 
+		private void AcceptSavegame(string filename)
+		{
+			// Copies this savegame to the content folders of each cartridge
+			// whose name matches the cartridge name in the savegame metadata.
+
+			System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to accept savegame " + filename);
+
+			// Refreshes the progress.
+			string businessTag = "accept:" + filename;
+			_isBusyAggregator[businessTag] = true;
+
+			// Gets the cartridge this savegame is associated with.
+			bool isAborted = false;
+			WF.Player.Core.Formats.GWS.Metadata saveMetadata = null;
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				if (!isf.FileExists(filename))
+				{
+					System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Savegame file not found: " + filename);
+
+					isAborted = true;
+				}
+
+				if (!isAborted)
+				{
+					using (IsolatedStorageFileStream fs = isf.OpenFile(filename, System.IO.FileMode.Open))
+					{
+						saveMetadata = WF.Player.Core.Formats.GWS.LoadMetadata(fs);
+					} 
+				}
+			}
+
+			if (!isAborted)
+			{
+				// For each matching tag, creates an associated savegame and copies the file to each
+				// tag's content folder.
+				List<CartridgeTag> matches;
+				lock (_syncRoot)
+				{
+					matches = Items.Where(ct => ct.Title == saveMetadata.CartridgeName).ToList();
+				}
+				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+				{
+					foreach (CartridgeTag tag in matches)
+					{
+						// Creates a savegame.
+						CartridgeSavegame save = new CartridgeSavegame(tag, saveMetadata, System.IO.Path.GetFileName(filename));
+
+						// Copies the new file to the right isolated storage.
+						isf.CopyFile(filename, save.SavegameFile);
+
+						// Adds the savegame to its tag.
+						tag.AddSavegame(save);
+					}
+				} 
+			}
+
+			// Refreshes the progress.
+			_isBusyAggregator[businessTag] = false;
+		}
+
 		#endregion
 
 		#region Provider Management
@@ -421,6 +482,7 @@ namespace Geowigo.Models
 			
 			// Sets the provider up.
 			provider.IsoStoreCartridgesPath = String.Format("{0}/From {1}", IsoStoreCartridgesPath, provider.ServiceName);
+			provider.IsoStoreCartridgeContentPath = CartridgeTag.GlobalSavegamePath;
 
 			// Adds the provider to the list.
 			_providers.Add(provider);
@@ -450,13 +512,33 @@ namespace Geowigo.Models
 
 		private void ProcessSyncEvent(CartridgeProviderSyncEventArgs e)
 		{
-			// Rejects the files marked to be removed.
+			// Accepts the files that have been added.
+			List<string> filesToRemove = new List<string>();
+			foreach (string filename in e.AddedFiles.Where(s => s.EndsWith(".gwc", StringComparison.InvariantCultureIgnoreCase)))
+			{
+				AcceptCartridge(filename);
+			}
+			foreach (string filename in e.AddedFiles.Where(s => s.EndsWith(".gws", StringComparison.InvariantCultureIgnoreCase)))
+			{
+				// Copies this savegame to the content folders of each cartridge
+				// whose name matches the cartridge name in the savegame metadata.
+				AcceptSavegame(filename);
+
+				// Marks the file to be deleted.
+				filesToRemove.Add(filename);
+			}
+
+			// Rejects and removes the files marked to be removed.
+			filesToRemove.AddRange(e.ToRemoveFiles);
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
-				foreach (string filename in e.ToRemoveFiles)
+				foreach (string filename in filesToRemove)
 				{
 					// Removes the file from the list.
-					RejectCartridge(filename);
+					if (filename.EndsWith(".gwc", StringComparison.InvariantCultureIgnoreCase))
+					{
+						RejectCartridge(filename); 
+					}
 
 					// Deletes the file in the store. 
 					if (isf.FileExists(filename))
@@ -466,11 +548,6 @@ namespace Geowigo.Models
 				}
 			}
 
-			// Accepts the files that have been added.
-			foreach (string filename in e.AddedFiles)
-			{
-				AcceptCartridge(filename);
-			}
 		}
 
 		private void OnProviderPropertyChanged(object sender, PropertyChangedEventArgs e)
