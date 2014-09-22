@@ -18,6 +18,8 @@ using System.Windows.Navigation;
 using System.Linq;
 using Microsoft.Phone.Shell;
 using WF.Player.Core.Threading;
+using System.Text;
+using Geowigo.Utils;
 
 namespace Geowigo.ViewModels
 {	
@@ -27,6 +29,20 @@ namespace Geowigo.ViewModels
 	/// </summary>
 	public class AppViewModel
 	{
+		#region Nested Classes
+
+		/// <summary>
+		/// A kind of message to display to the user when a game crash has occured.
+		/// </summary>
+		public enum CrashMessageType
+		{
+			NewGame,
+			Restore,
+			Runtime
+		}
+
+		#endregion
+		
 		#region Fields
 
 		private MessageBoxManager _MBManagerInstance;
@@ -293,6 +309,106 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Called when a game crashed. Displays a message and goes back home.
+		/// </summary>
+		/// <param name="crashMessageType"></param>
+		/// <param name="exception"></param>
+		/// <param name="cartridge"></param>
+		public void HandleGameCrash(CrashMessageType crashMessageType, Exception exception, Cartridge cartridge)
+		{
+			// Prepares the message.
+			StringBuilder sb = new StringBuilder();
+			sb.Append("A problem occurred while ");
+			switch (crashMessageType)
+			{
+				case CrashMessageType.NewGame:
+					sb.Append("starting a new game");
+					break;
+
+				case CrashMessageType.Restore:
+					sb.Append("restoring the saved game");
+					break;
+
+				case CrashMessageType.Runtime:
+					sb.Append("running the game");
+					break;
+
+				default:
+					sb.Append("running the game");
+					break;
+			}
+			sb.Append(", therefore Geowigo cannot go on. This most likely happens because of a faulty cartridge");
+			if (crashMessageType != CrashMessageType.NewGame)
+			{
+				sb.Append(" or savegame");
+			}
+			sb.Append(".\n\nIf the problem persists, you should contact the Cartridge owner, ");
+			sb.Append(cartridge.GetFullAuthor());
+			AggregateException agex = exception as AggregateException;
+			if (agex == null || 
+				(agex != null && agex.InnerExceptions != null && agex.InnerExceptions.Count > 0))
+			{
+				sb.Append(", quoting the following error messages that were raised during the crash:");
+				List<string> messages = new List<string>();
+				if (agex == null)
+				{
+					// In-depth dump of inner exception messages.
+					Exception curex = exception;
+					while (curex != null)
+					{
+						messages.Add(curex.Message);
+						curex = curex.InnerException;
+					}
+					messages.Reverse();
+				}
+				else
+				{
+					foreach (Exception e in agex.InnerExceptions)
+					{
+						messages.Add(e.Message);
+					}
+				}
+				int i = messages.Count;
+				foreach (string message in messages)
+				{
+					sb.Append("\n" + i-- + "> " + message);
+				}
+			}
+			else
+			{
+				sb.Append(".");
+			}
+
+			// Prepares the title.
+			string caption = "";
+			switch (crashMessageType)
+			{
+				case CrashMessageType.NewGame:
+				case CrashMessageType.Restore:
+					caption = "Cannot start game";
+					break;
+
+				case CrashMessageType.Runtime:
+					caption = "Cartridge crashed";
+					break;
+
+				default:
+					caption = "Game crash";
+					break;
+			}
+
+			// Shows a message box.
+			System.Windows.MessageBox.Show(
+				sb.ToString(),
+				caption,
+				MessageBoxButton.OK
+			);
+
+			// Goes back!
+			App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
+		}
+
+		/// <summary>
 		/// Kills the current Wherigo Core instance and replaces it with a new one.
 		/// </summary>
 		public void HardResetCore()
@@ -413,6 +529,7 @@ namespace Geowigo.ViewModels
 			model.Core.CompassCalibrationRequested += new EventHandler(Core_CompassCalibrationRequested);
 			model.Core.ShowStatusTextRequested += new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
 			model.Core.PlayAlertRequested += new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);
+			model.Core.CartridgeCrashed += new EventHandler<CrashEventArgs>(Core_CartridgeCrashed);
 		}
 
 		private void UnregisterModel(WherigoModel model)
@@ -428,7 +545,9 @@ namespace Geowigo.ViewModels
             model.Core.CartridgeCompleted -= new EventHandler<WherigoEventArgs>(Core_CartridgeCompleted);
 			model.Core.CompassCalibrationRequested -= new EventHandler(Core_CompassCalibrationRequested);
 			model.Core.ShowStatusTextRequested -= new EventHandler<StatusTextEventArgs>(Core_ShowStatusTextRequested);
-			model.Core.PlayAlertRequested -= new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);		}
+			model.Core.PlayAlertRequested -= new EventHandler<WherigoEventArgs>(Core_PlayAlertRequested);
+			model.Core.CartridgeCrashed -= new EventHandler<CrashEventArgs>(Core_CartridgeCrashed);
+		}
 
 		private void Core_AttributeChanged(object sender, AttributeChangedEventArgs e)
 		{
@@ -442,6 +561,12 @@ namespace Geowigo.ViewModels
             // Logs a history entry for cartridge completion.
             Model.History.AddCompletedGame(Model.CartridgeStore.GetCartridgeTagOrDefault(e.Cartridge));
         }
+
+		private void Core_CartridgeCrashed(object sender, CrashEventArgs e)
+		{
+			// Displays a message, resets the core and goes back to app home.
+			HandleGameCrash(CrashMessageType.Runtime, e.ExceptionObject, e.Cartridge);
+		}
 
 		private void Core_CompassCalibrationRequested(object sender, EventArgs e)
 		{

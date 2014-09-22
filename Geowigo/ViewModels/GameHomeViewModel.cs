@@ -472,40 +472,12 @@ namespace Geowigo.ViewModels
 		/// <param name="isRestore"></param>
 		private void FailInit(AggregateException ex, CartridgeTag tag, bool isRestore = false)
 		{
-			// Prepares the message.
-			StringBuilder sb = new StringBuilder();
-			sb.Append("A problem occurred while ");
-			sb.Append(isRestore ? "restoring the saved game" : "starting a new game");
-			sb.Append(", therefore Geowigo cannot go on. This most likely happens because of a faulty cartridge");
-			if (isRestore)
-			{
-				sb.Append(" or savegame");
-			}
-			sb.Append(".\n\nIf the problem persists, you should contact the Cartridge owner, ");
-			sb.Append(tag.Cartridge.GetFullAuthor());
-			if (ex.InnerExceptions != null && ex.InnerExceptions.Count > 0)
-			{
-				sb.Append(", quoting the following error messages that prevented the game from starting:");
-				int i = ex.InnerExceptions.Count;
-				foreach (Exception e in ex.InnerExceptions)
-				{
-					sb.Append("\n" + i + "> " + e.Message);
-				}
-			}
-			else
-			{
-				sb.Append(".");
-			}
-			
-			// Shows a message box.
-			System.Windows.MessageBox.Show(
-				sb.ToString(),
-				"Cannot start game",
-				MessageBoxButton.OK
-			);
-
-			// Goes back!
-			App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
+			// Let the app view model handle this crash.
+			App.Current.ViewModel.HandleGameCrash(
+				isRestore ? AppViewModel.CrashMessageType.Restore : AppViewModel.CrashMessageType.NewGame,
+				ex,
+				tag.Cartridge
+				);
 		}
 
         /// <summary>
