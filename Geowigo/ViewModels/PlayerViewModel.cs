@@ -239,7 +239,7 @@ namespace Geowigo.ViewModels
 
 			// Show accuracy if possible.
 			double? accuracy = Model.Core.DeviceHeadingAccuracy;
-			bool hasPoorAccuracy = accuracy.Value <= CompassCalibrationViewModel.MaxGoodHeadingAccuracy;
+			bool hasPoorAccuracy = accuracy.HasValue && accuracy.Value <= CompassCalibrationViewModel.MaxGoodHeadingAccuracy;
 			if (accuracy.HasValue)
 			{
 				string txt = String.Format("Accuracy: {0}° ", accuracy.Value);
