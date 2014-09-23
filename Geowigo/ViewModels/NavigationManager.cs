@@ -497,7 +497,8 @@ namespace Geowigo.ViewModels
 			}
 			else if (pageName.StartsWith(prefix + "CompassCalibrationPage.xaml")
 				|| pageName.StartsWith(prefix + "GameHomePage.xaml")
-				|| pageName.StartsWith(prefix + "GameMapPage.xaml"))
+				|| pageName.StartsWith(prefix + "GameMapPage.xaml")
+				|| pageName.StartsWith(prefix + "PlayerPage.xaml"))
 			{
 				scope = PageScope.GameExtra;
 			}
@@ -588,6 +589,17 @@ namespace Geowigo.ViewModels
 		}
 
 		/// <summary>
+		/// Navigates the app to the page about player and device info.
+		/// </summary>
+		public void NavigateToPlayerInfo()
+		{
+			string pageUrl = "/Views/PlayerPage.xaml";
+
+			// Navigates
+			NavigateCore(new Uri(pageUrl, UriKind.Relative), cancelIfAlreadyActive: true);
+		}
+
+		/// <summary>
 		/// Navigates the app to the game main page of a cartridge.
 		/// </summary>
 		public void NavigateToGameHome(string filename)
@@ -648,7 +660,15 @@ namespace Geowigo.ViewModels
 		/// <param name="wherigoObj"></param>
 		public void NavigateToView(Thing wherigoObj)
 		{
-			NavigateCore(new Uri("/Views/ThingPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
+			// If the thing is the player, navigates to device and player info view.
+			if (WherigoObject.AreSameEntities(wherigoObj, _parent.Model.Core.Player))
+			{
+				NavigateToPlayerInfo();
+			}
+			else
+			{
+				NavigateCore(new Uri("/Views/ThingPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
+			}
 		}
 
 		/// <summary>

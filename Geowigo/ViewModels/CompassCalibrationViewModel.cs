@@ -14,7 +14,13 @@ using Geowigo.Models;
 namespace Geowigo.ViewModels
 {
 	public class CompassCalibrationViewModel : BaseViewModel
-	{		
+	{
+		#region Constants
+		
+		public static readonly double MaxGoodHeadingAccuracy = 15d;
+
+		#endregion
+		
 		#region Events
 
 		/// <summary>
@@ -117,7 +123,7 @@ namespace Geowigo.ViewModels
 
 		public CompassCalibrationViewModel()
 		{
-			MaxHeadingAccuracy = 15;
+			MaxHeadingAccuracy = MaxGoodHeadingAccuracy;
 		}
 
 		protected override void OnModelChanging(Models.WherigoModel oldValue, Models.WherigoModel newValue)

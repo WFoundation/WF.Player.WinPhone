@@ -125,6 +125,17 @@ namespace Geowigo.Models
 			}
 		}
 
+		public GeoPositionStatus DeviceLocationStatus
+		{
+			get
+			{
+				lock (_SyncRoot)
+				{
+					return _GeoWatcher == null ? GeoPositionStatus.Disabled : _GeoWatcher.Status;
+				}
+			}
+		}
+
 		public double? DeviceHeading
 		{
 			get
@@ -569,7 +580,7 @@ namespace Geowigo.Models
 		{
 			// Do not apply sensor data if the engine is not ready yet,
 			// or if it is still busy.
-			if (!IsReady || IsBusy)
+			if (!IsReady)
 			{
 				return;
 			}
@@ -649,6 +660,9 @@ namespace Geowigo.Models
 				default:
 					throw new InvalidProgramException("Unexpected status of the Location Service.");
 			}
+
+			// Raises a property changed event.
+			RaisePropertyChanged("DeviceLocationStatus");
 		}
 
 		private void ProcessPosition(GeoPosition<GeoCoordinate> position)

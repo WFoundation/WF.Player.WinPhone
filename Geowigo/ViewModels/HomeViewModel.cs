@@ -225,6 +225,25 @@ namespace Geowigo.ViewModels
 		}
 		#endregion
 
+		#region ShowDeviceInfoCommand
+
+		private ICommand _ShowDeviceInfoCommand;
+
+		public ICommand ShowDeviceInfoCommand
+		{
+			get
+			{
+				if (_ShowDeviceInfoCommand == null)
+				{
+					_ShowDeviceInfoCommand = new RelayCommand(ShowDeviceInfo);
+				}
+
+				return _ShowDeviceInfoCommand;
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		protected override void InitFromNavigation(NavigationInfo nav)
@@ -242,6 +261,12 @@ namespace Geowigo.ViewModels
 		}
         
         #region Menu Commands
+
+		private void ShowDeviceInfo()
+		{
+			// Shows the info!
+			App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
+		}
 
         private void StartCartridge(CartridgeTag cartTag)
         {
@@ -407,6 +432,7 @@ namespace Geowigo.ViewModels
 			ApplicationBar = new ApplicationBar();
 			ApplicationBar.CreateAndAddMenuItem(ClearHistoryCommand, "clear history");
 			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
+			ApplicationBar.CreateAndAddMenuItem(ShowDeviceInfoCommand, "device info");
 			ApplicationBar.CreateAndAddMenuItem(CalibrateCompassCommand, "calibrate compass");
 			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
 		}

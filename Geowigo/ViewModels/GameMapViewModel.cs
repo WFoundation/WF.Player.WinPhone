@@ -222,6 +222,7 @@ namespace Geowigo.ViewModels
 		private Brush _playerPolygonStrokeBrush;
 		private DataTemplate _thingPushpinContentTemplate;
 		private DataTemplate _landmarkPushpinContentTemplate;
+		private ControlTemplate _noBorderButtonTemplate;
 		private WF.Player.Core.Utils.GeoMathHelper _geoMathHelper;
 
 		#endregion
@@ -237,6 +238,7 @@ namespace Geowigo.ViewModels
 			// Inits the templates.
 			_thingPushpinContentTemplate = (DataTemplate)App.Current.Resources["WherigoThingPushpinContentTemplate"];
 			_landmarkPushpinContentTemplate = (DataTemplate)App.Current.Resources["LandmarkPushpinContentTemplate"];
+			_noBorderButtonTemplate = (ControlTemplate)App.Current.Resources["NoBorderButtonTemplate"];
 
 			// Inits resources.
 			_geoMathHelper = new WF.Player.Core.Utils.GeoMathHelper();
@@ -288,11 +290,19 @@ namespace Geowigo.ViewModels
 				// Creates or refreshes the pushpin.
 				if (PlayerPushpin == null)
 				{
+					Button btn = new Button()
+					{
+						Template = _noBorderButtonTemplate,
+						Content = Model.Core.Player,
+						ContentTemplate = _thingPushpinContentTemplate,
+						Command = ShowThingDetailsCommand,
+						CommandParameter = Model.Core.Player
+					};
+					
 					PlayerPushpin = new Pushpin()
 					{
-						Content = Model.Core.Player,
-						Location = playerPos,
-						ContentTemplate = _thingPushpinContentTemplate
+						Content = btn,
+						Location = playerPos
 					};
 				}
 				else
