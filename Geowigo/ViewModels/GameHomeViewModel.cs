@@ -248,6 +248,25 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region ShowDeviceInfoCommand
+
+		private ICommand _ShowDeviceInfoCommand;
+
+		public ICommand ShowDeviceInfoCommand
+		{
+			get
+			{
+				if (_ShowDeviceInfoCommand == null)
+				{
+					_ShowDeviceInfoCommand = new RelayCommand(ShowDeviceInfo);
+				}
+
+				return _ShowDeviceInfoCommand;
+			}
+		}
+
+		#endregion
+
 		#endregion
 
 		#region Tasks Collection View Sources
@@ -499,6 +518,15 @@ namespace Geowigo.ViewModels
         }
 
         #region Menu Commands
+		/// <summary>
+		/// Makes the app show the device info page.
+		/// </summary>
+		private void ShowDeviceInfo()
+		{
+			// Shows the info!
+			App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
+		}
+
         /// <summary>
         /// Starts the process of saving a game.
         /// </summary>
@@ -663,6 +691,9 @@ namespace Geowigo.ViewModels
 
 			// Adds the savegame menu item.
 			ApplicationBar.CreateAndAddMenuItem(SaveGameCommand, "save game");
+
+			// Adds the device info menu item.
+			ApplicationBar.CreateAndAddMenuItem(ShowDeviceInfoCommand, "player+device info");
 
 			// Adds the maps menu item.
 			ApplicationBar.CreateAndAddButton("appbar.map.treasure.png", ShowMapCommand, "map");
