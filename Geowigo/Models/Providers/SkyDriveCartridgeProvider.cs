@@ -20,9 +20,11 @@ namespace Geowigo.Models.Providers
 
 		private static readonly string LiveConnectClientID = "000000004C10D95D";
 
-		private static readonly string[] _Scopes = new string[] { "wl.basic", "wl.skydrive", "wl.offline_access" };
+		private static readonly string[] _Scopes = new string[] { "wl.basic", "wl.skydrive_update", "wl.offline_access", "wl.signin" };
 
 		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
+
+		private static readonly string UploadFolderName = "Uploads";
 
 		#endregion
 		
@@ -55,12 +57,18 @@ namespace Geowigo.Models.Providers
 
 		private List<SkyDriveFile> _dlFiles = new List<SkyDriveFile>();
 
+		private List<string> _ulFiles;
+
 		private object _syncRoot = new object();
 
 		private LiveAuthClient _authClient;
 		private LiveConnectClient _liveClient;
 
 		private Timer _requestTimeout;
+
+		private string _geowigoFolderId;
+		private string _uploadsFolderId;
+		private IsolatedStorageFileStream _currentUlFileStream;
 		
 		#endregion
 
@@ -289,6 +297,7 @@ namespace Geowigo.Models.Providers
 			_liveClient.DownloadCompleted += new EventHandler<LiveDownloadCompletedEventArgs>(OnLiveClientDownloadCompleted);
 			_liveClient.BackgroundDownloadCompleted += new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientBackgroundDownloadCompleted);
 			_liveClient.GetCompleted += new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientGetCompleted);
+			_liveClient.UploadCompleted += new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientUploadCompleted);
 
 			// Makes the client download even when on battery, or cellular data scheme.
 			_liveClient.BackgroundTransferPreferences = BackgroundTransferPreferences.AllowCellularAndBattery;
@@ -383,6 +392,51 @@ namespace Geowigo.Models.Providers
 				}
 			}
 			
+		}
+
+		private void EndSyncDownloads()
+		{
+			// Sync Step 6. 
+			// The downloading phase of the sync is over, let's continue with uploads.
+
+			// Cancels everything if no Geowigo or upload folder was found.
+			if (_geowigoFolderId == null || _uploadsFolderId == null)
+			{
+				EndSync();
+				return;
+			}
+
+			// Makes a list of files to upload.
+			List<string> toUpload;
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				toUpload = isf.GetAllFiles("/*.gws")
+					.Union(isf.GetAllFiles("/*.gwl")
+					.Where(s => ("/"+s).StartsWith(IsoStoreCartridgeContentPath)))
+					.ToList();
+			}
+
+			// Returns if there is nothing to upload.
+			if (toUpload.Count < 1)
+			{
+				EndSync();
+				return;
+			}
+
+			// Stores the list of files to upload.
+			lock (_syncRoot)
+			{
+				_ulFiles = toUpload;
+			}
+
+			// Starts uploading the first file. The next ones will be triggered
+			// once it finished uploading.
+			string firstFile = _ulFiles[0];
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				_currentUlFileStream = isf.OpenFile(firstFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+				_liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(firstFile), _currentUlFileStream, OverwriteOption.Overwrite, firstFile);
+			}
 		}
 
 		private void EndSync()
@@ -506,7 +560,7 @@ namespace Geowigo.Models.Providers
 			// No result? Nothing to do.
 			if (e.Result == null)
 			{
-				EndSync(); 
+				EndSyncDownloads(); 
 				return;
 			}
 
@@ -529,6 +583,11 @@ namespace Geowigo.Models.Providers
 						if ("Geowigo".Equals((string)content["name"], StringComparison.InvariantCultureIgnoreCase))
 						{
 							// Sync Step 3. Asks for the list of files in this folder.
+
+							// Stores the folder id.
+							_geowigoFolderId = (string)content["id"];
+
+							// Asks for the list of files.
 							_liveClient.GetAsync((string)content["id"] + "/files", "geowigo");
 
 							// Starts the timeout timer.
@@ -542,7 +601,7 @@ namespace Geowigo.Models.Providers
 				
 				// If we are here, it means that the Geowigo folder was not found.
 				// The sync ends.
-				EndSync();
+				EndSyncDownloads();
 				return;
 			}
 			else if ("geowigo".Equals(e.UserState))
@@ -551,16 +610,18 @@ namespace Geowigo.Models.Providers
 				// We need to enumerate through all files and download each GWC
 				// or GWS file in the background.
 
+				List<object> data = (List<object>)e.Result["data"];
+
 				// Enumerates through all the file entries.
 				List<SkyDriveFile> cartFiles = new List<SkyDriveFile>();
 				List<SkyDriveFile> extraFiles = new List<SkyDriveFile>();
-				List<object> data = (List<object>)e.Result["data"];
 				foreach (IDictionary<string, object> content in data)
 				{
 					// Is it a cartridge file?
 					string name = (string)content["name"];
 					string lname = name.ToLower();
-					if ("file".Equals(content["type"]))
+					object type = content["type"];
+					if ("file".Equals(type))
 					{
 						if (lname.EndsWith(".gwc"))
 						{
@@ -572,6 +633,12 @@ namespace Geowigo.Models.Providers
 							// Adds the file to the list of extra files.
 							extraFiles.Add(new SkyDriveFile((string)content["id"], name, IsoStoreCartridgeContentPath));
 						}
+					}
+					else if ("folder".Equals(type) && UploadFolderName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+					{
+						// We found the uploads folder.
+						// Stores its id.
+						_uploadsFolderId = (string)content["id"];
 					}
 				}
 
@@ -643,8 +710,46 @@ namespace Geowigo.Models.Providers
 				}
 				else
 				{
-					EndSync();
+					EndSyncDownloads();
 				}
+			}
+		}
+
+		private void OnLiveClientUploadCompleted(object sender, LiveOperationCompletedEventArgs e)
+		{
+			// Sync Step 7. An upload has finished or didn't work.
+			// Try to upload the next pending file or finish the whole process.
+			
+			// Removes the file from the current list of pending uploads.
+			string nextFile = null;
+			lock (_syncRoot)
+			{
+				// Removes the completed upload.
+				_ulFiles.Remove((string)e.UserState);
+
+				// Gets the next one.
+				nextFile = _ulFiles.FirstOrDefault();
+			}
+
+			// Disposes the current file stream if any.
+			if (_currentUlFileStream != null)
+			{
+				_currentUlFileStream.Dispose();
+				_currentUlFileStream = null;
+			}
+
+			// If there is nothing more to do, the sync is over.
+			if (nextFile == null)
+			{
+				EndSync();
+				return;
+			}
+
+			// Uploads the next file.
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				_currentUlFileStream = isf.OpenFile(nextFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+				_liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(nextFile), _currentUlFileStream, OverwriteOption.Overwrite, nextFile);
 			}
 		}
 
@@ -682,7 +787,7 @@ namespace Geowigo.Models.Providers
 			// If no more files are pending download, the sync is over!
 			if (filesLeft == 0)
 			{
-				EndSync();
+				EndSyncDownloads();
 			}
 		}
 
