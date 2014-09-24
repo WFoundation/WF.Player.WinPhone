@@ -42,6 +42,9 @@ namespace Geowigo.ViewModels
 
         private Action _cartridgeStartAction;
         private bool _isReady;
+		private bool _isStartProcessLaunched;
+
+		private object _syncRoot = new object();
 
         #endregion
 
@@ -305,6 +308,15 @@ namespace Geowigo.ViewModels
 			// Cancels the back key event.
 			e.Cancel = true;
 
+			// Do nothing if the page is not ready.
+			lock (_syncRoot)
+			{
+				if (!_isStartProcessLaunched)
+				{
+					return;
+				}
+			}
+
 			// Ask if we really want to leave the game.
 			System.Windows.MessageBoxResult result = System.Windows.MessageBoxResult.None;
 			try
@@ -339,12 +351,20 @@ namespace Geowigo.ViewModels
             // UI thread dispatcher.
             if (_cartridgeStartAction == null)
             {
-                return;
+				lock (_syncRoot)
+				{
+					_isStartProcessLaunched = true; 
+				}
+				return;
             }
             Dispatcher.BeginInvoke(() =>
             {
                 // Runs the action.
                 _cartridgeStartAction();
+				lock (_syncRoot)
+				{
+					_isStartProcessLaunched = true; 
+				}
             });
         }
 
