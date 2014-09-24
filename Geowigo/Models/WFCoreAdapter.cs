@@ -578,12 +578,12 @@ namespace Geowigo.Models
 		#region Sensors
 		private void ApplySensorData()
 		{
-			// Do not apply sensor data if the engine is not ready yet,
-			// or if it is still busy.
-			if (!IsReady)
-			{
-				return;
-			}
+			//// Do not apply sensor data if the engine is not ready yet,
+			//// or if it is still busy.
+			//if (!IsReady)
+			//{
+			//    return;
+			//}
 
 			// Applies heading if found.
 			bool shouldRefreshHeading = false;
@@ -607,9 +607,12 @@ namespace Geowigo.Models
 			GeoCoordinate deviceLoc;
 			lock (_SyncRoot)
 			{
+				// Do not apply sensor data if the engine is not ready yet,
+				// or if no location has been found yet, or if the location hasn't
+				// changed.
 				shouldRefreshLoc =
 					_LastKnownLocation != null
-					&& _HasLastKnownLocationChanged;
+					&& _HasLastKnownLocationChanged && IsReady;
 				deviceLoc = _LastKnownLocation;
 			}
 			if (shouldRefreshLoc)

@@ -144,7 +144,7 @@ namespace Geowigo.ViewModels
 		{
 			get
 			{
-				return _CalibrateCompassCommand ?? (_CalibrateCompassCommand = new RelayCommand(CalibrateCompass, CanCalibrateCompassCommandExecute));
+				return _calibrateCompassCommand ?? (_calibrateCompassCommand = new RelayCommand(CalibrateCompass, CanCalibrateCompassCommandExecute));
 			}
 		}
 
@@ -154,7 +154,7 @@ namespace Geowigo.ViewModels
 
 		#region Fields
 
-		private RelayCommand _CalibrateCompassCommand;
+		private RelayCommand _calibrateCompassCommand;
 
 		#endregion
 
@@ -269,27 +269,58 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		protected override void OnCorePropertyChanged(string propName)
+		protected override void OnModelChanging(Models.WherigoModel oldValue, Models.WherigoModel newValue)
 		{
-			if (propName == "DeviceLocationStatus" || propName == "DeviceLocation")
+			// Removes handlers on the old model.
+			if (oldValue != null)
 			{
-				RefreshLocationStatuses();
+				// Disables the compass.
+				oldValue.Core.IsCompassEnabled = false;
+
+				// Removes handlers.
+				oldValue.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+				oldValue.Core.PlayerLocationChanged -= new EventHandler<Models.PlayerLocationChangedEventArgs>(Core_PlayerLocationChanged);
 			}
-			else if (propName == "DeviceHeading" || propName == "DeviceHeadingAccuracy"
-				|| propName == "IsCompassEnabled")
+
+			// Adds handlers to the new model.
+			if (newValue != null)
 			{
-				RefreshCompassStatuses();
+				// Enables the compass for diagnostics.
+				newValue.Core.IsCompassEnabled = true;
+
+				// Adds handlers.
+				newValue.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
+				newValue.Core.PlayerLocationChanged += new EventHandler<Models.PlayerLocationChangedEventArgs>(Core_PlayerLocationChanged);
 			}
 		}
 
 		protected override void OnModelChanged(Models.WherigoModel newModel)
 		{
-			// Enables the compass for diagnostics.
-			newModel.Core.IsCompassEnabled = true;
-			
+			if (newModel != null)
+			{
+				// Refreshes the statuses.
+				RefreshCompassStatuses();
+				RefreshLocationStatuses();
+			}
+		}
+
+		private void Core_PlayerLocationChanged(object sender, Models.PlayerLocationChangedEventArgs e)
+		{
 			// Refreshes the statuses.
 			RefreshCompassStatuses();
 			RefreshLocationStatuses();
+		}
+
+		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == "DeviceLocationStatus")
+			{
+				RefreshLocationStatuses();
+			}
+			else if (e.PropertyName == "IsCompassEnabled")
+			{
+				RefreshCompassStatuses();
+			}
 		}
 
 		protected override void InitFromNavigation(NavigationInfo nav)
