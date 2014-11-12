@@ -562,8 +562,16 @@ namespace Geowigo.ViewModels
         /// <param name="t"></param>
         private void ShowDetails(UIObject t)
         {
-            // Navigates to the appropriate view.
-            App.Current.ViewModel.NavigationManager.NavigateToView(t);
+            if (t.HasOnClick)
+            {
+                // Runs the on-click command.
+                t.CallOnClick();
+            }
+            else
+            {
+                // Navigates to the appropriate view.
+                App.Current.ViewModel.NavigationManager.NavigateToView(t); 
+            }
         }
 
         /// <summary>
