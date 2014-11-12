@@ -69,7 +69,7 @@
         <Grid x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<ScrollViewer>
         		<StackPanel Margin="0,0,0,15">
-        			<Image Source="{Binding WherigoObject.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
+        			<Image Source="{Binding WherigoObject.Media.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,5" Style="{StaticResource ThingTitleTextStyle}"/>
         			<TextBlock TextWrapping="Wrap" Margin="0" Text="{Binding StatusText, Converter={StaticResource UppercaseStringConverter}, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}" Style="{StaticResource ThingTitleTextStyle}"/>
         			<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Description, FallbackValue=Description, Mode=OneWay}" Margin="0,20,0,0" Style="{StaticResource ThingDescriptionTextStyle}" />

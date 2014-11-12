@@ -193,7 +193,6 @@ namespace Geowigo.ViewModels
 				// Do nothing if a message box is on-screen.
 				if (_appViewModel.MessageBoxManager.HasMessageBox)
 				{
-                    System.Diagnostics.Debug.WriteLine("DELAYED nav because message box is on screen.");
                     return false;
 				}
 
@@ -202,7 +201,6 @@ namespace Geowigo.ViewModels
 					// Do nothing for now if a navigation is in progress.
                     if (IsNavigating)
 					{
-                        System.Diagnostics.Debug.WriteLine("DELAYED nav because app is navigating.");
                         return false;
 					}
 
@@ -222,10 +220,6 @@ namespace Geowigo.ViewModels
 					{
 						RunJob(nextJob);
 					}
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("CANCELLED job because cannot run.");
-                    }
 
 					// Removes this job.
 					RemoveJob(nextJob);
