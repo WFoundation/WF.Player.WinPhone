@@ -91,6 +91,30 @@ namespace Geowigo.ViewModels
 			private PhoneApplicationFrame _rootFrame;
 			#endregion
 
+            #region Properties
+
+            private bool IsNavigating
+            {
+                get
+                {
+                    lock (_syncRoot)
+                    {
+                        return _isNavigating;
+                    }
+                }
+
+                set
+                {
+                    lock (_syncRoot)
+                    {
+                        _isNavigating = value;
+                        //System.Diagnostics.Debug.WriteLine("NavigationManager: IsNavigating = " + value);
+                    }
+                }
+            }
+
+            #endregion
+
 			#region Constructors
 			public NavigationQueue(NavigationManager parent)
 			{
@@ -100,6 +124,7 @@ namespace Geowigo.ViewModels
 
 				_rootFrame.Navigated += new NavigatedEventHandler(OnRootFrameNavigated);
 				_rootFrame.NavigationFailed += new NavigationFailedEventHandler(OnRootFrameNavigationFailed);
+                _rootFrame.NavigationStopped += new NavigationStoppedEventHandler(OnRootFrameNavigationStopped);
 				_appViewModel.MessageBoxManager.HasMessageBoxChanged += new EventHandler(OnHasMessageBoxChanged);
 			}
 
@@ -131,8 +156,8 @@ namespace Geowigo.ViewModels
 				}
 
 				// Checks if the queue needs to be processed, and
-				// if so, processes the next item.
-				CheckAndRunNext();
+				// if so, processes the next items.
+				CheckAndRunAll();
 			}
 			#endregion
 
@@ -144,26 +169,41 @@ namespace Geowigo.ViewModels
 			/// </summary>
 			public void ExpectNavigation()
 			{
-				lock (_syncRoot)
-				{
-					_isNavigating = true;
-				}
+                IsNavigating = true;
 			}
 
-			private void CheckAndRunNext()
+            /// <summary>
+            /// Runs all jobs in queue as long as they are not delayed.
+            /// </summary>
+            private void CheckAndRunAll()
+            {
+                while (CheckAndRunNext())
+                {
+                    
+                }
+            }
+
+            /// <summary>
+            /// Checks that a next job is scheduled and ready to be run, and runs it if it can be.
+            /// </summary>
+            /// <returns>True if a job was run or cancelled, false if there is no next job, or if jobs are currently
+            /// being delayed.</returns>
+			private bool CheckAndRunNext()
 			{
 				// Do nothing if a message box is on-screen.
 				if (_appViewModel.MessageBoxManager.HasMessageBox)
 				{
-					return;
+                    System.Diagnostics.Debug.WriteLine("DELAYED nav because message box is on screen.");
+                    return false;
 				}
 
 				lock (_syncRoot)
 				{
 					// Do nothing for now if a navigation is in progress.
-					if (_isNavigating)
+                    if (IsNavigating)
 					{
-						return;
+                        System.Diagnostics.Debug.WriteLine("DELAYED nav because app is navigating.");
+                        return false;
 					}
 
 					// Gets the next job.
@@ -172,7 +212,7 @@ namespace Geowigo.ViewModels
 					if (nextJob == null)
 					{
 						// Nothing to do.
-						return;
+						return false;
 					}
 
 					// Is the job is possible to execute?
@@ -182,16 +222,23 @@ namespace Geowigo.ViewModels
 					{
 						RunJob(nextJob);
 					}
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("CANCELLED job because cannot run.");
+                    }
 
 					// Removes this job.
-					RemoveJob(nextJob); 
+					RemoveJob(nextJob);
+
+                    return true;
 				}
+
 			}
 
 			private void RunJob(Job nextJob)
 			{
 				// We're going to navigate.
-				_isNavigating = true;
+                IsNavigating = true;
 				
 				// If the job allows it, checks if the back stack 
 				// already has a page with this Uri. If so, removes
@@ -232,11 +279,18 @@ namespace Geowigo.ViewModels
 					// Exceptions are caught and reported but ignored.
 					try
 					{
-						_rootFrame.Navigate(uri);
+                        if (!_rootFrame.Navigate(uri))
+                        {
+                            // We're not navigating anymore.
+                            IsNavigating = false;
+                        }
 					}
 					catch (Exception ex)
 					{
-						// Reports the exception.
+						// We're not navigating anymore.
+                        IsNavigating = false;
+                        
+                        // Reports the exception.
 						Utils.DebugUtils.DumpException(ex, "Error on Navigation request, handled.", dumpOnBugSenseToo: true);
 					}
 				});
@@ -254,7 +308,10 @@ namespace Geowigo.ViewModels
 					}
 					catch (Exception ex)
 					{
-						// Reports the exception.
+                        // We're not navigating anymore.
+                        IsNavigating = false;
+                        
+                        // Reports the exception.
 						Utils.DebugUtils.DumpException(ex, "Error on Navigation request, handled.", dumpOnBugSenseToo: true);
 					}
 				});
@@ -433,25 +490,34 @@ namespace Geowigo.ViewModels
 				ConformBackStack(e.Uri);
 
 				// No more navigation.
-				lock (_syncRoot)
-				{
-					_isNavigating = false;
-				}
+                IsNavigating = false;
 
-				// Runs next job if any.
-				CheckAndRunNext();
+				// Runs next jobs if any.
+				CheckAndRunAll();
 			}
 
 			private void OnRootFrameNavigationFailed(object sender, NavigationFailedEventArgs e)
 			{
-				// Runs next job if any.
-				CheckAndRunNext();
+                // No more navigation.
+                IsNavigating = false;
+                
+                // Runs next jobs if any.
+                CheckAndRunAll();
 			}
+
+            private void OnRootFrameNavigationStopped(object sender, NavigationEventArgs e)
+            {
+                // No more navigation.
+                IsNavigating = false;
+
+                // Runs next jobs if any.
+                CheckAndRunAll();
+            }
 
 			private void OnHasMessageBoxChanged(object sender, EventArgs e)
 			{
-				// Runs next job if any.
-				CheckAndRunNext();
+                // Runs next jobs if any.
+                CheckAndRunAll();
 			}
 			#endregion
 		}
@@ -651,7 +717,7 @@ namespace Geowigo.ViewModels
 		/// <param name="wherigoObj"></param>
 		public void NavigateToView(Input wherigoObj)
 		{
-			NavigateCore(new Uri("/Views/InputPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
+			NavigateCore(new Uri("/Views/InputPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative), cancelIfAlreadyActive: true);
 		}
 
 		/// <summary>
@@ -667,7 +733,7 @@ namespace Geowigo.ViewModels
 			}
 			else
 			{
-				NavigateCore(new Uri("/Views/ThingPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
+                NavigateCore(new Uri("/Views/ThingPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative), cancelIfAlreadyActive: true);
 			}
 		}
 
@@ -677,7 +743,7 @@ namespace Geowigo.ViewModels
 		/// <param name="wherigoObj"></param>
 		public void NavigateToView(Task wherigoObj)
 		{
-			NavigateCore(new Uri("/Views/TaskPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative));
+			NavigateCore(new Uri("/Views/TaskPage.xaml?wid=" + wherigoObj.ObjIndex, UriKind.Relative), cancelIfAlreadyActive: true);
 		}
 
 		/// <summary>
