@@ -617,7 +617,11 @@ namespace Geowigo.Models
 			}
 			if (shouldRefreshLoc)
 			{
-				this.RefreshLocation(deviceLoc.Latitude, deviceLoc.Longitude, deviceLoc.Altitude, deviceLoc.HorizontalAccuracy);
+				// Older versions of Urwigo generated emulator detection code that reacts to 3m location accuracy.
+                // We're not an emulator, so let's prevent this old code from running.
+                double normHorizontalAcc = deviceLoc.HorizontalAccuracy == 3d ? 2.99d : deviceLoc.HorizontalAccuracy;
+
+                this.RefreshLocation(deviceLoc.Latitude, deviceLoc.Longitude, deviceLoc.Altitude, normHorizontalAcc);
 			}
 			lock (_SyncRoot)
 			{
