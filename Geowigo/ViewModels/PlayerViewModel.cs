@@ -239,15 +239,14 @@ namespace Geowigo.ViewModels
 
 			// Show accuracy if possible.
 			double? accuracy = Model.Core.DeviceHeadingAccuracy;
-			bool hasPoorAccuracy = accuracy.HasValue && accuracy.Value <= CompassCalibrationViewModel.MaxGoodHeadingAccuracy;
+			bool hasPoorAccuracy = accuracy.HasValue && accuracy.Value >= CompassCalibrationViewModel.MaxGoodHeadingAccuracy;
 			if (accuracy.HasValue)
 			{
 				string txt = String.Format("Accuracy: {0}° ", accuracy.Value);
 
-				txt += hasPoorAccuracy ? "(OK)" : "(POOR)";
+				txt += hasPoorAccuracy ? "(POOR)" : "(OK)";
 
 				CompassAccuracyStatus = txt;
-				hasPoorAccuracy = true;
 			}
 			else
 			{
@@ -327,6 +326,10 @@ namespace Geowigo.ViewModels
 		{
 			// Inits the application bar.
 			InitAppBar();
+            
+            // Refresh everything.
+            RefreshLocationStatuses();
+            RefreshCompassStatuses();
 		}
 
 		private void InitAppBar()
