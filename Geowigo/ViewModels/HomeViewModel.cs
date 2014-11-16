@@ -16,6 +16,9 @@ using Geowigo.Models.Providers;
 using Microsoft.Phone.Shell;
 using Geowigo.Utils;
 using Microsoft.Phone.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Phone.Controls;
 
 namespace Geowigo.ViewModels
 {
@@ -51,6 +54,54 @@ namespace Geowigo.ViewModels
         // Using a DependencyProperty as the backing store for IsHistoryVisible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsHistoryVisibleProperty =
             DependencyProperty.Register("IsHistoryVisible", typeof(bool), typeof(HomeViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
+        #region IsRecentVisible
+
+
+        public bool IsRecentVisible
+        {
+            get { return (bool)GetValue(IsRecentVisibleProperty); }
+            set { SetValue(IsRecentVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsRecentVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsRecentVisibleProperty =
+            DependencyProperty.Register("IsRecentVisible", typeof(bool), typeof(HomeViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
+        #region RecentCartridges
+
+
+        public IEnumerable<CartridgeTag> RecentCartridges
+        {
+            get { return (IEnumerable<CartridgeTag>)GetValue(RecentCartridgesProperty); }
+            set { SetValue(RecentCartridgesProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for RecentCartridges.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty RecentCartridgesProperty =
+            DependencyProperty.Register("RecentCartridges", typeof(IEnumerable<CartridgeTag>), typeof(HomeViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
+        #region AlphaGroupedCartridges
+
+
+        public IEnumerable<AlphaKeyGroup<CartridgeTag>> AlphaGroupedCartridges
+        {
+            get { return (List<AlphaKeyGroup<CartridgeTag>>)GetValue(AlphaGroupedCartridgesProperty); }
+            set { SetValue(AlphaGroupedCartridgesProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for AlphaGroupedCartridges.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AlphaGroupedCartridgesProperty =
+            DependencyProperty.Register("AlphaGroupedCartridges", typeof(IEnumerable<AlphaKeyGroup<CartridgeTag>>), typeof(HomeViewModel), new PropertyMetadata(null));
 
 
         #endregion
@@ -249,12 +300,16 @@ namespace Geowigo.ViewModels
 		protected override void InitFromNavigation(NavigationInfo nav)
 		{
 			// Synchronizes the cartridge store.
-            RefreshVisibilities();
             Model.CartridgeStore.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnCartridgeStoreCollectionChanged);
 			Model.CartridgeStore.SyncFromIsoStore();
 
             // Monitors the history.
             Model.History.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnHistoryCollectionChanged);
+
+            // Initial refresh.
+            RefreshRecentCartridges();
+            RefreshAllCartridges();
+            RefreshVisibilities();
 
 			// Inits the app bar.
 			RefreshAppBar();
@@ -413,18 +468,43 @@ namespace Geowigo.ViewModels
 
         private void OnCartridgeStoreCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            RefreshAllCartridges();
+            
             RefreshVisibilities();
+        }
+
+        private void RefreshAllCartridges()
+        {
+            // Groups cartridges by first letter of name.
+            IEnumerable<IGrouping<string, CartridgeTag>> groups = Model.CartridgeStore.GroupBy(ct => ct.Title.ToLower().First().ToString());
+
+            // Creates a list of groups of cartridges.
+            AlphaGroupedCartridges = AlphaKeyGroup<CartridgeTag>.CreateGroups(Model.CartridgeStore, System.Globalization.CultureInfo.CurrentUICulture, ct => ct.Title.ToLower(), true);
         }
 
         private void OnHistoryCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            RefreshRecentCartridges();
+            
             RefreshVisibilities();
+        }
+
+        private void RefreshRecentCartridges()
+        {
+            IEnumerable<CartridgeTag> recentCarts = Model.History
+                .OrderByDescending(he => he.Timestamp)
+                .GroupBy(he => he.RelatedCartridgeFilename)
+                .Take(8)
+                .Select(ig => Model.CartridgeStore.GetCartridgeTagOrDefault(ig.Key));
+
+            RecentCartridges = recentCarts.Count() > 0 ? recentCarts : null;
         }
 
         private void RefreshVisibilities()
         {
             AreCartridgesVisible = Model.CartridgeStore.Count > 0;
             IsHistoryVisible = Model.History.Count > 0;
+            IsRecentVisible = RecentCartridges != null;
         }
 
 		private void RefreshAppBar()

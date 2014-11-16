@@ -7,116 +7,124 @@
     xmlns:Core="clr-namespace:System;assembly=mscorlib"
     xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
     mc:Ignorable="d">
-	<ControlTemplate x:Key="NoBorderButtonTemplate" TargetType="Button">
-		<Grid>
-			<ContentPresenter/>
-		</Grid>
-	</ControlTemplate>
-	<DataTemplate x:Key="EmptyTextButtonContentTemplate">
-		<Grid>
-			<TextBlock HorizontalAlignment="Left" Margin="0,0,0,1" TextWrapping="Wrap" Text="{Binding Mode=OneWay}" d:LayoutOverrides="Height" Style="{StaticResource EmptyListTextAccentStyle}"/>
-		</Grid>
-	</DataTemplate>
-	<Style x:Key="EmptyListTextAccentStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
-		<Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
-	</Style>
+    <ControlTemplate x:Key="NoBorderButtonTemplate" TargetType="Button">
+        <Grid>
+            <ContentPresenter/>
+        </Grid>
+    </ControlTemplate>
+    <DataTemplate x:Key="EmptyTextButtonContentTemplate">
+        <Grid>
+            <TextBlock HorizontalAlignment="Left" Margin="0,0,0,1" TextWrapping="Wrap" Text="{Binding Mode=OneWay}" d:LayoutOverrides="Height" Style="{StaticResource EmptyListTextAccentStyle}"/>
+        </Grid>
+    </DataTemplate>
+    <Style x:Key="EmptyListTextAccentStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+        <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
+    </Style>
 
-	<Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
+    <Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
 
     <Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
-	<Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
-	<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
-	
-	<DataTemplate x:Key="GamePivotTitleTemplate">
-		<StackPanel>
-			<TextBlock Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, FallbackValue=APP TITLE}" Style="{StaticResource PhoneTextNormalStyle}" Margin="0"/>
-			<TextBlock Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="0"/>
-		</StackPanel>
-	</DataTemplate>
-	
-	<Geowigo_Converters:UppercaseStringConverter x:Key="UppercaseStringConverter"/>
+    <Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
+    <Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 
-	<Geowigo_Converters:UIObjectToNameConverter x:Key="UIObjectToNameConverter"/>
-	
-	<DataTemplate x:Key="WherigoObjectGenericListItemTemplate">
-		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">
-			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
-			<StackPanel Orientation="Horizontal">
-				<Image Stretch="UniformToFill" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0"/>
-				<StackPanel Orientation="Vertical" Margin="0,-10,0,0">
-					<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
-					<TextBlock Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeMedium}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="32" TextTrimming="WordEllipsis"/>
-				</StackPanel>
-			</StackPanel>
-		</Grid>
-	</DataTemplate>
-	<DataTemplate x:Key="WherigoThingWithDistanceListItemTemplate">
-		<Grid d:DesignWidth="427" d:DesignHeight="110" Height="125">
-			<Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
-			<Grid>
-				<StackPanel Orientation="Horizontal">
-					<Image Stretch="UniformToFill" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
-					<StackPanel Orientation="Vertical">
-						<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,-13,0,0"/>
-						<TextBlock Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeMedium}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="32" TextTrimming="WordEllipsis" Margin="0,-2,0,0"/>
-						<Geowigo_Controls:DistanceControl Vector="{Binding VectorFromPlayer, Mode=OneWay}" Orientation="Horizontal" TextMargin="4,0,0,0" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyNormal}" Foreground="{StaticResource PhoneAccentBrush}" Height="25" Margin="0,4,0,0"/>
-					</StackPanel>
-				</StackPanel>
-			</Grid>
-		</Grid>
-	</DataTemplate>
-	<DataTemplate x:Key="WherigoObjectNameOnlyListItem">
-		<Grid Margin="0,0,0,10">
-			<TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeExtraLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}"/>
-		</Grid>
-	</DataTemplate>
-	<Style x:Key="ListHeaderTextBlockStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeNormal}"/>
-	</Style>
-	<Style x:Key="EmptyListTextStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
-		<Setter Property="Foreground" Value="{StaticResource PhoneTextBoxBrush}"/>
-	</Style>
-	
-	<ControlTemplate x:Key="AudioPlayerContentTemplate">
-		<Grid x:Name="MediaElementContainer">
-			<MediaElement x:Name="CommonMediaElement" Visibility="Collapsed" AutoPlay="True" />
-			<Grid x:Name="ClientArea">
-				<ContentPresenter/>
-			</Grid>
-		</Grid>
-	</ControlTemplate>
-	
-	<Style x:Key="MessageBoxDefaultTextStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiLight}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
-	</Style>
-	<Style x:Key="ListItemSubtitleTextStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
-	</Style>
-	<Style x:Key="ThingDescriptionTextStyle" TargetType="TextBlock">
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
-	</Style>
-	<Style x:Key="ThingTitleTextStyle" TargetType="TextBlock">
-		<Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
-		<Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
-	</Style>
-	<DataTemplate x:Key="WherigoThingPushpinContentTemplate">
-		<StackPanel Orientation="Horizontal" Margin="8,3">
-			<Image Height="30" Width="30" Margin="0,0,8,0" Visibility="{Binding Icon, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}}" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="UniformToFill"/>
-			<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name}" FontSize="{StaticResource PhoneFontSizeMediumLarge}"/>
-		</StackPanel>
-	</DataTemplate>
-	<DataTemplate x:Key="LandmarkPushpinContentTemplate">
-		<Grid d:DesignWidth="144" d:DesignHeight="46">
-			<TextBlock TextWrapping="Wrap" Text="{Binding}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeLarge}"/>
-		</Grid>
-	</DataTemplate>
-	
+    <DataTemplate x:Key="GamePivotTitleTemplate">
+        <StackPanel>
+            <TextBlock Text="{Binding AppTitle, Converter={StaticResource UppercaseStringConverter}, FallbackValue=APP TITLE}" Style="{StaticResource PhoneTextNormalStyle}" Margin="0"/>
+            <TextBlock Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="0"/>
+        </StackPanel>
+    </DataTemplate>
+
+    <Geowigo_Converters:UppercaseStringConverter x:Key="UppercaseStringConverter"/>
+
+    <Geowigo_Converters:UIObjectToNameConverter x:Key="UIObjectToNameConverter"/>
+
+    <DataTemplate x:Key="WherigoObjectGenericListItemTemplate">
+        <Grid d:DesignWidth="427" d:DesignHeight="110" Height="110">
+            <Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
+            <StackPanel Orientation="Horizontal">
+                <Image Stretch="UniformToFill" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0"/>
+                <StackPanel Orientation="Vertical" Margin="0,-10,0,0">
+                    <TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
+                    <TextBlock Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeMedium}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="32" TextTrimming="WordEllipsis"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="WherigoThingWithDistanceListItemTemplate">
+        <Grid d:DesignWidth="427" d:DesignHeight="110" Height="125">
+            <Image Source="Views/windowsphone_grid_red_transparent.png" Stretch="None" Margin="-24,-56,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="Collapsed"/>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Image Stretch="UniformToFill" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Width="62" Height="62" VerticalAlignment="Top" Margin="0,0,11,0" Visibility="{Binding Icon, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,-13,0,0"/>
+                        <TextBlock Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeMedium}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="32" TextTrimming="WordEllipsis" Margin="0,-2,0,0"/>
+                        <Geowigo_Controls:DistanceControl Vector="{Binding VectorFromPlayer, Mode=OneWay}" Orientation="Horizontal" TextMargin="4,0,0,0" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyNormal}" Foreground="{StaticResource PhoneAccentBrush}" Height="25" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="WherigoObjectNameOnlyListItem">
+        <Grid Margin="0,0,0,10">
+            <TextBlock TextWrapping="Wrap" Text="{Binding Text, FallbackValue=Command Name}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeExtraLarge}" FontFamily="{StaticResource PhoneFontFamilySemiLight}"/>
+        </Grid>
+    </DataTemplate>
+    <Style x:Key="ListHeaderTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeNormal}"/>
+    </Style>
+    <Style x:Key="EmptyListTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyLight}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeLarge}"/>
+        <Setter Property="Foreground" Value="{StaticResource PhoneTextBoxBrush}"/>
+    </Style>
+
+    <ControlTemplate x:Key="AudioPlayerContentTemplate">
+        <Grid x:Name="MediaElementContainer">
+            <MediaElement x:Name="CommonMediaElement" Visibility="Collapsed" AutoPlay="True" />
+            <Grid x:Name="ClientArea">
+                <ContentPresenter/>
+            </Grid>
+        </Grid>
+    </ControlTemplate>
+
+    <Style x:Key="MessageBoxDefaultTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiLight}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
+    </Style>
+    <Style x:Key="ListItemSubtitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMedium}"/>
+    </Style>
+    <Style x:Key="ThingDescriptionTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilyNormal}"/>
+    </Style>
+    <Style x:Key="ThingTitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource PhoneFontFamilySemiBold}"/>
+        <Setter Property="FontSize" Value="{StaticResource PhoneFontSizeMediumLarge}"/>
+    </Style>
+    <DataTemplate x:Key="WherigoThingPushpinContentTemplate">
+        <StackPanel Orientation="Horizontal" Margin="8,3">
+            <Image Height="30" Width="30" Margin="0,0,8,0" Visibility="{Binding Icon, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}}" Source="{Binding Icon.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="UniformToFill"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name}" FontSize="{StaticResource PhoneFontSizeMediumLarge}"/>
+        </StackPanel>
+    </DataTemplate>
+    <DataTemplate x:Key="LandmarkPushpinContentTemplate">
+        <Grid d:DesignWidth="144" d:DesignHeight="46">
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+        </Grid>
+    </DataTemplate>
+
+    <Geowigo_Converters:LongListSelectorColorConverter x:Key="LongListSelectorBackgroundColorConverter" NotEmptyBrush="{StaticResource PhoneAccentBrush}" >
+        <Geowigo_Converters:LongListSelectorColorConverter.EmptyBrush>
+            <SolidColorBrush Color="#FF515151"/>
+        </Geowigo_Converters:LongListSelectorColorConverter.EmptyBrush>
+    </Geowigo_Converters:LongListSelectorColorConverter>
+
+    <Geowigo_Converters:LongListSelectorColorConverter x:Key="LongListSelectorForegroundColorConverter" NotEmptyBrush="{StaticResource PhoneForegroundBrush}" EmptyBrush="{StaticResource PhoneTextBoxReadOnlyBrush}" />
+
 </ResourceDictionary>
