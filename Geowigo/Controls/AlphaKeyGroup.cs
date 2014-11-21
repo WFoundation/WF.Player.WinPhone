@@ -91,5 +91,17 @@ namespace Geowigo.Controls
             return list;
         }
 
+        public static string GetFirstAlphaNumChar(string name)
+        {
+            char firstChar = name.Trim().ToLower().First();
+            if (SortedLocalGrouping.Contains(firstChar))
+            {
+                return firstChar.ToString();
+            }
+            else
+            {
+                return SortedLocalGrouping[0].ToString();
+            }
+        }
     }
 }

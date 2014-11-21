@@ -475,11 +475,8 @@ namespace Geowigo.ViewModels
 
         private void RefreshAllCartridges()
         {
-            // Groups cartridges by first letter of name.
-            IEnumerable<IGrouping<string, CartridgeTag>> groups = Model.CartridgeStore.GroupBy(ct => ct.Title.ToLower().First().ToString());
-
             // Creates a list of groups of cartridges.
-            AlphaGroupedCartridges = AlphaKeyGroup<CartridgeTag>.CreateGroups(Model.CartridgeStore, System.Globalization.CultureInfo.CurrentUICulture, ct => ct.Title.ToLower(), true);
+            AlphaGroupedCartridges = AlphaKeyGroup<CartridgeTag>.CreateGroups(Model.CartridgeStore, System.Globalization.CultureInfo.CurrentUICulture, ct => AlphaKeyGroup<CartridgeTag>.GetFirstAlphaNumChar(ct.Title), true);
         }
 
         private void OnHistoryCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
