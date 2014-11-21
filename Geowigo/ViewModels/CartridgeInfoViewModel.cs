@@ -270,16 +270,55 @@ namespace Geowigo.ViewModels
 
 		#region Menu Actions
 
+        private bool CanCartridgeRun(WF.Player.Core.Cartridge cart)
+        {
+            bool canCartridgeRun = true;
+            
+            // Checks if a good location is available.
+            double? locationAccuracy = null;
+            if (Model.Core.DeviceLocation != null)
+            {
+                locationAccuracy = Model.Core.DeviceLocation.HorizontalAccuracy;
+            }
+            if (Model.Core.DeviceLocationStatus != System.Device.Location.GeoPositionStatus.Ready || locationAccuracy == null)
+            {
+                // No location is available.
+                canCartridgeRun = System.Windows.MessageBox.Show(
+                    String.Format("This device's location could not be found because location services are not ready. This may lead the game {0} to not behave correctly. Check the device status page from the main menu.\n\nTap on OK to run the game anyway, or on Cancel to return to the main menu.", cart.Name),
+                    "Location services are not ready",
+                    MessageBoxButton.OKCancel
+                    ) == System.Windows.MessageBoxResult.OK;
+            }
+            else if (locationAccuracy > PlayerViewModel.MaxGoodLocationAccuracy)
+            {
+                // No good accuracy.
+                canCartridgeRun = System.Windows.MessageBox.Show(
+                    String.Format("This device's location accuracy is poor right now ({1:0}m). This may lead the game {0} to not behave correctly. Check the device status page from the main menu.\n\nTap on OK to run the game anyway, or on Cancel to return to the main menu.", cart.Name, locationAccuracy),
+                    "Poor location accuracy",
+                    MessageBoxButton.OKCancel
+                    ) == System.Windows.MessageBoxResult.OK;
+            }
+
+            return canCartridgeRun;
+        }
+
 		private void StartNewGame()
 		{
-			// Starts a new game!
-			App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename);
+            // Starts the cartridge!
+            if (CanCartridgeRun(Cartridge))
+            {
+                // Starts a new game!
+                App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename);
+            }
 		}
 
         private void ResumeGame(CartridgeSavegame savegame)
         {
             // Resumes the game!
-            App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename, savegame);
+            if (CanCartridgeRun(Cartridge))
+            {
+                App.Current.ViewModel.NavigationManager.NavigateToGameHome(Cartridge.Filename, savegame); 
+            }
         }
 
         private void NavigateToStart()

@@ -142,25 +142,6 @@ namespace Geowigo.ViewModels
 
 		#region Commands
 
-		#region StartCartridgeCommand
-
-		private ICommand _StartCartridgeCommand;
-
-		public ICommand StartCartridgeCommand
-		{
-			get
-			{
-				if (_StartCartridgeCommand == null)
-				{
-					_StartCartridgeCommand = new RelayCommand<CartridgeTag>(StartCartridge);
-				} 
-
-				return _StartCartridgeCommand;
-			}
-		}
-
-		#endregion
-
 		#region ShowCartridgeInfoCommand
 
 		private ICommand _ShowCartridgeInfoCommand;
@@ -322,12 +303,6 @@ namespace Geowigo.ViewModels
 			// Shows the info!
 			App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
 		}
-
-        private void StartCartridge(CartridgeTag cartTag)
-        {
-            // Starts the cartridge!
-            App.Current.ViewModel.NavigationManager.NavigateToGameHome(cartTag.Cartridge.Filename);
-        }
 
         private void ShowCartridgeInfo(CartridgeTag cartTag)
         {
