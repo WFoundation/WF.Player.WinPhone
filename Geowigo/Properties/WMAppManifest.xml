@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2009/deployment" AppPlatformVersion="7.1">
-  <App xmlns="" ProductID="{a4d3826a-6eb5-47d1-b1b2-3075bbd5cd64}" Title="Geowigo" RuntimeType="Silverlight" Version="1.0.13.1" Genre="apps.normal" Author="Mangatome and the Wherigo Foundation" Description="Sample description" Publisher="Wherigo Foundation">
+  <App xmlns="" ProductID="{a4d3826a-6eb5-47d1-b1b2-3075bbd5cd64}" Title="Geowigo" RuntimeType="Silverlight" Version="1.0.14.0" Genre="apps.normal" Author="Mangatome and the Wherigo Foundation" Description="Sample description" Publisher="Wherigo Foundation">
     <IconPath IsRelative="true" IsResource="false">ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_IDENTITY_DEVICE" />
