@@ -248,25 +248,30 @@ namespace Geowigo.Models
 
 		public WFCoreAdapter() : base(new WinPhonePlatformHelper())
 		{
-			// Creates and starts the location service.
-			_GeoWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
-			_GeoWatcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(GeoWatcher_StatusChanged);
-			_GeoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(GeoWatcher_PositionChanged);
-			_GeoWatcher.Start();
-
-			// Creates and starts the compass service.
-			if (Compass.IsSupported)
-			{
-				_Compass = new Compass();
-				_Compass.TimeBetweenUpdates = TimeSpan.FromMilliseconds(250);
-				_Compass.CurrentValueChanged += new EventHandler<SensorReadingEventArgs<CompassReading>>(Compass_CurrentValueChanged);
-				_Compass.Calibrate += new EventHandler<CalibrationEventArgs>(OnCompassCalibrate);
-				//_Compass.Start();
-			}
-
-			// Deploys handlers.
-			RegisterCoreEventHandlers();
+			
 		}
+
+        protected override void InitInstanceOverride()
+        {
+            // Creates and starts the location service.
+            _GeoWatcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+            _GeoWatcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(GeoWatcher_StatusChanged);
+            _GeoWatcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(GeoWatcher_PositionChanged);
+            _GeoWatcher.Start();
+
+            // Creates and starts the compass service.
+            if (Compass.IsSupported)
+            {
+                _Compass = new Compass();
+                _Compass.TimeBetweenUpdates = TimeSpan.FromMilliseconds(250);
+                _Compass.CurrentValueChanged += new EventHandler<SensorReadingEventArgs<CompassReading>>(Compass_CurrentValueChanged);
+                _Compass.Calibrate += new EventHandler<CalibrationEventArgs>(OnCompassCalibrate);
+                //_Compass.Start();
+            }
+
+            // Deploys handlers.
+            RegisterCoreEventHandlers();
+        }
 
 		#endregion
 

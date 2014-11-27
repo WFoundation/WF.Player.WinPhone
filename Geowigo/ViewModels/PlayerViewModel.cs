@@ -278,7 +278,6 @@ namespace Geowigo.ViewModels
 
 				// Removes handlers.
 				oldValue.Core.PropertyChanged -= new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
-				oldValue.Core.PlayerLocationChanged -= new EventHandler<Models.PlayerLocationChangedEventArgs>(Core_PlayerLocationChanged);
 			}
 
 			// Adds handlers to the new model.
@@ -289,7 +288,6 @@ namespace Geowigo.ViewModels
 
 				// Adds handlers.
 				newValue.Core.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(Core_PropertyChanged);
-				newValue.Core.PlayerLocationChanged += new EventHandler<Models.PlayerLocationChangedEventArgs>(Core_PlayerLocationChanged);
 			}
 		}
 
@@ -303,23 +301,23 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-		private void Core_PlayerLocationChanged(object sender, Models.PlayerLocationChangedEventArgs e)
-		{
-			// Refreshes the statuses.
-			RefreshCompassStatuses();
-			RefreshLocationStatuses();
-		}
-
 		private void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == "DeviceLocationStatus")
+            // Alternative event handler because override OnCorePropertyChanged does not fire when the engine is not ready.
+            
+            if (e.PropertyName == "DeviceLocationStatus")
 			{
 				RefreshLocationStatuses();
 			}
-			else if (e.PropertyName == "IsCompassEnabled")
-			{
-				RefreshCompassStatuses();
-			}
+            else if (e.PropertyName == "DeviceLocation")
+            {
+                // If the engine is not ready, display the actual device location.
+                RefreshLocationStatuses();
+            }
+            else if (e.PropertyName == "IsCompassEnabled")
+            {
+                RefreshCompassStatuses();
+            }
 		}
 
 		protected override void InitFromNavigation(NavigationInfo nav)
