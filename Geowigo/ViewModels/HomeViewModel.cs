@@ -481,7 +481,7 @@ namespace Geowigo.ViewModels
 
 		private void RefreshAppBar()
 		{
-			ApplicationBar = new ApplicationBar();
+            ApplicationBar = new ApplicationBar() { Mode = ApplicationBarMode.Minimized };
 			ApplicationBar.CreateAndAddMenuItem(ClearHistoryCommand, "clear history");
 			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
 			ApplicationBar.CreateAndAddMenuItem(ShowDeviceInfoCommand, "device info");

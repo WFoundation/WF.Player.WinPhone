@@ -170,7 +170,7 @@
             					<Geowigo_Controls:NavigationListBox x:Name="CartridgeProviderList1" ItemTemplate="{StaticResource CartridgeProviderListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore.Providers, Mode=OneWay}" NavigationCommand="{Binding RunProviderActionCommand, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             				</StackPanel>
             			</ScrollViewer>
-            			<Geowigo_Controls:NavigationLongListSelector Height="425" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" ShowListHeader="False" ShowListFooter="False" GroupItemsPanel="{StaticResource CartridgeLongListGroupPanelTemplate}" GroupItemTemplate="{StaticResource CartridgeLongListGroupItemTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}"/>
+            			<Geowigo_Controls:NavigationLongListSelector Height="450" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" ShowListHeader="False" ShowListFooter="False" GroupItemsPanel="{StaticResource CartridgeLongListGroupPanelTemplate}" GroupItemTemplate="{StaticResource CartridgeLongListGroupItemTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}"/>
             		</StackPanel>
             	</Grid>
             </controls:PanoramaItem>
@@ -185,7 +185,7 @@
                 				<TextBlock Style="{StaticResource EmptyListTextStyle}" HorizontalAlignment="Left" TextWrapping="Wrap" Margin="0,10,0,0"><Run Text="Go ahe"/><Run Text="a"/><Run Text="d and "/><Run Text="play a game!"/></TextBlock>
                 			</StackPanel>
                 		</ScrollViewer>
-                		<Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource HistoryEntryListItemTemplate}" ItemsSource="{Binding Source={StaticResource HistorySource}}" Visibility="{Binding IsHistoryVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Height="425" NavigationCommand="{Binding RunHistoryEntryActionCommand, Mode=OneWay}" />
+                		<Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource HistoryEntryListItemTemplate}" ItemsSource="{Binding Source={StaticResource HistorySource}}" Visibility="{Binding IsHistoryVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Height="450" NavigationCommand="{Binding RunHistoryEntryActionCommand, Mode=OneWay}" />
                 	</StackPanel>
                 </Grid>
             </controls:PanoramaItem>
@@ -193,7 +193,7 @@
             	<Grid>
             		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
             		<StackPanel Margin="0,8,0,0" Orientation="Vertical" d:LayoutOverrides="Height">
-            			<Geowigo_Controls:NavigationListBox x:Name="CartridgesListBox" ItemsPanel="{StaticResource RecentCartridgesItemPanelTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" ItemTemplate="{StaticResource RecentCartridgeListItemTemplate}" Height="490" ScrollViewer.VerticalScrollBarVisibility="Disabled" d:LayoutOverrides="Height" ItemsSource="{Binding RecentCartridges}"/>
+            			<Geowigo_Controls:NavigationListBox x:Name="CartridgesListBox" ItemsPanel="{StaticResource RecentCartridgesItemPanelTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" ItemTemplate="{StaticResource RecentCartridgeListItemTemplate}" Height="450" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding RecentCartridges}"/>
             		</StackPanel>
             	</Grid>
             </controls:PanoramaItem>
