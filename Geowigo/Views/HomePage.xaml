@@ -113,7 +113,7 @@
 		<DataTemplate x:Key="CartridgeLongListItemTemplate">
 			<StackPanel Orientation="Horizontal" Margin="0,10">
 				<Grid Height="62" Width="62" Background="{StaticResource PhoneChromeBrush}" Margin="5,0,10,0">
-					<Image Stretch="UniformToFill" Source="{Binding Thumbnail}"/>
+					<Image Stretch="UniformToFill" Source="{Binding Icon}"/>
 				</Grid>
 				<TextBlock TextWrapping="Wrap" Text="{Binding Title, FallbackValue=&lt;Untitled&gt;}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
 			</StackPanel>

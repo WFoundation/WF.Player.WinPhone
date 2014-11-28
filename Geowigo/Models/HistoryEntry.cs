@@ -135,7 +135,7 @@ namespace Geowigo.Models
             RelatedCartridgeGuid = cartTag.Guid;
             RelatedCartridgeName = cartTag.Title;
 
-            BitmapSource thumb = (BitmapSource)cartTag.Thumbnail;
+            BitmapSource thumb = (BitmapSource)cartTag.Icon;
             RelatedCartridgeThumbnailBase64 = thumb == null ? null : Utils.ImageUtils.ToBase64String(thumb, ThumbnailWidth, ThumbnailWidth);
 
             Timestamp = DateTime.Now;

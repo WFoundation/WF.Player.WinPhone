@@ -36,11 +36,13 @@ namespace Geowigo.Models
 		public const string GlobalCachePath = "/Cache";
         public const string GlobalSavegamePath = "/Savegames_and_Logs";
 
-		public const int SmallThumbnailMinWidth = 173;
-		public const int BigThumbnailMinWidth = 432;
+        public const int SmallThumbnailMinWidth = 32;
+		public const int BigThumbnailMinWidth = 173;
+		public const int PosterMinWidth = 432;
 
 		private const string ThumbCacheFilename = "thumb.jpg";
 		private const string PosterCacheFilename = "poster.jpg";
+        private const string IconCacheFilename = "icon.jpg";
 
 		#endregion
 
@@ -48,6 +50,7 @@ namespace Geowigo.Models
 
 		private ImageSource _thumbnail;
 		private ImageSource _poster;
+        private ImageSource _icon;
 		private Dictionary<int, string> _soundFiles;
         private List<CartridgeSavegame> _savegames;
 
@@ -94,6 +97,27 @@ namespace Geowigo.Models
 		/// Gets the Cartridge object.
 		/// </summary>
 		public Cartridge Cartridge { get; private set; }
+
+        /// <summary>
+        /// Gets the cached small icon for the Cartridge.
+        /// </summary>
+        public ImageSource Icon
+        {
+            get
+            {
+                return _icon;
+            }
+
+            private set
+            {
+                if (_icon != value)
+                {
+                    _icon = value;
+
+                    RaisePropertyChanged("Icon");
+                }
+            }
+        } 
 
 		/// <summary>
 		/// Gets the cached thumbnail icon for the Cartridge.
@@ -213,7 +237,7 @@ namespace Geowigo.Models
 				}
 				else
 				{
-					Thumbnail = ImageUtils.SaveThumbnail(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+					Thumbnail = ImageUtils.SaveThumbnail(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, BigThumbnailMinWidth);
 				}
 
 				// Poster
@@ -224,8 +248,19 @@ namespace Geowigo.Models
 				}
 				else
 				{
-					Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, BigThumbnailMinWidth);
+					Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, PosterMinWidth);
 				}
+
+                // Icon
+                string iconCachePath = GetCachePathCore(IconCacheFilename);
+                if (isf.FileExists(iconCachePath))
+                {
+                    Icon = ImageUtils.GetBitmapSource(iconCachePath, isf);
+                }
+                else
+                {
+                    Icon = ImageUtils.SaveThumbnail(isf, iconCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+                }
 
 				// Sounds
 				ImportOrMakeSoundsCache(isf);
