@@ -305,16 +305,11 @@ namespace Geowigo.ViewModels
 		{
             // Alternative event handler because override OnCorePropertyChanged does not fire when the engine is not ready.
             
-            if (e.PropertyName == "DeviceLocationStatus")
+            if (e.PropertyName == "DeviceLocationStatus" || e.PropertyName == "DeviceLocation")
 			{
 				RefreshLocationStatuses();
 			}
-            else if (e.PropertyName == "DeviceLocation")
-            {
-                // If the engine is not ready, display the actual device location.
-                RefreshLocationStatuses();
-            }
-            else if (e.PropertyName == "IsCompassEnabled")
+            else if (e.PropertyName == "IsCompassEnabled" || e.PropertyName == "DeviceHeading" || e.PropertyName == "DeviceHeadingAccuracy")
             {
                 RefreshCompassStatuses();
             }
