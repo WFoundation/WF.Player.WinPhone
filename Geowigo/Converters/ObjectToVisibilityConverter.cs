@@ -52,6 +52,12 @@ namespace Geowigo.Converters
 					{
 						target = Visibility.Collapsed;
 					}
+
+                    // Strings give collapsed only if they are null or whitespace.
+                    else if (value is string && String.IsNullOrWhiteSpace((string)value))
+                    {
+                        target = Visibility.Collapsed;
+                    }
 				}
 			}
 

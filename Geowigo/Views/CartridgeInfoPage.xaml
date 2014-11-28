@@ -18,6 +18,7 @@
     toolkit:TiltEffect.IsTiltEnabled="True"
     shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
+		<toolkit:DailyDateTimeConverter x:Key="DailyDateTimeConverter"/>
 		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
 		<toolkit:HourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
@@ -41,7 +42,7 @@
 		<DataTemplate x:Key="SavegameListGroupItemTemplate">
 			<StackPanel d:DesignWidth="72" d:DesignHeight="65" Margin="0,0,0,40">
 				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, Mode=OneWay, ElementName=ThisCIP}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, ElementName=ThisCIP, Mode=OneWay}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
 			</StackPanel>
 		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>
@@ -72,6 +73,18 @@
             			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ThingTitleTextStyle}"/>
             			<TextBlock TextWrapping="Wrap" Text="{Binding Author}" Style="{StaticResource ThingTitleTextStyle}" Visibility="{Binding Author, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
             			<TextBlock TextWrapping="Wrap" Visibility="{Binding Author, ConverterParameter=invert;strict, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource ThingTitleTextStyle}"><Run Text="("/><Run Text="U"/><Run Text="nknown "/><Run Text="a"/><Run Text="uthor)"/></TextBlock>
+            			<StackPanel Orientation="Horizontal" Margin="0,26,0,0">
+            				<TextBlock TextWrapping="Wrap" Text="Version" Margin="0,0,5,0" Visibility="{Binding Cartridge.Version, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.Version, Mode=OneWay}" Visibility="{Binding Cartridge.Version, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            			</StackPanel>
+            			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Cartridge.CreateDate, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}">
+            				<TextBlock TextWrapping="Wrap" Text="Created on" Margin="0,0,5,0" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.CreateDate, Converter={StaticResource DailyDateTimeConverter}, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            			</StackPanel>
+            			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Cartridge.Player, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}">
+            				<TextBlock TextWrapping="Wrap" Text="Compiled for" Margin="0,0,5,0" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.Player, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            			</StackPanel>
             			<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.LongDescription, FallbackValue=Description, Mode=OneWay}" Margin="0,26,0,0" Style="{StaticResource ThingDescriptionTextStyle}"/>
             		</StackPanel>
             	</ScrollViewer>
