@@ -179,6 +179,18 @@ namespace Geowigo.Utils
 			{
 				extraDataList.Add(new BugSense.Core.Model.CrashExtraData("cartName", name.Trim()));
 			}
+
+            string engineGameState = "<unknown>";
+            Models.WherigoModel model = App.Current.Model;
+            if (model != null)
+            {
+                Models.WFCoreAdapter core = model.Core;
+                if (core != null)
+                {
+                    engineGameState = core.GameState.ToString();
+                }
+            }
+            extraDataList.Add(new BugSense.Core.Model.CrashExtraData("engineGameState", engineGameState));
 		}
 
 		/// <summary>
