@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010 Express for Windows Phone
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Phone
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Geowigo", "Geowigo\Geowigo.csproj", "{5E26988A-4610-4AB6-B62D-D60E0EDB4345}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.WP7", "..\WF.Player.Core\Core\Core.WP7.csproj", "{C72F81D8-6D7B-4ABF-888D-714044B60CDA}"
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoClassLibraries-wp7", "..\WF.Player.Core\Eluant\MonoClassLibraries\MonoClassLibraries-wp7.csproj", "{515D8F8A-3EC7-4259-BACE-654B6306B273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KopiLua-wp7", "..\..\NLua\KopiLua\KopiLua\KopiLua-wp7.csproj", "{330E0C63-4160-46E0-BBDA-325185A4AB7A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JeffWilcox.Maps", "..\..\Mangatome\wp-maps\src\JeffWilcox.Maps\JeffWilcox.Maps.csproj", "{0769A48C-216A-4E68-A522-E5CB5D40F0FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

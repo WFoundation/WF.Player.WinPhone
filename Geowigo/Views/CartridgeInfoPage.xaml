@@ -18,6 +18,8 @@
     toolkit:TiltEffect.IsTiltEnabled="True"
     shell:SystemTray.IsVisible="True" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
+		<Geowigo_Converters:ZonePointToStringConverter x:Key="ZonePointToStringConverter"/>
+		<Geowigo_Converters:ZonePointToGeoCoordinateConverter x:Key="ZonePointToGeoCoordinateConverter"/>
 		<toolkit:DailyDateTimeConverter x:Key="DailyDateTimeConverter"/>
 		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
 		<toolkit:HourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
@@ -68,7 +70,7 @@
         <controls:Pivot TitleTemplate="{StaticResource GamePivotTitleTemplate}" Title="{Binding}" SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}">
             <!--Élément un de tableau croisé dynamique-->
             <controls:PivotItem x:Name="InfoItem" Header="info">
-                <ScrollViewer>
+                <ScrollViewer Margin="0,0,0,2">
             		<StackPanel>
             			<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeTag.Title, Converter={StaticResource UppercaseStringConverter}, FallbackValue=TITLE, Mode=OneWay}" Style="{StaticResource ThingTitleTextStyle}"/>
             			<TextBlock TextWrapping="Wrap" Text="{Binding Author}" Style="{StaticResource ThingTitleTextStyle}" Visibility="{Binding Author, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
@@ -93,12 +95,18 @@
             <!--Élément deux de tableau croisé dynamique-->
             <controls:PivotItem x:Name="NavigateItem" Header="navigate">
                 <StackPanel Orientation="Vertical" d:LayoutOverrides="Height">
-            		<Button Template="{StaticResource NoBorderButtonTemplate}" Margin="-12,0,-12,30" Height="150" d:LayoutOverrides="Width, HorizontalMargin" Command="{Binding NavigateToStartCommand, Mode=OneWay}">
-                		<JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
-                	</Button>
-            		<ScrollViewer Margin="0,0,0,-400">
+            		<TextBlock TextWrapping="Wrap" Text="STARTING LOCATION" Style="{StaticResource ListHeaderTextBlockStyle}" Margin="0,0,0,8"/>
+            		<Grid Height="150" Margin="-12,0,-12,8" Background="{StaticResource PhoneInactiveBrush}">
+            			<Button Template="{StaticResource NoBorderButtonTemplate}" Command="{Binding NavigateToStartCommand, Mode=OneWay}" Background="{x:Null}">
+            				<JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate, Converter={StaticResource ZonePointToGeoCoordinateConverter}}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" StatusChanged="StaticMap_StatusChanged" MapCenterVisibility="{Binding IsMapCenterVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
+            			</Button>
+            			<TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Unable to download map of starting location." VerticalAlignment="Center" Style="{StaticResource PhoneTextSmallStyle}" Visibility="{Binding IsMapErrorMessageVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
+            			<toolkit:PerformanceProgressBar VerticalAlignment="Center" Height="10" IsIndeterminate="{Binding IsMapProgressBarVisible}"/>
+            		</Grid>
+            		<TextBlock TextWrapping="Wrap" Text="{Binding StartingCoordinate, Converter={StaticResource ZonePointToStringConverter}}" Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+            		<TextBlock TextWrapping="Wrap" Text="You can play this cartridge anywhere." Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+            		<ScrollViewer Margin="0,16,0,-280">
             			<StackPanel Orientation="Vertical">
-            				<TextBlock x:Name="CoordinatesText" TextWrapping="Wrap" Text="{Binding StartingCoordinate}" Style="{StaticResource ThingDescriptionTextStyle}"/>
             				<TextBlock x:Name="DescriptionText" TextWrapping="Wrap" Text="{Binding Cartridge.StartingDescription, Mode=OneWay}" d:LayoutOverrides="Width" Style="{StaticResource ThingDescriptionTextStyle}"/>
             			</StackPanel>
             		</ScrollViewer>
@@ -120,6 +128,7 @@
             </controls:PivotItem>
         </controls:Pivot>
         <Image Source="windowsphone_grid_red_transparent.png" Margin="0,-32,0,0" Stretch="None" Visibility="Collapsed"/>
+        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding VectorToStartingCoordinate}" Orientation="Horizontal" Visibility="{Binding VectorToStartingCoordinate, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,0,2,0"/>
     </Grid>
     
 </Geowigo_Views:BasePage>

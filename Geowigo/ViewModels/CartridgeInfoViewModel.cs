@@ -79,17 +79,17 @@ namespace Geowigo.ViewModels
         #region StartingCoordinate
 
 
-        public GeoCoordinate StartingCoordinate
+        public WF.Player.Core.ZonePoint StartingCoordinate
         {
-            get { return (GeoCoordinate)GetValue(StartingCoordinateProperty); }
+            get { return (WF.Player.Core.ZonePoint)GetValue(StartingCoordinateProperty); }
             set { SetValue(StartingCoordinateProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for StartingCoordinate.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty StartingCoordinateProperty =
-            DependencyProperty.Register("StartingCoordinate", typeof(GeoCoordinate), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+            DependencyProperty.Register("StartingCoordinate", typeof(WF.Player.Core.ZonePoint), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
 
-        
+
         #endregion
 
         #region SavegameGroups
@@ -142,13 +142,76 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-		#endregion
+        #region IsMapCenterVisible
 
-		#region Commands
 
-		#region StartNewGameCommand
+        public bool IsMapCenterVisible
+        {
+            get { return (bool)GetValue(IsMapCenterVisibleProperty); }
+            set { SetValue(IsMapCenterVisibleProperty, value); }
+        }
 
-		private ICommand _startNewGameCommand;
+        // Using a DependencyProperty as the backing store for IsMapCenterVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsMapCenterVisibleProperty =
+            DependencyProperty.Register("IsMapCenterVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
+        #region IsMapProgressBarVisible
+
+
+        public bool IsMapProgressBarVisible
+        {
+            get { return (bool)GetValue(IsMapProgressBarVisibleProperty); }
+            set { SetValue(IsMapProgressBarVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsMapProgressBarVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsMapProgressBarVisibleProperty =
+            DependencyProperty.Register("IsMapProgressBarVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
+
+
+
+        #endregion
+
+        #region IsMapErrorMessageVisible
+
+
+        public bool IsMapErrorMessageVisible
+        {
+            get { return (bool)GetValue(IsMapErrorMessageVisibleProperty); }
+            set { SetValue(IsMapErrorMessageVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsMapErrorMessageVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsMapErrorMessageVisibleProperty =
+            DependencyProperty.Register("IsMapErrorMessageVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
+
+
+        #endregion
+
+        #region VectorToStartingCoordinate
+
+
+        public WF.Player.Core.LocationVector VectorToStartingCoordinate
+        {
+            get { return (WF.Player.Core.LocationVector)GetValue(VectorToStartingCoordinateProperty); }
+            set { SetValue(VectorToStartingCoordinateProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for VectorToStartingCoordinate.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty VectorToStartingCoordinateProperty =
+            DependencyProperty.Register("VectorToStartingCoordinate", typeof(WF.Player.Core.LocationVector), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+        #endregion
+        #endregion
+
+        #region Commands
+
+        #region StartNewGameCommand
+
+        private ICommand _startNewGameCommand;
 
 		/// <summary>
 		/// Gets a command to start a new game.
@@ -226,6 +289,7 @@ namespace Geowigo.ViewModels
 				// Refreshes content.
 				RefreshAppBar();
                 RefreshStaticContent();
+                RefreshLocatedContent();
                 RefreshSavegames();
 			}
 		}
@@ -327,7 +391,7 @@ namespace Geowigo.ViewModels
             BingMapsDirectionsTask task = new BingMapsDirectionsTask();
             task.End = new LabeledMapLocation(
                 String.Format("Starting Location for {0}", Cartridge.Name),
-                StartingCoordinate);
+                StartingCoordinate.ToGeoCoordinate());
 
             // Starts the task.
             task.Show();
@@ -370,14 +434,6 @@ namespace Geowigo.ViewModels
 
         private void RefreshStaticContent()
         {
-            // Starting point.
-            StartingCoordinate = Cartridge.IsPlayAnywhere 
-                ? (Model.Core.DeviceLocation ?? new GeoCoordinate(0, 0, 0))
-                : new GeoCoordinate(
-                    Cartridge.StartingLocationLatitude,
-                    Cartridge.StartingLocationLongitude,
-                    Cartridge.StartingLocationAltitude);
-
 			// Author name and company.
 			string fullAuthor = Cartridge.GetFullAuthor();
 			if (!String.IsNullOrWhiteSpace(fullAuthor))
@@ -385,5 +441,64 @@ namespace Geowigo.ViewModels
 				Author = "by " + fullAuthor;
 			}
         }
-	}
+
+        private void RefreshLocatedContent()
+        {
+            // Starting point.
+            if (Cartridge.IsPlayAnywhere)
+            {
+                // In play anywhere, displays the device's location.
+
+                if (Model.Core.DeviceLocation == null)
+                {
+                    // No location yet: display a default.
+                    StartingCoordinate = WF.Player.Core.ZonePoint.Zero;
+                }
+                else
+                {
+                    // Change the current coordinates if it is far enough from the last one.
+                    if (StartingCoordinate == null || Model.Core.DeviceLocation.GetDistanceTo(StartingCoordinate.ToGeoCoordinate()) > 50)
+                    {
+                        StartingCoordinate = Model.Core.DeviceLocation.ToZonePoint();
+                    }
+                }
+
+                VectorToStartingCoordinate = null;
+            }
+            else
+            {
+                // Displays the cartridge's start location.
+                StartingCoordinate = Cartridge.StartingLocation;
+                VectorToStartingCoordinate = Model.Core.DeviceLocation == null ? null : Model.Core.DeviceLocation.ToZonePoint().GetVectorTo(StartingCoordinate);
+            }
+        }
+
+        public void OnStaticMapStatusChanged(JeffWilcox.Controls.StaticMapStatus status)
+        {
+            IsMapCenterVisible = status == JeffWilcox.Controls.StaticMapStatus.Done;
+            IsMapErrorMessageVisible = status == JeffWilcox.Controls.StaticMapStatus.Failed;
+            IsMapProgressBarVisible = status == JeffWilcox.Controls.StaticMapStatus.Downloading;
+        }
+
+        protected override void OnModelChanging(WherigoModel oldValue, WherigoModel newValue)
+        {
+            if (oldValue != null)
+            {
+                newValue.Core.PropertyChanged -= Core_PropertyChanged;
+            }
+
+            if (newValue != null)
+            {
+                newValue.Core.PropertyChanged += Core_PropertyChanged;
+            }
+        }
+
+        void Core_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DeviceLocation")
+            {
+                RefreshLocatedContent();
+            }
+        }
+    }
 }

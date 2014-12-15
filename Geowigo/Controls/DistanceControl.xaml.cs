@@ -148,21 +148,24 @@ namespace Geowigo.Controls
 
 			Unloaded += new RoutedEventHandler(OnUnloaded);
 
-			App.Current.Model.Core.PlayerLocationChanged += new EventHandler<Models.PlayerLocationChangedEventArgs>(OnPlayerLocationChanged);
+            App.Current.Model.Core.PropertyChanged += OnCorePropertyChanged;
 		}
+
+        void OnCorePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "DeviceHeading")
+            {
+                double? heading = App.Current.Model.Core.DeviceHeading;
+                if (heading.HasValue)
+                {
+                    RefreshBearing(deviceHeading: heading.Value);
+                }
+            }
+        }
 
 		private void OnUnloaded(object sender, RoutedEventArgs e)
 		{
-			App.Current.Model.Core.PlayerLocationChanged -= new EventHandler<Models.PlayerLocationChangedEventArgs>(OnPlayerLocationChanged);
-		}
-
-		private void OnPlayerLocationChanged(object sender, Models.PlayerLocationChangedEventArgs e)
-		{
-			// If the heading of the device has changed, adjusts the bearing that is on-screen.
-			if (e.Heading.HasValue)
-			{
-				RefreshBearing(deviceHeading: e.Heading);
-			}
+            App.Current.Model.Core.PropertyChanged -= OnCorePropertyChanged;
 		}
 
 		private void OnDistanceChanged(DependencyPropertyChangedEventArgs e)

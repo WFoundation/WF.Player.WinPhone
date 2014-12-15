@@ -31,5 +31,10 @@ namespace Geowigo.Views
 		{
 			InitializeComponent();
 		}
+
+		private void StaticMap_StatusChanged(object sender, JeffWilcox.Controls.StaticMapStatusChangedEventArgs e)
+		{
+            ViewModel.OnStaticMapStatusChanged(e.Status);
+		}
 	}
 }

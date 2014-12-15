@@ -59,9 +59,6 @@
     <Reference Include="ImageTools.IO.Gif">
       <HintPath>..\libs\ImageTools.IO.Gif.dll</HintPath>
     </Reference>
-    <Reference Include="JeffWilcox.Maps">
-      <HintPath>..\packages\JeffWilcox.Maps.1.1\lib\sl4-windowsphone71\JeffWilcox.Maps.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Devices.Sensors" />
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Live">
@@ -128,6 +125,8 @@
     <Compile Include="Controls\AlphaKeyGroup.cs" />
     <Compile Include="Controls\NavigationLongListSelector.cs" />
     <Compile Include="Converters\LongListSelectorColorConverter.cs" />
+    <Compile Include="Converters\ZonePointToGeoCoordinateConverter.cs" />
+    <Compile Include="Converters\ZonePointToStringConverter.cs" />
     <Compile Include="Utils\CollectionsExtensions.cs" />
     <Compile Include="Utils\IsolatedStorageExtensions.cs" />
     <Compile Include="Utils\ProgressAggregator.cs" />
@@ -340,6 +339,10 @@
     <Resource Include="Views\windowsphone_grid_red_transparent.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Mangatome\wp-maps\src\JeffWilcox.Maps\JeffWilcox.Maps.csproj">
+      <Project>{0769A48C-216A-4E68-A522-E5CB5D40F0FA}</Project>
+      <Name>JeffWilcox.Maps</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\WF.Player.Core\Core\Core.WP7.csproj">
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
