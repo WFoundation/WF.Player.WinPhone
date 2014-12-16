@@ -349,7 +349,7 @@ namespace Geowigo.Models
 						}
 						catch (Exception ex)
 						{
-							// This cartridge seems improper to loading.
+							// This cartridge seems improper to load.
 							// Let's just dump the exception and return.
 							DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
 							System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Loading failed, ignored : " + filename);
@@ -366,21 +366,19 @@ namespace Geowigo.Models
 				lock (_syncRoot)
 				{
 					existingCC = this.Items.SingleOrDefault(cc => cc.Guid == cart.Guid);
-				}
-				if (existingCC != null)
-				{
-					// Refreshes the progress.
-					_isBusyAggregator[businessTag] = false;
 
-					return existingCC;
-				}
+				    if (existingCC != null)
+				    {
+					    // Refreshes the progress.
+					    _isBusyAggregator[businessTag] = false;
 
-				// The cartridge does not exist in the store yet. Creates an entry for it.
-				newCC = new CartridgeTag(cart);
+					    return existingCC;
+				    }
 
-				// Adds the context to the store.
-				lock (_syncRoot)
-				{
+				    // The cartridge does not exist in the store yet. Creates an entry for it.
+				    newCC = new CartridgeTag(cart);
+
+				    // Adds the context to the store.
 					this.Items.Add(newCC);
 				}
 
