@@ -141,6 +141,7 @@
     </Compile>
     <Compile Include="Controls\AlphaKeyGroup.cs" />
     <Compile Include="Controls\NavigationLongListSelector.cs" />
+    <Compile Include="Converters\FixedHourlyDateTimeConverter.cs" />
     <Compile Include="Converters\LongListSelectorColorConverter.cs" />
     <Compile Include="Converters\ZonePointToGeoCoordinateConverter.cs" />
     <Compile Include="Converters\ZonePointToStringConverter.cs" />

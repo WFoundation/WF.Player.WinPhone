@@ -218,6 +218,7 @@ namespace Geowigo.Models
 		#endregion
 
 		#region Cache
+
 		/// <summary>
 		/// Imports or create the cache for this CartridgeTag.
 		/// </summary>

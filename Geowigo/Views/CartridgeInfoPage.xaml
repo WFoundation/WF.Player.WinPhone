@@ -22,7 +22,7 @@
 		<Geowigo_Converters:ZonePointToGeoCoordinateConverter x:Key="ZonePointToGeoCoordinateConverter"/>
 		<toolkit:DailyDateTimeConverter x:Key="DailyDateTimeConverter"/>
 		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
-		<toolkit:HourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
+        <Geowigo_Converters:FixedHourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 		<toolkit:FullViewDateTimeConverter x:Key="FullViewDateTimeConverter"/>
@@ -128,7 +128,7 @@
             </controls:PivotItem>
         </controls:Pivot>
         <Image Source="windowsphone_grid_red_transparent.png" Margin="0,-32,0,0" Stretch="None" Visibility="Collapsed"/>
-        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding VectorToStartingCoordinate}" Orientation="Horizontal" Visibility="{Binding VectorToStartingCoordinate, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,16,8,0"/>
+        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding VectorToStartingCoordinate}" Orientation="Horizontal" Visibility="{Binding VectorToStartingCoordinate, ConverterParameter=strict, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,12,8,0"/>
     </Grid>
     
 </Geowigo_Views:BasePage>
