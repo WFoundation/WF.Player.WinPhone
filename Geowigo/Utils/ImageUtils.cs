@@ -16,13 +16,15 @@ namespace Geowigo.Utils
 {
 	public class ImageUtils
 	{
-		static ImageUtils()
+        private static ImageTools.Filtering.GaussianBlur _gaussianBlurFilter;
+        
+        static ImageUtils()
 		{
 			// Adds support for GIF.
 			Decoders.AddDecoder<GifDecoder>();
 		}
 
-		public static BitmapSource GetBitmapSource(ExtendedImage image)
+		public static WriteableBitmap GetBitmapSource(ExtendedImage image)
 		{
 			// Waits for the bitmap to be loaded if it needs so.
 			if (!image.IsFilled)
@@ -46,45 +48,11 @@ namespace Geowigo.Utils
 				image.LoadingCompleted -= onLoaded;
 			}
 
-
 			// Converts the bitmap.
-			// Source code from ImageTools.Utils.ImageExtensions.ToBitmap();
-			WriteableBitmap bitmap = new WriteableBitmap(image.PixelWidth, image.PixelHeight);
-
-			ImageBase temp = image;
-
-			byte[] pixels = temp.Pixels;
-
-			if (pixels != null)
-			{
-				int[] raster = bitmap.Pixels;
-
-				if (raster != null)
-				{
-					Buffer.BlockCopy(pixels, 0, raster, 0, pixels.Length);
-
-					for (int i = 0; i < raster.Length; i++)
-					{
-						int abgr = raster[i];
-						int a = (abgr >> 24) & 0xff;
-
-						float m = a / 255f;
-
-						int argb = a << 24 |
-							(int)(((abgr >> 0) & 0xff) * m) << 16 |
-							(int)(((abgr >> 8) & 0xff) * m) << 8 |
-							(int)(((abgr >> 16) & 0xff) * m);
-						raster[i] = argb;
-					}
-				}
-			}
-
-			bitmap.Invalidate();
-
-			return bitmap;  
+            return image.ToBitmap();
 		}
 
-		public static BitmapSource GetBitmapSource(byte[] data)
+		public static WriteableBitmap GetBitmapSource(byte[] data)
 		{
 			using (MemoryStream ms = new MemoryStream(data))
 			{
@@ -95,7 +63,7 @@ namespace Geowigo.Utils
 					image = new BitmapImage();
 					image.SetSource(ms);
 
-					return image;
+					return new WriteableBitmap(image);
 				}
 				catch (Exception)
 				{
@@ -109,7 +77,7 @@ namespace Geowigo.Utils
 						eim.SetSource(ms);
 
                         // Gets the image source for the image.
-						BitmapSource bs = GetBitmapSource(eim);
+						WriteableBitmap bs = GetBitmapSource(eim);
                         if (bs == null)
                         {
                             // Something went wrong.
@@ -127,7 +95,7 @@ namespace Geowigo.Utils
 			}
 		}
 
-		public static BitmapSource GetBitmapSource(Media media)
+		public static WriteableBitmap GetBitmapSource(Media media)
 		{
 			if (media == null || media.Data == null)
 			{
@@ -167,23 +135,23 @@ namespace Geowigo.Utils
 			return image;
 		}
 
-		public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1)
+		public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1, bool blur = false)
 		{
 			// Make sure this method runs in the UI thread.
 			if (!Deployment.Current.Dispatcher.CheckAccess())
 			{
 				return Deployment.Current.Dispatcher.Invoke<ImageSource>(() => 
 				{
-					return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth);
+					return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth, blur);
 				});
 			}
 			
 			// Gets the images.
-			BitmapSource preferedImage = GetBitmapSource(prefered);
-			BitmapSource fallbackImage = GetBitmapSource(fallback);
+			WriteableBitmap preferedImage = GetBitmapSource(prefered);
+            WriteableBitmap fallbackImage = GetBitmapSource(fallback);
 
 			// Determines which image needs to be saved.
-			BitmapSource targetImage = preferedImage;
+            WriteableBitmap targetImage = preferedImage;
 			if (preferedImage == null)
 			{
 				// Use the fallback image if the prefered image does not exist.
@@ -206,13 +174,39 @@ namespace Geowigo.Utils
 			int targetWidth = (int) Math.Max(minWidth, targetImage.PixelWidth);
 			double sourcePixelRatio = targetImage.PixelWidth / (double) targetImage.PixelHeight;
 			int targetHeight = (int) Math.Floor(targetWidth / sourcePixelRatio);
-			
+            
+            // Blurs the image if needed.
+            if (blur)
+            {
+                // Converts the image to an ImageTools image.
+                ExtendedImage targetExtendedImage = targetImage.ToImage();
+
+                // Resizes the image if it can help decreasing the time needed to blur it.
+                // The image is only resized if the target size is less than the original size.
+                // Otherwise it means that the original image is smaller than the target size, in which case we blur it
+                // as it is and let WP scale up the blurred image later.
+                if (targetExtendedImage.PixelHeight * targetExtendedImage.PixelWidth > targetWidth * targetHeight)
+                {
+                    targetExtendedImage = ExtendedImage.Resize(targetExtendedImage, targetWidth, targetHeight, new ImageTools.Filtering.NearestNeighborResizer());  
+                }
+                
+                // Inits the blur filter if needed and runs it.
+                if (_gaussianBlurFilter == null)
+                {
+                    _gaussianBlurFilter = new ImageTools.Filtering.GaussianBlur() { Variance = 2d };
+                }
+                targetExtendedImage = ExtendedImage.Apply(targetExtendedImage, _gaussianBlurFilter);
+
+                // Converts the image back to a WP-displayable image.
+                targetImage = targetExtendedImage.ToBitmap();
+            }
+
 			// Saves the image.
 			try
 			{
 				using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Create, FileAccess.ReadWrite))
 				{
-					new WriteableBitmap(targetImage).SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
+                    targetImage.SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
 				}
 			}
 			catch (ArgumentException ex)

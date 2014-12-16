@@ -65,7 +65,7 @@
         	<TextBlock x:Name="CartridgeTitle" Text="{Binding Cartridge.Name, FallbackValue=Cartridge Name}" Style="{StaticResource PhoneTextNormalStyle}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="12,0,185,0"/>
         	<TextBlock x:Name="PageTitle" Text="{Binding WherigoObject.Name, Converter={StaticResource LowercaseStringConverter}, FallbackValue=thing}" Margin="9,-10,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
-        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding WherigoObject.VectorFromPlayer, Mode=OneWay}" d:LayoutOverrides="VerticalAlignment" Orientation="Horizontal" Visibility="{Binding IsCompassVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Margin="0,0,2,0"/>
+        <Geowigo_Controls:DistanceControl HorizontalAlignment="Right" Height="68" VerticalAlignment="Top" Width="177" Vector="{Binding WherigoObject.VectorFromPlayer, Mode=OneWay}" d:LayoutOverrides="VerticalAlignment" Orientation="Horizontal" Visibility="{Binding IsCompassVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Visible}" Margin="0,16,8,0"/>
         <Grid x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<ScrollViewer>
         		<StackPanel Margin="0,0,0,15">

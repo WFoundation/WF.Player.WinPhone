@@ -240,17 +240,6 @@ namespace Geowigo.Models
 					Thumbnail = ImageUtils.SaveThumbnail(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, BigThumbnailMinWidth);
 				}
 
-				// Poster
-				string posterCachePath = GetCachePathCore(PosterCacheFilename);
-				if (isf.FileExists(posterCachePath))
-				{
-					Poster = ImageUtils.GetBitmapSource(posterCachePath, isf);
-				}
-				else
-				{
-					Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, PosterMinWidth);
-				}
-
                 // Icon
                 string iconCachePath = GetCachePathCore(IconCacheFilename);
                 if (isf.FileExists(iconCachePath))
@@ -260,6 +249,17 @@ namespace Geowigo.Models
                 else
                 {
                     Icon = ImageUtils.SaveThumbnail(isf, iconCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+                }
+
+                // Poster
+                string posterCachePath = GetCachePathCore(PosterCacheFilename);
+                if (isf.FileExists(posterCachePath))
+                {
+                    Poster = ImageUtils.GetBitmapSource(posterCachePath, isf);
+                }
+                else
+                {
+                    Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, PosterMinWidth, true);
                 }
 
 				// Sounds

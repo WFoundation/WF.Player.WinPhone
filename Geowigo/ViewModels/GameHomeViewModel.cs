@@ -50,6 +50,22 @@ namespace Geowigo.ViewModels
 
 		#region Dependency Properties
 
+        #region CartridgeTag
+
+
+        public CartridgeTag CartridgeTag
+        {
+            get { return (CartridgeTag)GetValue(CartridgeTagProperty); }
+            set { SetValue(CartridgeTagProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CartridgeTag.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CartridgeTagProperty =
+            DependencyProperty.Register("CartridgeTag", typeof(CartridgeTag), typeof(GameHomeViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
 		#region PivotSelectedIndex
 
 
@@ -433,7 +449,7 @@ namespace Geowigo.ViewModels
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
 			{
 				// Gets the cartridge tag for this cartridge.
-				CartridgeTag cartTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filename);
+				CartridgeTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filename);
 				
 				string gwsFilename;
 
@@ -445,7 +461,7 @@ namespace Geowigo.ViewModels
                         new Action(() =>
                         {
 							// Starts logging.
-							Model.Core.StartLogging(cartTag.CreateLogFile());
+							Model.Core.StartLogging(CartridgeTag.CreateLogFile());
 							
 							// Restores the game.
 							Model.Core.InitAndRestoreCartridgeAsync(filename, gwsFilename)
@@ -458,13 +474,13 @@ namespace Geowigo.ViewModels
 									}
 									catch (AggregateException ex)
 									{
-										FailInit(ex, cartTag, true);
+                                        FailInit(ex, CartridgeTag, true);
 									}
 
 									// Registers a history entry.
 									Model.History.AddRestoredGame(
-										cartTag,
-										cartTag.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+                                        CartridgeTag,
+                                        CartridgeTag.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
@@ -475,7 +491,7 @@ namespace Geowigo.ViewModels
                         new Action(() =>
                         {
 							// Starts logging.
-							Model.Core.StartLogging(cartTag.CreateLogFile());
+                            Model.Core.StartLogging(CartridgeTag.CreateLogFile());
 							
 							// Starts the game.
 							Model.Core.InitAndStartCartridgeAsync(filename)
@@ -488,11 +504,11 @@ namespace Geowigo.ViewModels
 									}
 									catch (AggregateException ex)
 									{
-										FailInit(ex, cartTag);
+                                        FailInit(ex, CartridgeTag);
 									}
 
 									// Registers a history entry.
-									Model.History.AddStartedGame(cartTag);
+                                    Model.History.AddStartedGame(CartridgeTag);
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
