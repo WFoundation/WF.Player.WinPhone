@@ -42,7 +42,7 @@
 
 <!--TitlePanel contient le nom de l'application et le titre de la page--><!--ContentPanel - placez tout contenu supplémentaire ici-->
         <Grid x:Name="ContentPanel" Grid.Row="1">
-			<Microsoft_Phone_Controls_Maps:Map x:Name="MapControl" d:LayoutOverrides="Width" ZoomLevel="16" CredentialsProvider="Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW">
+			<Microsoft_Phone_Controls_Maps:Map x:Name="MapControl" d:LayoutOverrides="Width" ZoomLevel="16">
         		<Microsoft_Phone_Controls_Maps:Map.Center>
         			<System_Device_Location:GeoCoordinate Altitude="NaN" Course="NaN" HorizontalAccuracy="NaN" Longitude="0" Latitude="49" Speed="NaN" VerticalAccuracy="NaN"/>
         		</Microsoft_Phone_Controls_Maps:Map.Center>

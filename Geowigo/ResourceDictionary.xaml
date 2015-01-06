@@ -23,8 +23,6 @@
         <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
     </Style>
 
-    <Core:String x:Key="BingMapsKey">Aky-rX92l8-uHnEukNWTHz75wNu12p79pyXDLI_t0yFXvwp_4qLtSfhV1c3zgAdW</Core:String>
-
     <Geowigo_Converters:PlayerZoneStateToStringConverter x:Key="PlayerZoneStateToStringConverter"/>
     <Geowigo_Converters:ByteArrayToImageSourceConverter x:Key="ByteArrayToImageSourceConverter"/>
     <Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>

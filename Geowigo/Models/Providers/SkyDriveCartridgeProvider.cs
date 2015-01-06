@@ -18,8 +18,6 @@ namespace Geowigo.Models.Providers
 	{
 		#region Constants
 
-		private static readonly string LiveConnectClientID = "000000004C10D95D";
-
 		private static readonly string[] _Scopes = new string[] { "wl.basic", "wl.skydrive_update", "wl.offline_access", "wl.signin" };
 
 		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
@@ -247,7 +245,17 @@ namespace Geowigo.Models.Providers
 			// Makes sure the auth client exists.
 			if (_authClient == null)
 			{
-				_authClient = new LiveAuthClient(LiveConnectClientID);
+                string clientId = null;
+                try
+                {
+                    clientId = (string)App.Current.Resources["LiveConnectClientID"];
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Unable to fetch LiveConnectClientID from App resources.", ex);
+                }
+
+                _authClient = new LiveAuthClient(clientId);
 				_authClient.InitializeCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientInitializeCompleted);
 				_authClient.LoginCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientLoginCompleted);
 			}

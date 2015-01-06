@@ -3,13 +3,25 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"       
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
-    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone">
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:Core="clr-namespace:System;assembly=mscorlib">
 
     <!--Ressources d'applications-->
     <Application.Resources>
         <ResourceDictionary>
     		<ResourceDictionary.MergedDictionaries>
+                
+                <!-- This is the public resource dictionary.-->
                 <ResourceDictionary Source="/Geowigo;component/ResourceDictionary.xaml"/>
+                
+                <!-- This is the private resource dictionary. It contains the various API keys, and is
+                not disclosed for this reason. Its contents are listed below for reference. -->
+                <!--
+                <Core:String x:Key="BingMapsKey">YOUR API KEY</Core:String>
+                <Core:String x:Key="LiveConnectClientID">YOUR CLIENT ID</Core:String>
+                -->
+                <ResourceDictionary Source="/Geowigo;component/PrivateResourceDictionary.xaml"/>
+                
     		</ResourceDictionary.MergedDictionaries>
     	</ResourceDictionary>
     </Application.Resources>

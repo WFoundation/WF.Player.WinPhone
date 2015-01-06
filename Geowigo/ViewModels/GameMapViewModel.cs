@@ -273,6 +273,23 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+        internal CredentialsProvider GetMapsCredentialsProvider()
+        {
+            try
+            {
+                // Gets the api key from the app's resources.
+                string apiKey = (string)App.Current.Resources["BingMapsKey"];
+
+                // Return the provider.
+                return new ApplicationIdCredentialsProvider(apiKey);
+            }
+            catch (Exception)
+            {
+                // We couldn't retrieve the API key, so there's no credential provider to return.
+                return null;
+            }
+        }
+
 		private void RefreshPlayer()
 		{
 			// Gets the current position of the device.

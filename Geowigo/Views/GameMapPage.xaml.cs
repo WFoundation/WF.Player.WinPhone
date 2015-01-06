@@ -38,6 +38,9 @@ namespace Geowigo.Views
 		{
 			InitializeComponent();
 
+            // Sets the maps API key.
+            MapControl.CredentialsProvider = ViewModel.GetMapsCredentialsProvider();
+
 			MapControl.Mode = new Microsoft.Phone.Controls.Maps.AerialMode(true);
 
 			// Adds event listeners for collection changes in the View Model.
