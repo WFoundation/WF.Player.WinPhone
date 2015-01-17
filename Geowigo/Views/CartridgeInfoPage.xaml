@@ -22,7 +22,7 @@
 		<Geowigo_Converters:ZonePointToGeoCoordinateConverter x:Key="ZonePointToGeoCoordinateConverter"/>
 		<toolkit:DailyDateTimeConverter x:Key="DailyDateTimeConverter"/>
 		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
-        <Geowigo_Converters:FixedHourlyDateTimeConverter x:Key="HourlyDateTimeConverter"/>
+        <Geowigo_Converters:FixedHourlyDateTimeConverter x:Key="FixedHourlyDateTimeConverter"/>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 		<toolkit:FullViewDateTimeConverter x:Key="FullViewDateTimeConverter"/>
@@ -36,7 +36,7 @@
 							<TextBlock d:LayoutOverrides="Width" Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Text="Saved manually." Visibility="{Binding IsAutosave, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 							<TextBlock Foreground="{StaticResource PhoneAccentBrush}" TextTrimming="WordEllipsis" Visibility="{Binding IsAutosave, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" Style="{StaticResource ListItemSubtitleTextStyle}"><Run Text="Saved "/><Run Text="automatically"/><Run Text="."/></TextBlock>
 						</StackPanel>
-						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource HourlyDateTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
+						<TextBlock Foreground="{StaticResource PhoneTextBoxBrush}" TextTrimming="WordEllipsis" Margin="0,-2,0,0" Text="{Binding Timestamp, Converter={StaticResource FixedHourlyDateTimeConverter}}" Style="{StaticResource ListItemSubtitleTextStyle}"/>
 					</StackPanel>
 				</StackPanel>
 			</Grid>

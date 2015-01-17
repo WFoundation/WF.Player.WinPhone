@@ -22,7 +22,24 @@ namespace Geowigo.Converters
                 DateTime fixedValue = ((DateTime)value).ToLocalTime();
 
                 // The conversion should be fine now.
-                return _wrappedConverter.Convert(fixedValue, targetType, parameter, culture);
+                try
+                {
+                    return _wrappedConverter.Convert(fixedValue, targetType, parameter, culture);
+                }
+                catch (NotSupportedException)
+                {
+                    // Despite all precautions, if the conversion still doesn't work, this probably means that 
+                    // the date is still considered to be "in the future". Let's assume it's not too far from the present...
+                    try
+                    {
+                        return _wrappedConverter.Convert(DateTime.Now, targetType, parameter, culture);
+                    }
+                    catch (Exception)
+                    {
+                        // Great despair, and nothing much to be done...
+                        return null;
+                    }
+                }
             }
 
             // Let the wrapper converter handle other values.
