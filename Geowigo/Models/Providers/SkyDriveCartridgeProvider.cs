@@ -41,6 +41,11 @@ namespace Geowigo.Models.Providers
 			public string Name { get; set; }
 
 			public string DownloadDirectory { get; set; }
+
+            public override string ToString()
+            {
+                return String.Format("[{0}, {1}, {2}]", Id, Name, DownloadDirectory);
+            }
 		}
 
 		#endregion
@@ -67,7 +72,7 @@ namespace Geowigo.Models.Providers
 		private string _geowigoFolderId;
 		private string _uploadsFolderId;
 		private IsolatedStorageFileStream _currentUlFileStream;
-		
+
 		#endregion
 
 		#region Properties
@@ -93,6 +98,7 @@ namespace Geowigo.Models.Providers
 					if (_isLinked != value)
 					{
 						_isLinked = value;
+                        Log("IsLinked = " + value);
 						RaisePropertyChanged("IsLinked");
 					}
 				}
@@ -128,6 +134,7 @@ namespace Geowigo.Models.Providers
 					if (_isSyncing != value)
 					{
 						_isSyncing = value;
+                        Log("IsSyncing = " + value);
 						RaisePropertyChanged("IsSyncing");
 					}
 				}
@@ -159,10 +166,21 @@ namespace Geowigo.Models.Providers
 
 		public SkyDriveCartridgeProvider()
 		{
-			// Tries to link the provider but does not start the login
+            // Opens a new log session.
+            DebugUtils.NewLogSession("SkyDrive");
+            
+            // Tries to link the provider but does not start the login
 			// process if no active session has been found.
 			BeginLink(false);
 		}
+
+        private void Log(string message)
+        {
+            // Appends the name of the calling method and logs the line.
+            System.Diagnostics.StackFrame frame = new System.Diagnostics.StackFrame(1);
+            var method = frame.GetMethod();
+            DebugUtils.Log("SkyDrive", method.Name + "(): " + message);
+        }
 
 		private void RaisePropertyChanged(string propName)
 		{
@@ -192,6 +210,7 @@ namespace Geowigo.Models.Providers
 			}
 
 			// The timer should fire once only.
+            Log("Started Timeout timer: " + timeSpan);
 			timer.Change((int)timeSpan.TotalMilliseconds, Timeout.Infinite);
 		}
 
@@ -206,11 +225,15 @@ namespace Geowigo.Models.Providers
 					_requestTimeout = null;
 				}
 			}
+
+            Log("Stopped timeout timer.");
 		}
 
 		private void OnTimeoutTimerTick(object target)
 		{
-			// Cancels the timer.
+            Log("Timeout timer ticked!");
+            
+            // Cancels the timer.
 			CancelTimeoutTimer();
 
 			// We are not syncing anymore.
@@ -233,7 +256,8 @@ namespace Geowigo.Models.Providers
 			// Returns if already linked.
 			if (IsLinked)
 			{
-				return;
+                Log("Already linked, ignored.");
+                return;
 			}
 			
 			// Stores auto-login setting.
@@ -252,6 +276,7 @@ namespace Geowigo.Models.Providers
                 }
                 catch (Exception ex)
                 {
+                    Log("Unable to fetch LiveConnectClientID from App resources.");
                     throw new InvalidOperationException("Unable to fetch LiveConnectClientID from App resources.", ex);
                 }
 
@@ -263,25 +288,29 @@ namespace Geowigo.Models.Providers
 			// Starts initializing.
 			try
 			{
-				_authClient.InitializeAsync(_Scopes);
+                Log("Starts InitializeAsync");
+                _authClient.InitializeAsync(_Scopes);
 			}
 			catch (LiveAuthException ex)
 			{
 				// Ignores but dumps the exception.
+                Log("LiveAuthException: " + ex.Message);
 				Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: false);
 			}
 		}
 
 		private void OnAuthClientInitializeCompleted(object sender, LoginCompletedEventArgs e)
-		{
-			if (e.Status == LiveConnectSessionStatus.Connected)
+		{            
+            if (e.Status == LiveConnectSessionStatus.Connected)
 			{
-				// We're online, get the client.
+                Log("Connected. Moving on with client.");
+
+                // We're online, get the client.
 				MakeClientFromSession(e.Session);
 			}
 			else
 			{
-				// Checks if we need to auto login.
+                // Checks if we need to auto login.
 				bool shouldAutoLogin = false;
 				lock (_syncRoot)
 				{
@@ -291,8 +320,13 @@ namespace Geowigo.Models.Providers
 				// If we need to auto-login, do it.
 				if (shouldAutoLogin)
 				{
-					_authClient.LoginAsync(_Scopes);
-				}
+                    Log("Not connected. Starts LoginAsync (auto-login)");
+                    _authClient.LoginAsync(_Scopes);
+                }
+                else
+                {
+                    Log("Not connected. Auto-login not requested.");
+                }
 			}
 		}
 
@@ -314,13 +348,17 @@ namespace Geowigo.Models.Providers
 			// while the app was not active.
 			_liveClient.AttachPendingTransfers();
 
+            Log("Client init'd.");
+
 			// Notify we're linked.
 			IsLinked = true;
 		}
 
 		private void OnAuthClientLoginCompleted(object sender, LoginCompletedEventArgs e)
 		{
-			if (e.Status == LiveConnectSessionStatus.Connected)
+            Log("Login done. Status = " + e.Status);
+            
+            if (e.Status == LiveConnectSessionStatus.Connected)
 			{
 				// We're online, get the client.
 				MakeClientFromSession(e.Session);
@@ -339,13 +377,15 @@ namespace Geowigo.Models.Providers
 			// Sanity checks.
 			if (!IsLinked)
 			{
-				throw new InvalidOperationException("The SkyDrive provider is not linked.");
+                Log("The SkyDrive provider is not linked.");
+                throw new InvalidOperationException("The SkyDrive provider is not linked.");
 			}
 
 			// Makes sure a pending sync is not in progress.
 			if (IsSyncing)
 			{
-				return;
+                Log("IsSyncing, ignored.");
+                return;
 			}
 			IsSyncing = true;
 
@@ -357,6 +397,7 @@ namespace Geowigo.Models.Providers
 			}
 
 			// Sync Step 1: Ask for the list of files from root folder.
+            Log("Starts GetAsync: me/skydrive/files?filter=folders");
 			_liveClient.GetAsync("me/skydrive/files?filter=folders", "root");
 
 			// Starts the timeout timer.
@@ -365,7 +406,7 @@ namespace Geowigo.Models.Providers
 
 		private void BeginDownloadFile(SkyDriveFile file)
 		{
-			// Adds the file id to the list of currently downloading files.
+            // Adds the file id to the list of currently downloading files.
 			lock (_syncRoot)
 			{
 				_dlFiles.Add(file);
@@ -374,29 +415,34 @@ namespace Geowigo.Models.Providers
 			// The emulator has no support for background download.
 			// Peform a direct download instead.
 			bool shouldDirectDownload = !IsBackgroundDownloadAllowed || Microsoft.Devices.Environment.DeviceType == Microsoft.Devices.DeviceType.Emulator;
-			
+
 			// Starts downloading the cartridge to the isostore.
+            string dlState = GetDownloadUserState(file);
+            Log(file.ToString() + ", directDownload = " + shouldDirectDownload + ", dlState = " + dlState);
 			string fileAttribute = file.Id + "/content";
 			if (shouldDirectDownload)
 			{
 				// Direct download.
-				_liveClient.DownloadAsync(fileAttribute, GetDownloadUserState(file));
+                Log("Starts DownloadAsync");
+				_liveClient.DownloadAsync(fileAttribute, dlState);
 			}
 			else
 			{
 				try
 				{
 					// Tries to perform a background download.
+                    Log("Starts BackgroundDownloadAsync");
 					_liveClient.BackgroundDownloadAsync(
 						fileAttribute,
 						new Uri(GetTempIsoStorePath(file.Name), UriKind.RelativeOrAbsolute),
-						GetDownloadUserState(file)
+                        dlState
 						);
 				}
 				catch (Exception)
 				{
 					// Tries the direct download method.
-					_liveClient.DownloadAsync(fileAttribute, GetDownloadUserState(file));
+                    Log("Starts DownloadAsync (fallback)");
+                    _liveClient.DownloadAsync(fileAttribute, dlState);
 				}
 			}
 			
@@ -406,6 +452,8 @@ namespace Geowigo.Models.Providers
 		{
 			// Sync Step 6. 
 			// The downloading phase of the sync is over, let's continue with uploads.
+
+            Log("Downloads done. Moving on.");
 
 			// Cancels everything if no Geowigo or upload folder was found.
 			if (_geowigoFolderId == null || _uploadsFolderId == null)
@@ -437,19 +485,27 @@ namespace Geowigo.Models.Providers
 				_ulFiles = toUpload;
 			}
 
+            foreach (string item in toUpload)
+            {
+                Log("Scheduled for upload " + item);
+            }
+
 			// Starts uploading the first file. The next ones will be triggered
 			// once it finished uploading.
 			string firstFile = _ulFiles[0];
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
 				_currentUlFileStream = isf.OpenFile(firstFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                Log("Starts UploadAsync");
 				_liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(firstFile), _currentUlFileStream, OverwriteOption.Overwrite, firstFile);
 			}
 		}
 
 		private void EndSync()
 		{
-			CartridgeProviderSyncEventArgs e;
+            Log("Sync ends.");
+            
+            CartridgeProviderSyncEventArgs e;
 
 			// Marks the sync as completed.
 			lock (_syncRoot)
@@ -515,15 +571,22 @@ namespace Geowigo.Models.Providers
 					try
 					{
 						isf.MoveFile(GetTempIsoStorePath(dlFilename), filepath);
+                        Log("Moved file to " + filepath);
 					}
 					catch (Exception ex)
 					{
 						// In case of exception here, do nothing.
 						// An attempt to load the file will be done anyway.
-						Geowigo.Utils.DebugUtils.DumpException(ex, string.Format("dlFilename={0};targetFilename={1}", dlFilename, filepath), true);
+                        string message = string.Format("dlFilename={0};targetFilename={1}", dlFilename, filepath);
+                        Log("Exception: " + ex.Message + " (" + message + ")");
+						Geowigo.Utils.DebugUtils.DumpException(ex, message, true);
 					}
 				}
-			}
+            }
+            else
+            {
+                Log("No result.");
+            }
 
 			PostProcessDownload(filepath, filesLeft);
 		}
@@ -555,7 +618,13 @@ namespace Geowigo.Models.Providers
 						e.Result.CopyTo(fs);
 					}
 				}
-			}
+
+                Log("Created " + filepath);
+            }
+            else
+            {
+                Log("No result.");
+            }
 
 			PostProcessDownload(filepath, filesLeft);
 		}
@@ -584,7 +653,15 @@ namespace Geowigo.Models.Providers
 				List<object> data = (List<object>)e.Result["data"];
 				foreach (IDictionary<string, object> content in data)
 				{
-					// Is it a folder?
+					// Is it a folder.
+                    try
+                    {
+                        Log("Found " + content["type"] + " called " + content["name"]);
+                    }
+                    catch (Exception)
+                    {
+                    }
+
 					if ("folder".Equals(content["type"]))
 					{
 						// Is its name "Geowigo"?
@@ -596,6 +673,7 @@ namespace Geowigo.Models.Providers
 							_geowigoFolderId = (string)content["id"];
 
 							// Asks for the list of files.
+                            Log("Found Geowigo folder. Starts GetAsync.");
 							_liveClient.GetAsync((string)content["id"] + "/files", "geowigo");
 
 							// Starts the timeout timer.
@@ -609,6 +687,7 @@ namespace Geowigo.Models.Providers
 				
 				// If we are here, it means that the Geowigo folder was not found.
 				// The sync ends.
+                Log("No Geowigo folder found in root.");
 				EndSyncDownloads();
 				return;
 			}
@@ -629,16 +708,25 @@ namespace Geowigo.Models.Providers
 					string name = (string)content["name"];
 					string lname = name.ToLower();
 					object type = content["type"];
+                    try
+                    {
+                        Log("Found " + type + " called " + lname);
+                    }
+                    catch (Exception)
+                    {
+                    }
 					if ("file".Equals(type))
 					{
 						if (lname.EndsWith(".gwc"))
 						{
 							// Adds the file to the list of cartridges.
+                            Log("Marked as cartridge to download: " + name);
 							cartFiles.Add(new SkyDriveFile((string)content["id"], name, IsoStoreCartridgesPath));
 						}
 						else if (lname.EndsWith(".gws"))
 						{
 							// Adds the file to the list of extra files.
+                            Log("Marked as extra file to download: " + name);
 							extraFiles.Add(new SkyDriveFile((string)content["id"], name, IsoStoreCartridgeContentPath));
 						}
 					}
@@ -646,6 +734,7 @@ namespace Geowigo.Models.Providers
 					{
 						// We found the uploads folder.
 						// Stores its id.
+                        Log("Found Uploads folder.");
 						_uploadsFolderId = (string)content["id"];
 					}
 				}
@@ -680,6 +769,7 @@ namespace Geowigo.Models.Providers
 					if (isoStoreExtraFiles.Any(s => s.EndsWith("/" + ef.Name, StringComparison.InvariantCultureIgnoreCase)))
 					{
 						// The file needn't be downloaded.
+                        Log("Unmarked download because it exists locally: " + ef);
 						extraFiles.Remove(ef);
 					}
 				} 
@@ -690,6 +780,18 @@ namespace Geowigo.Models.Providers
 					.Where(sd => !isoStoreFiles.Contains(GetIsoStorePath(sd.Name, sd.DownloadDirectory)))
 					.Union(extraFiles)
 					.ToList();
+
+                foreach (SkyDriveFile file in toDlFiles)
+                {
+                    Log("Scheduled to download: " + file);
+                }
+                Log("Total count of scheduled downloads: " + toDlFiles.Count);
+
+                foreach (string fileName in toRemoveFiles)
+                {
+                    Log("Scheduled to remove locally: " + fileName);
+                }
+                Log("Total count of scheduled local removals: " + toRemoveFiles.Count);
 
 				// Bakes an event for when the sync will be over.
 				lock (_syncRoot)
@@ -727,6 +829,8 @@ namespace Geowigo.Models.Providers
 		{
 			// Sync Step 7. An upload has finished or didn't work.
 			// Try to upload the next pending file or finish the whole process.
+
+            Log("Upload completed: " + e.UserState);
 			
 			// Removes the file from the current list of pending uploads.
 			string nextFile = null;
@@ -756,7 +860,8 @@ namespace Geowigo.Models.Providers
 			// Uploads the next file.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
-				_currentUlFileStream = isf.OpenFile(nextFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                Log("Starts UploadAsync.");
+                _currentUlFileStream = isf.OpenFile(nextFile, FileMode.Open, FileAccess.Read, FileShare.Read);
 				_liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(nextFile), _currentUlFileStream, OverwriteOption.Overwrite, nextFile);
 			}
 		}
