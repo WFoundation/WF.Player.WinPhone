@@ -16,6 +16,53 @@ namespace Geowigo.Utils
 {
 	public class ImageUtils
 	{
+        public class ThumbnailOptions
+        {
+            public ThumbnailOptions(IsolatedStorageFile isf, string filename, Media preferred, Media fallback, int minWidth)
+            {
+                IsoStoreFile = isf;
+                Filename = filename;
+                PreferedMedia = preferred;
+                FallbackMedia = fallback;
+                MinWidth = minWidth;
+            }
+
+            public ThumbnailOptions(IsolatedStorageFile isf, string filename, Media preferred, Media fallback, int minWidth, bool blur)
+            {
+                IsoStoreFile = isf;
+                Filename = filename;
+                PreferedMedia = preferred;
+                FallbackMedia = fallback;
+                MinWidth = minWidth;
+                Blur = blur;
+            }
+
+            public ThumbnailOptions(IsolatedStorageFile isf, string filename, Media preferred, Media fallback, int minWidth, bool blur, int heightToCrop)
+            {
+                IsoStoreFile = isf;
+                Filename = filename;
+                PreferedMedia = preferred;
+                FallbackMedia = fallback;
+                MinWidth = minWidth;
+                Blur = blur;
+                CropRectangle = new Rectangle(0, 0, minWidth, heightToCrop);
+            }
+
+            public Media PreferedMedia { get; set; }
+
+            public Media FallbackMedia { get; set; }
+
+            public int MinWidth { get; set; }
+
+            public bool Blur { get; set; }
+
+            public string Filename { get; set; }
+
+            public IsolatedStorageFile IsoStoreFile { get; set; }
+
+            public Rectangle? CropRectangle { get; set; }
+        }
+        
         private static ImageTools.Filtering.GaussianBlur _gaussianBlurFilter;
         
         static ImageUtils()
@@ -135,20 +182,22 @@ namespace Geowigo.Utils
 			return image;
 		}
 
-		public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1, bool blur = false)
+        //public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1, bool blur = false)
+        public static ImageSource SaveThumbnail(ThumbnailOptions options)
 		{
 			// Make sure this method runs in the UI thread.
 			if (!Deployment.Current.Dispatcher.CheckAccess())
 			{
 				return Deployment.Current.Dispatcher.Invoke<ImageSource>(() => 
 				{
-					return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth, blur);
+                    //return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth, blur);
+                    return SaveThumbnail(options);
 				});
 			}
 			
 			// Gets the images.
-			WriteableBitmap preferedImage = GetBitmapSource(prefered);
-            WriteableBitmap fallbackImage = GetBitmapSource(fallback);
+			WriteableBitmap preferedImage = GetBitmapSource(options.PreferedMedia);
+            WriteableBitmap fallbackImage = GetBitmapSource(options.FallbackMedia);
 
 			// Determines which image needs to be saved.
             WriteableBitmap targetImage = preferedImage;
@@ -157,7 +206,7 @@ namespace Geowigo.Utils
 				// Use the fallback image if the prefered image does not exist.
 				targetImage = fallbackImage;
 			}
-			else if (fallbackImage != null && minWidth > -1 && preferedImage.PixelWidth < minWidth && preferedImage.PixelWidth < fallbackImage.PixelWidth)
+            else if (fallbackImage != null && options.MinWidth > -1 && preferedImage.PixelWidth < options.MinWidth && preferedImage.PixelWidth < fallbackImage.PixelWidth)
 			{
 				// Use the fallback image if its width is bigger than the prefered image's width, the latter being
 				// smaller than the min width.
@@ -171,15 +220,16 @@ namespace Geowigo.Utils
 			}
 
 			// Gets the dimensions of the target image.
-			int targetWidth = (int) Math.Max(minWidth, targetImage.PixelWidth);
+			int targetWidth = (int) Math.Max(options.MinWidth, targetImage.PixelWidth);
 			double sourcePixelRatio = targetImage.PixelWidth / (double) targetImage.PixelHeight;
 			int targetHeight = (int) Math.Floor(targetWidth / sourcePixelRatio);
             
             // Blurs the image if needed.
-            if (blur)
+            ExtendedImage targetExtendedImage = null;
+            if (options.Blur)
             {
                 // Converts the image to an ImageTools image.
-                ExtendedImage targetExtendedImage = targetImage.ToImage();
+                targetExtendedImage = targetImage.ToImage();
 
                 // Resizes the image if it can help decreasing the time needed to blur it.
                 // The image is only resized if the target size is less than the original size.
@@ -196,15 +246,47 @@ namespace Geowigo.Utils
                     _gaussianBlurFilter = new ImageTools.Filtering.GaussianBlur() { Variance = 2d };
                 }
                 targetExtendedImage = ExtendedImage.Apply(targetExtendedImage, _gaussianBlurFilter);
+            }
 
-                // Converts the image back to a WP-displayable image.
+            // Crops the image if needed.
+            if (options.CropRectangle.HasValue)
+            {
+                if (targetExtendedImage == null)
+                {
+                    // Converts the image to an ImageTools image.
+                    targetExtendedImage = targetImage.ToImage();
+                }
+
+                // Computes the downscaled crop rectangle.
+                // We're downscaling the crop rectangle instead of upscaling the image and then cropping it,
+                // in order to save some time.
+                // WP will upscale the cropped image later on.
+                int conformedCropWidth = Math.Min(options.CropRectangle.Value.Width, targetWidth);
+                int conformedCropHeight = Math.Min(options.CropRectangle.Value.Height, targetHeight);
+                double scaleFactor = (double)targetExtendedImage.PixelWidth / (double)targetWidth;
+                Rectangle crop = options.CropRectangle.Value;
+                crop.Width = (int)(conformedCropWidth * scaleFactor);
+                crop.Height = (int)(conformedCropHeight * scaleFactor);
+                crop.X = (int)((double)crop.X * scaleFactor);
+                crop.Y = (int)((double)crop.Y * scaleFactor);
+
+                // Crops the image.
+                targetExtendedImage = ExtendedImage.Crop(targetExtendedImage, crop);
+
+                // Stores the final dimensions of the image for later scaling.
+                targetWidth = conformedCropWidth;
+                targetHeight = conformedCropHeight;
+            }
+
+            if (targetExtendedImage != null)
+            {
                 targetImage = targetExtendedImage.ToBitmap();
             }
 
 			// Saves the image.
 			try
 			{
-				using (IsolatedStorageFileStream stream = isoStore.OpenFile(filename, FileMode.Create, FileAccess.ReadWrite))
+				using (IsolatedStorageFileStream stream = options.IsoStoreFile.OpenFile(options.Filename, FileMode.Create, FileAccess.ReadWrite))
 				{
                     targetImage.SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
 				}

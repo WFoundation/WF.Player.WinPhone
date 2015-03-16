@@ -155,7 +155,7 @@
 
     <!--LayoutRoot contient la grille racine où tout le contenu des autres pages est placé-->
     <Grid x:Name="LayoutRoot">
-        <controls:Panorama Title="geowigo">
+        <controls:Panorama Title="geowigo" Background="{Binding BackgroundImageBrush}">
 
             <!--Élément un de panorama-->
 
@@ -170,7 +170,7 @@
             					<Geowigo_Controls:NavigationListBox x:Name="CartridgeProviderList1" ItemTemplate="{StaticResource CartridgeProviderListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore.Providers, Mode=OneWay}" NavigationCommand="{Binding RunProviderActionCommand, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             				</StackPanel>
             			</ScrollViewer>
-            			<Geowigo_Controls:NavigationLongListSelector Height="450" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" ShowListHeader="False" ShowListFooter="False" GroupItemsPanel="{StaticResource CartridgeLongListGroupPanelTemplate}" GroupItemTemplate="{StaticResource CartridgeLongListGroupItemTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}"/>
+            			<Geowigo_Controls:NavigationLongListSelector Height="450" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" ShowListHeader="False" ShowListFooter="False" GroupItemsPanel="{StaticResource CartridgeLongListGroupPanelTemplate}" GroupItemTemplate="{StaticResource CartridgeLongListGroupItemTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" Background="{x:Null}"/>
             		</StackPanel>
             	</Grid>
             </controls:PanoramaItem>

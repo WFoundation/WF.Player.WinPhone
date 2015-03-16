@@ -39,10 +39,13 @@ namespace Geowigo.Models
         public const int SmallThumbnailMinWidth = 32;
 		public const int BigThumbnailMinWidth = 173;
 		public const int PosterMinWidth = 432;
+        public const int PanoramaMinWidth = 1024;
+        public const int PanoramaCropHeight = 800;
 
 		private const string ThumbCacheFilename = "thumb.jpg";
 		private const string PosterCacheFilename = "poster.jpg";
         private const string IconCacheFilename = "icon.jpg";
+        private const string PanoramaCacheFilename = "panorama.jpg";
 
 		#endregion
 
@@ -51,6 +54,7 @@ namespace Geowigo.Models
 		private ImageSource _thumbnail;
 		private ImageSource _poster;
         private ImageSource _icon;
+        private ImageSource _panorama;
 		private Dictionary<int, string> _soundFiles;
         private List<CartridgeSavegame> _savegames;
 
@@ -161,6 +165,27 @@ namespace Geowigo.Models
 			}
 		}
 
+        /// <summary>
+        /// Gets the cached panorama image for the Cartridge.
+        /// </summary>
+        public ImageSource Panorama
+        {
+            get
+            {
+                return _panorama;
+            }
+
+            private set
+            {
+                if (_panorama != value)
+                {
+                    _panorama = value;
+
+                    RaisePropertyChanged("Panorama");
+                }
+            }
+        }
+
 		/// <summary>
 		/// Gets the cached filenames of sounds of this Cartridge.
 		/// </summary>
@@ -238,7 +263,7 @@ namespace Geowigo.Models
 				}
 				else
 				{
-					Thumbnail = ImageUtils.SaveThumbnail(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, BigThumbnailMinWidth);
+					Thumbnail = ImageUtils.SaveThumbnail(new ImageUtils.ThumbnailOptions(isf, thumbCachePath, Cartridge.Icon, Cartridge.Poster, BigThumbnailMinWidth));
 				}
 
                 // Icon
@@ -249,7 +274,7 @@ namespace Geowigo.Models
                 }
                 else
                 {
-                    Icon = ImageUtils.SaveThumbnail(isf, iconCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth);
+                    Icon = ImageUtils.SaveThumbnail(new ImageUtils.ThumbnailOptions(isf, iconCachePath, Cartridge.Icon, Cartridge.Poster, SmallThumbnailMinWidth));
                 }
 
                 // Poster
@@ -260,7 +285,18 @@ namespace Geowigo.Models
                 }
                 else
                 {
-                    Poster = ImageUtils.SaveThumbnail(isf, posterCachePath, Cartridge.Poster, null, PosterMinWidth, true);
+                    Poster = ImageUtils.SaveThumbnail(new ImageUtils.ThumbnailOptions(isf, posterCachePath, Cartridge.Poster, null, PosterMinWidth, true));
+                }
+
+                // Panorama
+                string panoramaCachePath = GetCachePathCore(PanoramaCacheFilename);
+                if (isf.FileExists(panoramaCachePath))
+                {
+                    Panorama = ImageUtils.GetBitmapSource(panoramaCachePath, isf);
+                }
+                else
+                {
+                    Panorama = ImageUtils.SaveThumbnail(new ImageUtils.ThumbnailOptions(isf, panoramaCachePath, Cartridge.Poster, null, PanoramaMinWidth, true, PanoramaCropHeight));
                 }
 
 				// Sounds

@@ -106,6 +106,24 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region BackgroundImageBrush
+
+
+
+        public ImageBrush BackgroundImageBrush
+        {
+            get { return (ImageBrush)GetValue(BackgroundImageBrushProperty); }
+            set { SetValue(BackgroundImageBrushProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for BackgroundImageBrush.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty BackgroundImageBrushProperty =
+            DependencyProperty.Register("BackgroundImageBrush", typeof(ImageBrush), typeof(HomeViewModel), new PropertyMetadata(null));
+
+
+
+        #endregion
+
         #endregion
         
         #region Properties
@@ -301,6 +319,7 @@ namespace Geowigo.ViewModels
 		{
 			// Synchronizes the cartridge store.
             Model.CartridgeStore.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnCartridgeStoreCollectionChanged);
+            Model.CartridgeStore.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnCartridgeStorePropertyChanged);
 			Model.CartridgeStore.SyncFromIsoStore();
 
             // Monitors the history.
@@ -480,6 +499,39 @@ namespace Geowigo.ViewModels
             RefreshAllCartridges();
             
             RefreshVisibilities();
+        }
+
+        private void OnCartridgeStorePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            // Only refresh the background image if there's none right now and the store is not busy.
+            if (e.PropertyName == "IsBusy" && !((CartridgeStore)sender).IsBusy && BackgroundImageBrush == null)
+            {
+                RefreshBackground();
+            }
+        }
+
+        private void RefreshBackground()
+        {
+            // Shows a random cartridge poster as background, or nothing if no cartridge with 
+            // a poster is installed.
+            lock (Model.CartridgeStore.SyncRoot)
+            {
+                IEnumerable<CartridgeTag> posteredCartridges = Model.CartridgeStore.Where(ct => ct.Panorama != null);
+                int cnt = posteredCartridges.Count();
+                if (cnt < 1)
+                {
+                    BackgroundImageBrush = null;
+                }
+                else
+                {                    
+                    BackgroundImageBrush = new ImageBrush() 
+                    {
+                        ImageSource = posteredCartridges.ElementAt(new Random().Next(cnt)).Panorama, 
+                        Stretch = Stretch.UniformToFill,
+                        Opacity = 0.4d
+                    };
+                } 
+            }
         }
 
         private void RefreshAllCartridges()

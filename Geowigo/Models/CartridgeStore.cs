@@ -92,6 +92,17 @@ namespace Geowigo.Models
 			}
 		}
 
+        /// <summary>
+        /// Gets an object that can be used to enumerate this store's content.
+        /// </summary>
+        public object SyncRoot
+        {
+            get
+            {
+                return _syncRoot;
+            }
+        }
+
 		#endregion
 
 		#region Constructors
