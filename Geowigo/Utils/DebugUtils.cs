@@ -12,12 +12,22 @@ using System.IO.IsolatedStorage;
 using System.IO;
 using System.Diagnostics;
 using BugSense;
+using System.Collections.Generic;
+using System.Text;
+using System.Linq;
+using System.Reflection;
 
 namespace Geowigo.Utils
 {
 	public class DebugUtils
 	{
-		#region Dumps
+        #region Fields
+
+        private static Dictionary<string, string> _LogSessions = new Dictionary<string, string>();
+
+        #endregion
+        
+        #region Dumps
 		/// <summary>
 		/// Dumps a message and data to the isolated storage.
 		/// </summary>
@@ -157,6 +167,109 @@ namespace Geowigo.Utils
 		} 
 		#endregion
 
+        #region Logs
+
+        /// <summary>
+        /// Creates a new log session for a particular name.
+        /// </summary>
+        /// <param name="logName"></param>
+        public static void NewLogSession(string logName) 
+        {
+            // Prepares the name of the log file.
+            string logFileName = "/Debug/" + DateTime.UtcNow.ToString("yyyyMMddHHmmssffff") + "_log_" + logName + ".txt";
+
+            // Creates the file.
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Makes sure the directory exists.
+                isf.CreateDirectory("Debug");
+
+                // Creates the file.
+                isf.OpenFile(logFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite).Dispose();
+            }
+
+            // Saves the session filename for later.
+            _LogSessions[logName] = logFileName;
+        }
+
+        /// <summary>
+        /// Logs a message in a previously created log session.
+        /// </summary>
+        /// <param name="logName"></param>
+        /// <param name="message"></param>
+        public static void Log(string logName, string message)
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Opens the log file.
+                string filename = _LogSessions[logName];
+                using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                {
+                    // Appends the message.
+                    using (StreamWriter sw = new StreamWriter(isfs))
+                    {
+                        sw.WriteLine(DateTime.UtcNow.ToString("HH:mm:ss") + " " + message);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Bug Reporting
+
+        /// <summary>
+        /// Compiles all generated debug file into one string.
+        /// </summary>
+        /// <returns></returns>
+        public static string MakeDebugReport(bool includeRawData = false)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Geowigo v" + GetVersion());
+            sb.AppendLine("Report generated on " + DateTime.UtcNow);
+
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                // Enumerates files in /Debug.
+                foreach (string filePath in isf.GetFileNames("/Debug/").Select(s => System.IO.Path.Combine("\\Debug", s)))
+                {
+                    // Got a file.
+                    sb.AppendLine();
+                    sb.AppendLine("===========");
+                    sb.AppendLine(filePath);
+                    if (!includeRawData && filePath.Contains("rawdata"))
+                    {
+                        sb.AppendLine("Ignored in this report.");
+                        continue;
+                    }
+
+                    // Let's output the file.
+                    sb.AppendLine();
+                    try
+                    {
+                        using (IsolatedStorageFileStream isfs = isf.OpenFile(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        {
+                            using (StreamReader sr = new StreamReader(isfs))
+                            {
+                                sb.AppendLine(sr.ReadToEnd());
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        sb.AppendLine("!!! Exception while reading log file: " + ex.Message);
+                    }
+                }
+            }
+
+            sb.AppendLine("===========");
+            sb.AppendLine("End of report.");
+
+            return sb.ToString();
+        }
+
+        #endregion
 
 		#region BugSense Specific
 
@@ -201,5 +314,18 @@ namespace Geowigo.Utils
 			BugSenseHandler.Instance.ClearCrashExtraData();
 		} 
 		#endregion
-	}
+
+        /// <summary>
+        /// Returns the declared version of this app.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetVersion()
+        {
+            return Version.Parse(Assembly.GetExecutingAssembly()
+                        .GetCustomAttributes(false)
+                        .OfType<AssemblyFileVersionAttribute>()
+                        .First()
+                        .Version).ToString();
+        }
+    }
 }
