@@ -276,6 +276,25 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region SendBugReportCommand
+
+        private ICommand _SendBugReportCommand;
+
+        public ICommand SendBugReportCommand
+        {
+            get
+            {
+                if (_SendBugReportCommand == null)
+                {
+                    _SendBugReportCommand = new RelayCommand(SendBugReport);
+                }
+
+                return _SendBugReportCommand;
+            }
+        }
+
+        #endregion
+
 		#endregion
 
 		protected override void InitFromNavigation(NavigationInfo nav)
@@ -429,6 +448,21 @@ namespace Geowigo.ViewModels
 			return Model.Core.IsCompassSupported;
 		}
 
+        private void SendBugReport()
+        {
+            // Bakes the report.
+            string report = DebugUtils.MakeDebugReport();
+
+            // Starts a mail task.
+            EmailComposeTask email = new EmailComposeTask()
+            {
+                To = "contact@cybisoft.net",
+                Subject = "Geowigo Bug Report",
+                Body = report
+            };
+            email.Show();
+        }
+
         #endregion
 
         #region Collection View Sources
@@ -487,6 +521,7 @@ namespace Geowigo.ViewModels
 			ApplicationBar.CreateAndAddMenuItem(ShowDeviceInfoCommand, "device info");
 			ApplicationBar.CreateAndAddMenuItem(CalibrateCompassCommand, "calibrate compass");
 			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
+            ApplicationBar.CreateAndAddMenuItem(SendBugReportCommand, "send bug report");
 		}
     }
 }
