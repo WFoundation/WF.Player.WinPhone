@@ -656,10 +656,13 @@ namespace Geowigo.Models.Providers
 					// Is it a folder.
                     try
                     {
-                        Log("Found " + content["type"] + " called " + content["name"]);
+                        string type = content.ContainsKey("type") ? ((content["type"] as string) ?? "<null>") : "<unknown>";
+                        string name = content.ContainsKey("name") ? ((content["name"] as string) ?? "<null>") : "<unknown>";
+                        Log("Found " + type + " called " + name);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        Log("Exception while logging discovered entry: " + ex.Message);
                     }
 
 					if ("folder".Equals(content["type"]))
