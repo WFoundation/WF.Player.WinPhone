@@ -263,7 +263,7 @@ namespace Geowigo.ViewModels
 			{
 				RefreshZones();
 			}
-			else if (propName == "ActiveVisibleThings")
+			else if (propName == "VisibleThings")
 			{
 				RefreshThings();
 			}
@@ -400,11 +400,11 @@ namespace Geowigo.ViewModels
 			List<Pushpin> things = new List<Pushpin>();
 			
 			// Groups all active things by their location.
-			if (Model.Core.ActiveVisibleThings != null)
+			if (Model.Core.VisibleThings != null)
 			{
 				// Creates a pushpin for each group of non-Zone things that share 
 				// a valid location.
-				IEnumerable<IGrouping<GeoCoordinate, Thing>> thingsByLocation = Model.Core.ActiveVisibleThings
+				IEnumerable<IGrouping<GeoCoordinate, Thing>> thingsByLocation = Model.Core.VisibleThings
 						.Where(t => t.ObjectLocation != null && !(t is Zone))
 						.GroupBy(t => t.ObjectLocation.ToGeoCoordinate());
 

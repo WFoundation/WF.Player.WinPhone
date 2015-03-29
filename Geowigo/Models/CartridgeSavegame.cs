@@ -3,6 +3,7 @@ using WF.Player.Core;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization;
 using System.Windows.Media;
+using System.Linq;
 
 namespace Geowigo.Models
 {
@@ -196,6 +197,37 @@ namespace Geowigo.Models
 
         private string GetDefaultName(CartridgeTag tag)
         {
+            // Gets a context-aware default name:
+            // Proximity to the closest thing.
+            Thing closestThing = App.Current.Model.Core.VisibleThings
+                .OrderBy(t => { if (t.VectorFromPlayer == null) { return -1; } else { return t.VectorFromPlayer.Distance.Value; } })
+                .FirstOrDefault();
+
+            if (closestThing != null)
+            {
+                string proximity = "By";
+
+                if (closestThing is Zone)
+                {
+                    PlayerZoneState state = ((Zone)closestThing).State;
+                    if (state == PlayerZoneState.Inside)
+                    {
+                        proximity = "Inside";
+                    }
+                    else if (state == PlayerZoneState.Proximity)
+                    {
+                        proximity = "Close to";
+                    }
+                }
+                else if (closestThing is Character)
+                {
+                    proximity = "Close to";
+                }
+
+                return String.Format("{0} {1}", proximity, closestThing.Name);
+            }
+
+            // We've had no luck finding a closest thing.
             return String.Format("MySavegame{0}{1}{2}{3}",
                 Timestamp.DayOfYear,
                 Timestamp.Hour,

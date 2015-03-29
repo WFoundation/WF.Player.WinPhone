@@ -91,7 +91,7 @@ namespace Geowigo.Models
 
 		#region Properties
 
-		public List<Thing> ActiveVisibleThings { get; private set; }
+		public List<Thing> VisibleThings { get; private set; }
 
 		public GeoCoordinate DeviceLocation 
 		{
@@ -773,11 +773,11 @@ namespace Geowigo.Models
 		{
 			if (e.PropertyName == "ActiveVisibleZones" || e.PropertyName == "VisibleObjects")
 			{
-				ActiveVisibleThings = new List<Thing>();
-				ActiveVisibleThings.AddRange(ActiveVisibleZones.OfType<Thing>());
-				ActiveVisibleThings.AddRange(VisibleObjects);
+				VisibleThings = new List<Thing>();
+				VisibleThings.AddRange(ActiveVisibleZones.OfType<Thing>());
+				VisibleThings.AddRange(VisibleObjects);
 
-				RaisePropertyChanged("ActiveVisibleThings");
+				RaisePropertyChanged("VisibleThings");
 			}
 			else if (_Compass != null && e.PropertyName == "GameState")
 			{
