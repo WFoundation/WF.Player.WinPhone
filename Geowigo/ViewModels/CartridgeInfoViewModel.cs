@@ -388,10 +388,10 @@ namespace Geowigo.ViewModels
         private void NavigateToStart()
         {
             // Creates a new Bing Maps task.
-            BingMapsDirectionsTask task = new BingMapsDirectionsTask();
-            task.End = new LabeledMapLocation(
-                String.Format("Starting Location for {0}", Cartridge.Name),
-                StartingCoordinate.ToGeoCoordinate());
+            BingMapsTask task = new BingMapsTask();
+            task.Center = StartingCoordinate.ToGeoCoordinate();
+            task.SearchTerm = String.Format("{0}", StartingCoordinate.ToString(WF.Player.Core.GeoCoordinateUnit.DecimalDegrees));
+            task.ZoomLevel = 2;
 
             // Starts the task.
             task.Show();
