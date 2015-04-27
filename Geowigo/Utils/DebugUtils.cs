@@ -316,6 +316,24 @@ namespace Geowigo.Utils
 		#endregion
 
         /// <summary>
+        /// Removes all files from the log and dump cache.
+        /// </summary>
+        public static void ClearCache()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                try
+                {
+                    isf.DeleteDirectory("/Debug");
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns the declared version of this app.
         /// </summary>
         /// <returns></returns>

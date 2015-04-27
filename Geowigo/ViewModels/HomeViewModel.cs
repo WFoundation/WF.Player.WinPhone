@@ -313,6 +313,25 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region ClearCacheCommand
+
+        private ICommand _ClearCacheCommand;
+
+        public ICommand ClearCacheCommand
+        {
+            get
+            {
+                if (_ClearCacheCommand == null)
+                {
+                    _ClearCacheCommand = new RelayCommand(ClearCache);
+                }
+
+                return _ClearCacheCommand;
+            }
+        }
+
+        #endregion
+
 		#endregion
 
 		protected override void InitFromNavigation(NavigationInfo nav)
@@ -482,6 +501,16 @@ namespace Geowigo.ViewModels
             email.Show();
         }
 
+        private void ClearCache()
+        {
+            // Cleans the cache.
+            DebugUtils.ClearCache();
+            Model.CartridgeStore.ClearCache();
+
+            // Rebuilds the cache.
+            Model.CartridgeStore.SyncFromIsoStore();
+        }
+
         #endregion
 
         #region Collection View Sources
@@ -574,6 +603,7 @@ namespace Geowigo.ViewModels
 			ApplicationBar.CreateAndAddMenuItem(CalibrateCompassCommand, "calibrate compass");
 			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
             ApplicationBar.CreateAndAddMenuItem(SendBugReportCommand, "send bug report");
+            ApplicationBar.CreateAndAddMenuItem(ClearCacheCommand, "clear cache");
 		}
     }
 }

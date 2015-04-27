@@ -598,5 +598,31 @@ namespace Geowigo.Models
 				OnPropertyChanged(new PropertyChangedEventArgs("IsBusy"));
 			}
 		}
-	}
+
+        /// <summary>
+        /// Removes cartridge cache entries (not savegames or cartridge files). Loaded cartridge tags
+        /// are unloaded from memory.
+        /// </summary>
+        public void ClearCache()
+        {
+            // Clears the cache.
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                try
+                {
+                    isf.DeleteDirectory(CartridgeTag.GlobalCachePath);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+
+            // Clears this collection.
+            lock (_syncRoot)
+            {
+                this.Items.Clear();
+            }
+        }
+    }
 }
