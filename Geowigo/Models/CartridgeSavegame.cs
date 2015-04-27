@@ -218,13 +218,24 @@ namespace Geowigo.Models
                     {
                         proximity = "Close to";
                     }
+                    else if (state == PlayerZoneState.Distant)
+                    {
+                        proximity = "Away from";
+                    }
+                    else
+                    {
+                        proximity = null;
+                    }
                 }
                 else if (closestThing is Character)
                 {
                     proximity = "Close to";
                 }
 
-                return String.Format("{0} {1}", proximity, closestThing.Name);
+                if (proximity != null)
+                {
+                    return String.Format("{0} {1}", proximity, closestThing.Name); 
+                }
             }
 
             // We've had no luck finding a closest thing.
