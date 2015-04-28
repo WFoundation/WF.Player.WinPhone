@@ -109,7 +109,6 @@ namespace Geowigo.Models
         /// <param name="gwsFilePath">Path to the GWS savegame file.</param>
         /// <param name="isf">Isostore file to use to load.</param>
         /// <returns>The cartridge savegame.</returns>
-        /// 
         public static CartridgeSavegame FromIsoStore(string gwsFilePath, IsolatedStorageFile isf)
         {
             // Checks that the metadata file exists.

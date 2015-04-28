@@ -445,7 +445,7 @@ namespace Geowigo.Models
 				{
 					using (System.IO.Stream fs = cs.CreateOrReplace(isf))
 					{
-						Save(fs);
+						Save(fs, cs.Name);
 					}
 				}
 			}
