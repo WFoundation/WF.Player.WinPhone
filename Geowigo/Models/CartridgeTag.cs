@@ -359,13 +359,30 @@ namespace Geowigo.Models
         {
             // Sanity check: a savegame with similar name should
             // not exist.
-			CartridgeSavegame sameNameCS;
-            if ((sameNameCS = Savegames.SingleOrDefault(c => c.Name == cs.Name)) != null)
+            if (Savegames.Any(c => c.Name == cs.Name))
             {
-				System.Diagnostics.Debug.WriteLine("CartridgeTag: Removing savegame to make room for new one: " + sameNameCS.Name);
+				System.Diagnostics.Debug.WriteLine("CartridgeTag: Renaming new savegame because an old one with same name exists: " + cs.Name);
 				
-				// Removes the previous savegame that bears the same name.
-				RemoveSavegame(sameNameCS);
+				// What's the last savegame following the pattern "name (n)"?
+                int dbl = 0;
+                System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(cs.Name + @" \((\d+)\)");
+                foreach (string name in Savegames.Where(c => c.Name.StartsWith(cs.Name)).Select(c => c.Name))
+                {
+                    foreach (System.Text.RegularExpressions.Match match in r.Matches(name))
+                    {
+                        int i = -1;
+                        if (int.TryParse(match.Groups[1].Value, out i) && i > dbl)
+                        {
+                            dbl = i;
+                        }
+                    }
+                }
+
+                // Renames the savegame.
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    cs.Rename(this, cs.Name + " (" + ++dbl + ")", isf);
+                }
             }
             
             // Makes sure the savegame is exported to the cache.
@@ -475,9 +492,16 @@ namespace Geowigo.Models
                 // For each file, imports its metadata.
                 foreach (string file in gwsFiles)
                 {
+                    string path = PathToSavegames + "/" + file;
                     try
                     {
-                        cSavegames.Add(CartridgeSavegame.FromIsoStore(PathToSavegames + "/" + file, isf));
+                        cSavegames.Add(CartridgeSavegame.FromIsoStore(path, isf));
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        // No associated meta-data or the file does not exist.
+                        // Let the store decide what to do.
+                        App.Current.Model.CartridgeStore.OnUnknownSavegame(path);
                     }
                     catch (Exception ex)
                     {

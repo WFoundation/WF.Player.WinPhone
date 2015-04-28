@@ -405,9 +405,9 @@ namespace Geowigo.Models
 			return newCC;
 		}
 
-		private void AcceptSavegame(string filename)
-		{
-			// Copies this savegame to the content folders of each cartridge
+		private bool AcceptSavegame(string filename)
+		{            
+            // Copies this savegame to the content folders of each cartridge
 			// whose name matches the cartridge name in the savegame metadata.
 
 			System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to accept savegame " + filename);
@@ -437,6 +437,7 @@ namespace Geowigo.Models
 				}
 			}
 
+            bool foundMatch = false;
 			if (!isAborted)
 			{
 				// For each matching tag, creates an associated savegame and copies the file to each
@@ -446,25 +447,45 @@ namespace Geowigo.Models
 				{
 					matches = Items.Where(ct => ct.Title == saveMetadata.CartridgeName).ToList();
 				}
-				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-				{
-					foreach (CartridgeTag tag in matches)
-					{
-						// Creates a savegame.
-						CartridgeSavegame save = new CartridgeSavegame(tag, saveMetadata, System.IO.Path.GetFileName(filename));
+                if (matches.Count > 0)
+                {
+                    using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                    {
+                        foreach (CartridgeTag tag in matches)
+                        {
+                            // Creates a savegame.
+                            CartridgeSavegame save = new CartridgeSavegame(tag, saveMetadata, System.IO.Path.GetFileName(filename));
 
-						// Copies the new file to the right isolated storage.
-						isf.CopyFile(filename, save.SavegameFile);
+                            // Copies the new file to the right isolated storage.
+                            if (filename != save.SavegameFile)
+                            {
+                                isf.CopyFile(filename, save.SavegameFile, true);
+                            }
 
-						// Adds the savegame to its tag.
-						tag.AddSavegame(save);
-					}
-				} 
+                            // Adds the savegame to its tag.
+                            tag.AddSavegame(save);
+
+                            foundMatch = true;
+                        }
+                    }  
+                }
 			}
 
 			// Refreshes the progress.
 			_isBusyAggregator[businessTag] = false;
+
+            return !isAborted && foundMatch;
 		}
+
+        /// <summary>
+        /// Processes an unknown savegame file in the isolated storage.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns>True if the savegame was recognized and added to a tag, false otherwise.</returns>
+        public bool OnUnknownSavegame(string filename)
+        {
+            return AcceptSavegame(filename);
+        }
 
 		#endregion
 

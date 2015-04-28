@@ -156,6 +156,31 @@ namespace Geowigo.Models
         }
 
         /// <summary>
+        /// Changes the name of this savegame.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="name"></param>
+        public void Rename(CartridgeTag tag, string name, IsolatedStorageFile isf)
+        {
+            string oldGwsFile = SavegameFile;
+            string oldMdFile = MetadataFile;
+            
+            // Changes the properties.
+            Name = name;
+            SetFileProperties(tag);
+
+            // Renames the files.
+            if (isf.FileExists(oldGwsFile))
+            {
+                isf.MoveFile(oldGwsFile, SavegameFile);
+            }
+            if (isf.FileExists(oldMdFile))
+            {
+                isf.MoveFile(oldMdFile, MetadataFile);
+            }
+        }
+
+        /// <summary>
         /// Exports the savegame to the isolated storage.
         /// </summary>
         public void ExportToIsoStore()
@@ -198,9 +223,17 @@ namespace Geowigo.Models
         {
             // Gets a context-aware default name:
             // Proximity to the closest thing.
-            Thing closestThing = App.Current.Model.Core.VisibleThings
-                .OrderBy(t => { if (t.VectorFromPlayer == null) { return -1; } else { return t.VectorFromPlayer.Distance.Value; } })
-                .FirstOrDefault();
+            Thing closestThing = null;
+            try
+            {
+               closestThing = App.Current.Model.Core.VisibleThings
+             .OrderBy(t => { if (t.VectorFromPlayer == null) { return -1; } else { return t.VectorFromPlayer.Distance.Value; } })
+             .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+
+            }
 
             if (closestThing != null)
             {
@@ -250,7 +283,7 @@ namespace Geowigo.Models
 			if (saveFilename == null)
 			{
 				string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
-				SavegameFile = String.Format("/{0}/{1}_{2}.gws",
+				SavegameFile = String.Format("{0}/{1}_{2}.gws",
 					tag.PathToSavegames,
 					Name,
 					fname
@@ -258,7 +291,7 @@ namespace Geowigo.Models
 			}
 			else
 			{
-				SavegameFile = String.Format("/{0}/{1}", tag.PathToSavegames, saveFilename);
+				SavegameFile = String.Format("{0}/{1}", tag.PathToSavegames, saveFilename);
 				if (!SavegameFile.EndsWith(".gws", StringComparison.InvariantCultureIgnoreCase))
 				{
 					SavegameFile += ".gws";
