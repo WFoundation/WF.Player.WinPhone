@@ -7,7 +7,25 @@ namespace Geowigo.Utils
 {
 	public static class IsolatedStorageExtensions
 	{
-		public static List<String> GetAllDirectories(this IsolatedStorageFile storeFile, string pattern)
+        public static void DeleteDirectoryRecursive(this IsolatedStorageFile storeFile, string dir)
+        {
+            // Goes in depth.
+            foreach (string innerDir in storeFile.GetDirectoryNames(dir + "/*"))
+            {
+                storeFile.DeleteDirectoryRecursive(Path.Combine(dir, innerDir));
+            }
+
+            // Delete all files in this directory.
+            foreach (string file in storeFile.GetFileNames(dir + "/*"))
+            {
+                storeFile.DeleteFile(Path.Combine(dir, file));
+            }
+
+            // Deletes this directory.
+            storeFile.DeleteDirectory(dir);
+        }
+        
+        public static List<String> GetAllDirectories(this IsolatedStorageFile storeFile, string pattern)
 		{
 			// Get the root of the search string.
 			string root = Path.GetDirectoryName(pattern);

@@ -324,7 +324,7 @@ namespace Geowigo.Utils
             {
                 try
                 {
-                    isf.DeleteDirectory("/Debug");
+                    isf.DeleteDirectoryRecursive("/Debug");
                 }
                 catch (Exception)
                 {

@@ -610,7 +610,7 @@ namespace Geowigo.Models
             {
                 try
                 {
-                    isf.DeleteDirectory(CartridgeTag.GlobalCachePath);
+                    isf.DeleteDirectoryRecursive(CartridgeTag.GlobalCachePath);
                 }
                 catch (Exception)
                 {
