@@ -455,7 +455,7 @@ namespace Geowigo.ViewModels
 		private void SyncProviders()
 		{
 			// Syncs providers that are not synced.
-			Model.CartridgeStore.SyncFromProviders();
+            Model.CartridgeStore.SyncAll();
 		}
 
 		private void ClearHistory()

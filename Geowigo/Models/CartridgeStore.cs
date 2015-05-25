@@ -275,6 +275,12 @@ namespace Geowigo.Models
 
 		#endregion
 
+        public void SyncAll()
+        {
+            SyncFromIsoStore();
+            SyncFromProviders();
+        }
+
 		#region Tag Acceptance
 
 		/// <summary>
