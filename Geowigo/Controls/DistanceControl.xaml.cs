@@ -126,6 +126,26 @@ namespace Geowigo.Controls
 
 		#endregion
 
+        #region WherigoObject
+
+
+        public Thing WherigoObject
+        {
+            get { return (Thing)GetValue(WherigoObjectProperty); }
+            set { SetValue(WherigoObjectProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for WherigoObject.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty WherigoObjectProperty =
+            DependencyProperty.Register("WherigoObject", typeof(Thing), typeof(DistanceControl), new PropertyMetadata(null, OnWherigoObjectChanged));
+
+        private static void OnWherigoObjectChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((DistanceControl)d).OnWherigoObjectChanged(e.NewValue as Thing);
+        }
+
+        #endregion
+
 		#endregion
 
 		#region Members
@@ -172,62 +192,113 @@ namespace Geowigo.Controls
 		{
 			Distance newDistance = e.NewValue as Distance;
 
-			if (newDistance == null)
-			{
-				// Shows the control in a state displaying that the distance is undefined.
-				DistanceText.Text = "Unknown";
-				VisualStateManager.GoToState(this, this.UnknownState.Name, true);
-			}
-			else
-			{
-				// Tries to retrieve the new distance value.
-				// In some rare cases this may fail.
-				double distanceValue = 0;
-				try
-				{
-					distanceValue = newDistance.Value;
-				}
-				catch (InvalidOperationException)
-				{
-					// This probably means that an error occurred while computing
-					// or retrieving the value. Let's display "Unknown" as a distance
-					// text.
-					DistanceText.Text = "Unknown";
-					return;
-				}
-				
-				// Are we inside or outside?
-				if (distanceValue == 0)
-				{
-					DistanceText.Text = "Here";
-					VisualStateManager.GoToState(this, this.InsideState.Name, true);
-				}
-				else
-				{
-					DistanceText.Text = newDistance.BestMeasureAs(DistanceUnit.Meters);
-					VisualStateManager.GoToState(this, this.OutsideState.Name, true);
-				}
-				
-			}
+            RefreshFromDistance(newDistance);
 		}
+
+        private void RefreshFromDistance(Distance newDistance)
+        {
+            if (newDistance == null)
+            {
+                if (WherigoObject == null)
+                {
+                    // Shows the control in a state displaying that the distance is undefined.
+                    DistanceText.Text = "In Range";
+                    VisualStateManager.GoToState(this, this.UnknownState.Name, true);
+                }
+                else
+                {
+                    // Shows some context: the thing's container, if there is one.
+                    if (WherigoObject.Container == null)
+                    {
+                        // No clue, let's just show "In Range".
+                        DistanceText.Text = "In Range";
+                        VisualStateManager.GoToState(this, this.UnknownState.Name, true);
+                    }
+                    else
+                    {
+                        // We have a name.
+                        DistanceText.Text = "By " + WherigoObject.Container.Name;
+                        VisualStateManager.GoToState(this, this.UnknownState.Name, true);
+                    }
+                }
+            }
+            else
+            {
+                // Tries to retrieve the new distance value.
+                // In some rare cases this may fail.
+                double distanceValue = 0;
+                try
+                {
+                    distanceValue = newDistance.Value;
+                }
+                catch (InvalidOperationException)
+                {
+                    // This probably means that an error occurred while computing
+                    // or retrieving the value. Let's display "Unknown" as a distance
+                    // text.
+                    DistanceText.Text = "Unknown";
+                    return;
+                }
+
+                // Are we inside or outside?
+                if (distanceValue == 0)
+                {
+                    DistanceText.Text = "Here";
+                    VisualStateManager.GoToState(this, this.InsideState.Name, true);
+                }
+                else
+                {
+                    DistanceText.Text = newDistance.BestMeasureAs(DistanceUnit.Meters);
+                    VisualStateManager.GoToState(this, this.OutsideState.Name, true);
+                }
+
+            }
+        }
 
 		private void OnVectorChanged(DependencyPropertyChangedEventArgs e)
 		{
 			LocationVector v = (LocationVector)e.NewValue;
-			
-			if (v == null)
-			{
-				// No distance to show.
-				Distance = null;
-				RefreshBearing(bearingFromNorth: 0);
-			}
-			else
-			{
-				// A distance to show!
-				Distance = v.Distance;
-				RefreshBearing(bearingFromNorth: v.Bearing);
-			}
+
+            RefreshFromVector(v);
 		}
+
+        private void RefreshFromVector(LocationVector v)
+        {
+            if (v == null)
+            {
+                // No distance to show.
+                bool distanceChanged = Distance != null;
+                Distance = null;
+                RefreshBearing(bearingFromNorth: 0);
+                if (!distanceChanged)
+                {
+                    RefreshFromDistance(null);
+                }
+            }
+            else
+            {
+                // A distance to show!
+                Distance = v.Distance;
+                RefreshBearing(bearingFromNorth: v.Bearing);
+            }
+        }
+
+        private void OnWherigoObjectChanged(WF.Player.Core.Thing wherigoObject)
+        {
+            // Updates the vector.
+            LocationVector vector = null;
+            if (wherigoObject != null)
+            {
+                vector = wherigoObject.VectorFromPlayer;
+            }
+
+            bool vectorChanged = Vector != vector;
+            Vector = vector;
+            if (!vectorChanged)
+            {
+                RefreshFromVector(vector);
+            }
+        }
 
 		private void RefreshBearing(double? bearingFromNorth = null, double? deviceHeading = null)
 		{

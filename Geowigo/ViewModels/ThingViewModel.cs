@@ -347,7 +347,7 @@ namespace Geowigo.ViewModels
 
 		private void RefreshContainerVisibilities()
 		{
-			IsCompassVisible = WherigoObject.Container != Model.Core.Player;
+			IsCompassVisible = WherigoObject.Container != Model.Core.Player && WherigoObject.VectorFromPlayer != null;
 		}
 
 		#endregion

@@ -59,7 +59,7 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,-13,0,0"/>
                         <TextBlock Text="{Binding Description, FallbackValue=Description, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeMedium}" Foreground="{StaticResource PhoneTextBoxBrush}" MaxHeight="32" TextTrimming="WordEllipsis" Margin="0,-2,0,0"/>
-                        <Geowigo_Controls:DistanceControl Vector="{Binding VectorFromPlayer, Mode=OneWay}" Orientation="Horizontal" TextMargin="4,0,0,0" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyNormal}" Foreground="{StaticResource PhoneAccentBrush}" Height="25" Margin="0,4,0,0"/>
+                        <Geowigo_Controls:DistanceControl WherigoObject="{Binding Mode=OneWay}" Orientation="Horizontal" TextMargin="4,0,0,0" FontSize="{StaticResource PhoneFontSizeMedium}" FontFamily="{StaticResource PhoneFontFamilyNormal}" Foreground="{StaticResource PhoneAccentBrush}" Height="25" Margin="0,4,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </Grid>
