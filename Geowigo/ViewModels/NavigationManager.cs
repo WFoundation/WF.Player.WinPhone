@@ -777,7 +777,7 @@ namespace Geowigo.ViewModels
 			_queue.ExpectNavigation();
 		}
 
-		private void NavigateCore(Uri source, bool cancelIfAlreadyActive = false, bool preferBackNav = false)
+		private void NavigateCore(Uri source, bool cancelIfAlreadyActive = true, bool preferBackNav = false)
 		{
 			_queue.AcceptNavigate(source, cancelIfAlreadyActive, preferBackNav);
 		}
