@@ -185,7 +185,7 @@ namespace Geowigo.Utils
                 isf.CreateDirectory("Debug");
 
                 // Creates the file.
-                isf.OpenFile(logFileName, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.ReadWrite).Dispose();
+                isf.OpenFile(logFileName, FileMode.CreateNew, FileAccess.Write, FileShare.ReadWrite).Dispose();
             }
 
             // Saves the session filename for later.
@@ -199,18 +199,25 @@ namespace Geowigo.Utils
         /// <param name="message"></param>
         public static void Log(string logName, string message)
         {
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            try
             {
-                // Opens the log file.
-                string filename = _LogSessions[logName];
-                using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
                 {
-                    // Appends the message.
-                    using (StreamWriter sw = new StreamWriter(isfs))
+                    // Opens the log file.
+                    string filename = _LogSessions[logName];
+                    using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                     {
-                        sw.WriteLine(DateTime.UtcNow.ToString("HH:mm:ss") + " " + message);
+                        // Appends the message.
+                        using (StreamWriter sw = new StreamWriter(isfs))
+                        {
+                            sw.WriteLine(DateTime.UtcNow.ToString("HH:mm:ss") + " " + message);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error while logging message: " + ex.ToString());
             }
         }
 
@@ -229,38 +236,45 @@ namespace Geowigo.Utils
             sb.AppendLine("Geowigo v" + GetVersion());
             sb.AppendLine("Report generated on " + DateTime.UtcNow);
 
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            try
             {
-                // Enumerates files in /Debug.
-                foreach (string filePath in isf.GetFileNames("/Debug/").Select(s => System.IO.Path.Combine("\\Debug", s)))
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
                 {
-                    // Got a file.
-                    sb.AppendLine();
-                    sb.AppendLine("===========");
-                    sb.AppendLine(filePath);
-                    if (!includeRawData && filePath.Contains("rawdata"))
+                    // Enumerates files in /Debug.
+                    foreach (string filePath in isf.GetFileNames("/Debug/").Select(s => System.IO.Path.Combine("\\Debug", s)))
                     {
-                        sb.AppendLine("Ignored in this report.");
-                        continue;
-                    }
-
-                    // Let's output the file.
-                    sb.AppendLine();
-                    try
-                    {
-                        using (IsolatedStorageFileStream isfs = isf.OpenFile(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                        // Got a file.
+                        sb.AppendLine();
+                        sb.AppendLine("===========");
+                        sb.AppendLine(filePath);
+                        if (!includeRawData && filePath.Contains("rawdata"))
                         {
-                            using (StreamReader sr = new StreamReader(isfs))
+                            sb.AppendLine("Ignored in this report.");
+                            continue;
+                        }
+
+                        // Let's output the file.
+                        sb.AppendLine();
+                        try
+                        {
+                            using (IsolatedStorageFileStream isfs = isf.OpenFile(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                             {
-                                sb.AppendLine(sr.ReadToEnd());
+                                using (StreamReader sr = new StreamReader(isfs))
+                                {
+                                    sb.AppendLine(sr.ReadToEnd());
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        sb.AppendLine("!!! Exception while reading log file: " + ex.Message);
+                        catch (Exception ex)
+                        {
+                            sb.AppendLine("!!! Exception while reading log file: " + ex.Message);
+                        }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                // Nothing to do.
             }
 
             sb.AppendLine("===========");
