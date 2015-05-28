@@ -19,8 +19,11 @@
 	toolkit:TiltEffect.IsTiltEnabled="True" shell:SystemTray.IsVisible="False" ApplicationBar="{Binding ApplicationBar}">
 	<Geowigo_Views:BasePage.Resources>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
-		<toolkit:RelativeTimeConverter x:Key="RelativeTimeConverter"/>
-		<toolkit:ListViewDateTimeConverter x:Key="ListViewDateTimeConverter"/>
+        <Geowigo_Converters:SafeDateTimeConverter x:Key="RelativeTimeConverter">
+            <Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+                <toolkit:RelativeTimeConverter />
+            </Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+        </Geowigo_Converters:SafeDateTimeConverter>
 		<ItemsPanelTemplate x:Key="RecentCartridgesItemPanelTemplate">
 			<toolkit:WrapPanel Orientation="Vertical" d:DesignWidth="285" d:DesignHeight="206"/>
 		</ItemsPanelTemplate>

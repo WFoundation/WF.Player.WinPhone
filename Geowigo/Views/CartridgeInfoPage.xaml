@@ -20,12 +20,19 @@
 	<Geowigo_Views:BasePage.Resources>
 		<Geowigo_Converters:ZonePointToStringConverter x:Key="ZonePointToStringConverter"/>
 		<Geowigo_Converters:ZonePointToGeoCoordinateConverter x:Key="ZonePointToGeoCoordinateConverter"/>
-		<toolkit:DailyDateTimeConverter x:Key="DailyDateTimeConverter"/>
+        <Geowigo_Converters:SafeDateTimeConverter x:Key="FixedDailyDateTimeConverter">
+            <Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+                <toolkit:DailyDateTimeConverter/>
+            </Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+        </Geowigo_Converters:SafeDateTimeConverter>
 		<Geowigo_Converters:LongDateConverter x:Key="LongDateConverter"/>
-        <Geowigo_Converters:FixedHourlyDateTimeConverter x:Key="FixedHourlyDateTimeConverter"/>
+        <Geowigo_Converters:SafeDateTimeConverter x:Key="FixedHourlyDateTimeConverter">
+            <Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+                <toolkit:HourlyDateTimeConverter/>
+            </Geowigo_Converters:SafeDateTimeConverter.WrappedConverter>
+        </Geowigo_Converters:SafeDateTimeConverter>
 		<Geowigo_Converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
 		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
-		<toolkit:FullViewDateTimeConverter x:Key="FullViewDateTimeConverter"/>
 		<DataTemplate x:Key="SavegameListGroupItemInnerTemplate">
 			<Grid d:LayoutOverrides="HorizontalAlignment" Margin="0,0,0,20">
 				<StackPanel Orientation="Horizontal">
@@ -81,7 +88,7 @@
             			</StackPanel>
             			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Cartridge.CreateDate, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}">
             				<TextBlock TextWrapping="Wrap" Text="Created on" Margin="0,0,5,0" Style="{StaticResource ThingDescriptionTextStyle}"/>
-            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.CreateDate, Converter={StaticResource DailyDateTimeConverter}, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
+            				<TextBlock TextWrapping="Wrap" Text="{Binding Cartridge.CreateDate, Converter={StaticResource FixedDailyDateTimeConverter}, Mode=OneWay}" Style="{StaticResource ThingDescriptionTextStyle}"/>
             			</StackPanel>
             			<StackPanel Orientation="Horizontal" Margin="0" Visibility="{Binding Cartridge.Player, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}">
             				<TextBlock TextWrapping="Wrap" Text="Compiled for" Margin="0,0,5,0" Style="{StaticResource ThingDescriptionTextStyle}"/>

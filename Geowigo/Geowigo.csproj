@@ -151,11 +151,12 @@
     </Compile>
     <Compile Include="Controls\AlphaKeyGroup.cs" />
     <Compile Include="Controls\NavigationLongListSelector.cs" />
-    <Compile Include="Converters\FixedHourlyDateTimeConverter.cs" />
+    <Compile Include="Converters\SafeDateTimeConverter.cs" />
     <Compile Include="Converters\LongListSelectorColorConverter.cs" />
     <Compile Include="Converters\ZonePointToGeoCoordinateConverter.cs" />
     <Compile Include="Converters\ZonePointToStringConverter.cs" />
     <Compile Include="Utils\CollectionsExtensions.cs" />
+    <Compile Include="Utils\ConverterExtensions.cs" />
     <Compile Include="Utils\IsolatedStorageExtensions.cs" />
     <Compile Include="Utils\ProgressAggregator.cs" />
     <Compile Include="Utils\WherigoExtensions.cs" />
