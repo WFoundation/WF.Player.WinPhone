@@ -354,7 +354,12 @@ namespace Geowigo.ViewModels
 
 		private void RefreshBounds()
 		{
-			// Gets the current bounds of the engine.
+            if (Model == null || Model.Core == null || Model.Core.Cartridge == null)
+            {
+                return;
+            }
+            
+            // Gets the current bounds of the engine.
 			CoordBounds bounds = Model.Core.Bounds;
 
 			// Are the bounds valid?
