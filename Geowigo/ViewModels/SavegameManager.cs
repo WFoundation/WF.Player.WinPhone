@@ -54,7 +54,14 @@ namespace Geowigo.ViewModels
 			_appViewModel.Model.Core.SaveAsync(cs)
 				.ContinueWith(t =>
 				{
-					// If this is a manual save, shows a message box.
+					// If the savegame failed, display a message.
+                    if (!t.Result)
+                    {
+                        MessageBox.Show("An error occured while preparing the savegame. Please try again.", "Error", MessageBoxButton.OK);
+                        return;
+                    }
+                    
+                    // If this is a manual save, shows a message box.
 					if (!isAutoSave)
 					{
 						// What happens next depends on the result of this message box.

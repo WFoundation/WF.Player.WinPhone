@@ -424,12 +424,12 @@ namespace Geowigo.Models
 		/// </summary>
 		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
 		/// <returns></returns>
-		public System.Threading.Tasks.Task SaveAsync(CartridgeSavegame cs)
+		public System.Threading.Tasks.Task<bool> SaveAsync(CartridgeSavegame cs)
 		{
-			return System.Threading.Tasks.Task.Factory.StartNew(() =>
+			return System.Threading.Tasks.Task.Factory.StartNew<bool>(() =>
 			{
 				WaitForGameState(EngineGameState.Playing);
-				Save(cs);
+                return Save(cs);
 			});
 		} 
 
@@ -437,7 +437,8 @@ namespace Geowigo.Models
 		/// Saves the game to a CartridgeSavegame object.
 		/// </summary>
 		/// <param name="cs">The CartridgeSavegame representing the savegame.</param>
-		public void Save(CartridgeSavegame cs)
+        /// <returns>True if the savegame was a success, false if an error occured.</returns>
+		public bool Save(CartridgeSavegame cs)
 		{
 			try
 			{
@@ -448,14 +449,12 @@ namespace Geowigo.Models
 						Save(fs, cs.Name);
 					}
 				}
+
+                return true;
 			}
 			catch (Exception)
 			{
-				lock (_SyncRoot)
-				{
-					_IsInCrash = true;
-				}
-				throw;
+                return false;
 			}
 		}
 
