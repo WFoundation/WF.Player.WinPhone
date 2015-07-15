@@ -864,8 +864,22 @@ namespace Geowigo.Models.Providers
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
                 Log("Starts UploadAsync.");
-                _currentUlFileStream = isf.OpenFile(nextFile, FileMode.Open, FileAccess.Read, FileShare.Read);
-				_liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(nextFile), _currentUlFileStream, OverwriteOption.Overwrite, nextFile);
+
+                try
+                {
+                    _currentUlFileStream = isf.OpenFile(nextFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+                }
+                catch (Exception ex)
+                {
+                    Log(String.Format("Cannot open file to upload {0}: " + ex.Message, nextFile));
+
+                    // Do this step once again.
+                    OnLiveClientUploadCompleted(sender, e);
+                    return;
+                }
+
+                // Starts the upload if opening the file was a success.
+                _liveClient.UploadAsync(_uploadsFolderId, Path.GetFileName(nextFile), _currentUlFileStream, OverwriteOption.Overwrite, nextFile);
 			}
 		}
 
