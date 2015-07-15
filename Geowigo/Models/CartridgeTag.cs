@@ -204,7 +204,7 @@ namespace Geowigo.Models
         {
             get
             {
-				return _savegames ?? (_savegames = new List<CartridgeSavegame>());
+                return _savegames;
             }
         }
 
@@ -236,8 +236,8 @@ namespace Geowigo.Models
             );
 			PathToLogs = PathToSavegames;
 
-			// Event handlers.
-			//Cartridge.PropertyChanged += new PropertyChangedEventHandler(OnCartridgePropertyChanged);
+            // Lists
+            _savegames = new List<CartridgeSavegame>();
 		}
 
 		#endregion
@@ -497,7 +497,7 @@ namespace Geowigo.Models
                     {
                         cSavegames.Add(CartridgeSavegame.FromIsoStore(path, isf));
                     }
-                    catch (FileNotFoundException ex)
+                    catch (FileNotFoundException)
                     {
                         // No associated meta-data or the file does not exist.
                         // Let the store decide what to do.
@@ -513,7 +513,7 @@ namespace Geowigo.Models
             }
 
             // Sets the savegame list.
-            _savegames = cSavegames;
+            _savegames.AddRange(cSavegames);
             RaisePropertyChanged("Savegames");
         }
 
