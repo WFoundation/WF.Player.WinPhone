@@ -431,10 +431,10 @@ namespace Geowigo.ViewModels
                 if (savegame == null)
                 {
                     // Asks for removing the entry.
-                    if (System.Windows.MessageBox.Show(String.Format("The savegame {0} could not be found, perhaps because it is not installed anymore.\n\nDo you want to remove this history entry?", entry.RelatedSavegameName), "Savegame not found", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+                    if (System.Windows.MessageBox.Show(String.Format("The savegame {0} could not be found, perhaps because it is not installed anymore.\n\nDo you want to remove history entries for this cartridge?", entry.RelatedSavegameName), "Savegame not found", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
                     {
                         // Clears the history of the entries related to this cartridge.
-                        Model.History.Remove(entry);
+                        Model.History.RemoveAllOf(entry.RelatedCartridgeGuid);
                     } 
                 }
                 else
@@ -528,6 +528,8 @@ namespace Geowigo.ViewModels
             RefreshAllCartridges();
             
             RefreshVisibilities();
+
+            RefreshRecentCartridges();
         }
 
         private void OnCartridgeStorePropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -582,7 +584,8 @@ namespace Geowigo.ViewModels
                 .OrderByDescending(he => he.Timestamp)
                 .GroupBy(he => he.RelatedCartridgeFilename)
                 .Take(8)
-                .Select(ig => Model.CartridgeStore.GetCartridgeTagOrDefault(ig.Key));
+                .Select(ig => Model.CartridgeStore.GetCartridgeTagOrDefault(ig.Key))
+                .Where(ct => ct != null);
 
             RecentCartridges = recentCarts.Count() > 0 ? recentCarts : null;
         }
