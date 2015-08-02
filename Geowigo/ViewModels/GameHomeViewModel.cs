@@ -480,7 +480,7 @@ namespace Geowigo.ViewModels
 									// Registers a history entry.
 									Model.History.AddRestoredGame(
                                         CartridgeTag,
-                                        CartridgeTag.Savegames.SingleOrDefault(cs => cs.SavegameFile == gwsFilename));
+                                        CartridgeTag.Savegames.FirstOrDefault(cs => cs.SavegameFile == gwsFilename));
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
