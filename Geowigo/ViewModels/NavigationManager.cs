@@ -551,7 +551,8 @@ namespace Geowigo.ViewModels
 				scope = PageScope.Game;
 			}
 			else if (pageName.StartsWith(prefix + "HomePage.xaml") ||
-				pageName.StartsWith(prefix + "CartridgeInfoPage.xaml"))
+                pageName.StartsWith(prefix + "CartridgeInfoPage.xaml") || 
+                pageName.StartsWith(prefix + "SettingsPage.xaml"))
 			{
 				scope = PageScope.App;
 			}
@@ -704,6 +705,28 @@ namespace Geowigo.ViewModels
 		{
 			NavigateCore(new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}&{2}={3}", CartridgeInfoViewModel.CartridgeFilenameKey, tag.Cartridge.Filename, CartridgeInfoViewModel.CartridgeIdKey, tag.Guid), UriKind.Relative));
 		}
+
+        /// <summary>
+        /// Navigates the app to the settings page.
+        /// </summary>
+        public void NavigateToSettings()
+        {
+            NavigateCore(new Uri("/Views/SettingsPage.xaml", UriKind.Relative));
+        }
+
+        /// <summary>
+        /// Navigates the app to the wizard of linking a provider.
+        /// </summary>
+        public void NavigateToProviderLinkWizard(Models.Providers.ICartridgeProvider provider)
+        {
+            if (provider == null || provider.GetType() != typeof(Models.Providers.SkyDriveCartridgeProvider))
+            {
+                throw new NotSupportedException();
+            }
+            
+            NavigateCore(new Uri(String.Format("/Views/SettingsPage.xaml?{0}={1}&{2}={3}", SettingsViewModel.ProviderServiceNameKey, provider.ServiceName, SettingsViewModel.ProviderWizardKey, Boolean.TrueString), UriKind.Relative));
+        }
+
 
 		/// <summary>
 		/// Navigates the app to the view that best fits an Input object.

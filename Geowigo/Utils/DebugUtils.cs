@@ -21,13 +21,41 @@ namespace Geowigo.Utils
 {
 	public class DebugUtils
 	{
+        
         #region Fields
 
         private static Dictionary<string, string> _LogSessions = new Dictionary<string, string>();
 
         #endregion
-        
+
+        /// <summary>
+        /// Gets how many files are involved in the debug report.
+        /// </summary>
+        public static int ReportFileCount
+        {
+            get
+            {
+                try
+                {
+                    using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                    {
+                        if (!isf.DirectoryExists("/Debug"))
+                        {
+                            return 0;
+                        }
+                        
+                        return isf.GetFileNames("/Debug/").Length;
+                    }
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+        }
+
         #region Dumps
+
 		/// <summary>
 		/// Dumps a message and data to the isolated storage.
 		/// </summary>

@@ -82,6 +82,8 @@ namespace Geowigo.Controls
 		private Func<bool> _CanExecute;
 		private Action _Execute;
 
+        private bool? _LastCanExecuteValue;
+
 		public event EventHandler CanExecuteChanged;
 
 		public RelayCommand(Action execute)
@@ -98,8 +100,22 @@ namespace Geowigo.Controls
 
 		public bool CanExecute(object parameter)
 		{
-			return _CanExecute();
+			bool canExecute = _CanExecute();
+            bool valueChanged = canExecute != _LastCanExecuteValue;
+            _LastCanExecuteValue = canExecute;
+
+            if (valueChanged && CanExecuteChanged != null)
+            {
+                CanExecuteChanged(this, EventArgs.Empty);
+            }
+
+            return canExecute;
 		}
+
+        public void RefreshCanExecute()
+        {
+            CanExecute(null);
+        }
 
 		public void Execute(object parameter)
 		{

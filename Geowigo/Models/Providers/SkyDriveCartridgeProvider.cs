@@ -150,6 +150,52 @@ namespace Geowigo.Models.Providers
 			get;
 			set;
 		}
+
+        /// <summary>
+        /// Gets if this provider is able to download.
+        /// </summary>
+        /// <remarks>The value only makes sense if IsLinked is true and IsSyncing is false.</remarks>
+        public bool CanDownload { get; private set; }
+
+        /// <summary>
+        /// Gets if this provider is able to upload.
+        /// </summary>
+        /// <remarks>The value only makes sense if IsLinked is true and IsSyncing is false.</remarks>
+        public bool CanUpload { get; private set; }
+
+        /// <summary>
+        /// Gets how many cartridges this provider provides.
+        /// </summary>
+        public int CartridgeCount
+        {
+            get
+            {
+                try
+                {
+                    using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                    {
+                        if (!isf.DirectoryExists(IsoStoreCartridgesPath))
+                        {
+                            return 0;
+                        }
+                        
+                        string[] fileNames = isf.GetFileNames(System.IO.Path.Combine(IsoStoreCartridgesPath, "*.gwc"));
+
+                        return fileNames.Length;
+                    }
+                }
+                catch (Exception)
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the name of the owner of the cartridge source.
+        /// </summary>
+        public string OwnerName { get; private set; }
+
 		#endregion
 
 		#region Events
@@ -284,7 +330,7 @@ namespace Geowigo.Models.Providers
 				_authClient.InitializeCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientInitializeCompleted);
 				_authClient.LoginCompleted += new EventHandler<LoginCompletedEventArgs>(OnAuthClientLoginCompleted);
 			}
-
+            
 			// Starts initializing.
 			try
 			{
@@ -369,6 +415,43 @@ namespace Geowigo.Models.Providers
 		}
 
 		#endregion
+
+        #region LiveConnect Unlink/Logout
+
+        public void Unlink()
+        {
+            if (!IsLinked)
+            {
+                Log("The SkyDrive provider is not linked.");
+                throw new InvalidOperationException("The SkyDrive provider is not linked.");
+            }
+
+            _authClient.Logout();
+
+            IsSyncing = false;
+            IsLinked = false;
+
+            _authClient = null;
+
+            if (_liveClient != null)
+            {
+                KillClient(_liveClient);
+                _liveClient = null;
+            }
+        }
+
+        private void KillClient(LiveConnectClient client)
+        {
+            // Removes event handlers.
+            client.DownloadCompleted -= new EventHandler<LiveDownloadCompletedEventArgs>(OnLiveClientDownloadCompleted);
+            client.BackgroundDownloadCompleted -= new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientBackgroundDownloadCompleted);
+            client.GetCompleted -= new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientGetCompleted);
+            client.UploadCompleted -= new EventHandler<LiveOperationCompletedEventArgs>(OnLiveClientUploadCompleted);
+
+            Log("Client dead.");
+        }
+
+        #endregion
 
 		#region LiveConnect Sync
 
@@ -672,8 +755,19 @@ namespace Geowigo.Models.Providers
 						{
 							// Sync Step 3. Asks for the list of files in this folder.
 
+                            // Stores the owner.
+                            try
+                            {
+                                OwnerName = (string)((IDictionary<string, object>)content["from"])["name"];
+                            }
+                            catch (Exception ex2)
+                            {
+                                Log("Cannot find folder owner: " + ex2.Message);
+                            }
+
 							// Stores the folder id.
 							_geowigoFolderId = (string)content["id"];
+                            CanDownload = true;
 
 							// Asks for the list of files.
                             Log("Found Geowigo folder. Starts GetAsync.");
@@ -739,6 +833,7 @@ namespace Geowigo.Models.Providers
 						// Stores its id.
                         Log("Found Uploads folder.");
 						_uploadsFolderId = (string)content["id"];
+                        CanUpload = true;
 					}
 				}
 

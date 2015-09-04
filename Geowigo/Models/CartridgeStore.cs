@@ -103,6 +103,11 @@ namespace Geowigo.Models
             }
         }
 
+        /// <summary>
+        /// Gets or sets if providers should sync when they are successfully linked.
+        /// </summary>
+        public bool AutoSyncProvidersOnLink { get; set; }
+
 		#endregion
 
 		#region Constructors
@@ -590,7 +595,7 @@ namespace Geowigo.Models
 		{
 			ICartridgeProvider provider = (ICartridgeProvider)sender;
 
-			if (e.PropertyName == "IsLinked" && provider.IsLinked)
+            if (AutoSyncProvidersOnLink && e.PropertyName == "IsLinked" && provider.IsLinked)
 			{
 				// The provider is now linked. Start syncing.
 				provider.BeginSync();

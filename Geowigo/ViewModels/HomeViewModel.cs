@@ -222,23 +222,7 @@ namespace Geowigo.ViewModels
 		{
 			get
 			{
-				return _SyncProvidersCommand ?? (_SyncProvidersCommand = new RelayCommand(SyncProviders));
-			}
-		}
-		#endregion
-
-		#region ClearHistoryCommand
-
-		private ICommand _ClearHistoryCommand;
-
-		/// <summary>
-		/// Gets a command to clear the history.
-		/// </summary>
-		public ICommand ClearHistoryCommand
-		{
-			get
-			{
-				return _ClearHistoryCommand ?? (_ClearHistoryCommand = new RelayCommand(ClearHistory));
+				return _SyncProvidersCommand ?? (_SyncProvidersCommand = new RelayCommand(SyncAll));
 			}
 		}
 		#endregion
@@ -259,77 +243,21 @@ namespace Geowigo.ViewModels
 		}
 		#endregion
 
-		#region CalibrateCompassCommand
+        #region ShowSettingsCommand
+        private ICommand _ShowSettingsCommand;
 
-		private ICommand _CalibrateCompassCommand;
-
-		/// <summary>
-		/// Gets a command to start calibrating the compass.
-		/// </summary>
-		public ICommand CalibrateCompassCommand
-		{
-			get
-			{
-				return _CalibrateCompassCommand ?? (_CalibrateCompassCommand = new RelayCommand(CalibrateCompass, CanCalibrateCompassExecute));
-			}
-		}
-		#endregion
-
-		#region ShowDeviceInfoCommand
-
-		private ICommand _ShowDeviceInfoCommand;
-
-		public ICommand ShowDeviceInfoCommand
-		{
-			get
-			{
-				if (_ShowDeviceInfoCommand == null)
-				{
-					_ShowDeviceInfoCommand = new RelayCommand(ShowDeviceInfo);
-				}
-
-				return _ShowDeviceInfoCommand;
-			}
-		}
-
-		#endregion
-
-        #region SendBugReportCommand
-
-        private ICommand _SendBugReportCommand;
-
-        public ICommand SendBugReportCommand
+        public ICommand ShowSettingsCommand
         {
             get
             {
-                if (_SendBugReportCommand == null)
+                if (_ShowSettingsCommand == null)
                 {
-                    _SendBugReportCommand = new RelayCommand(SendBugReport);
+                    _ShowSettingsCommand = new RelayCommand(ShowSettings);
                 }
 
-                return _SendBugReportCommand;
+                return _ShowSettingsCommand;
             }
         }
-
-        #endregion
-
-        #region ClearCacheCommand
-
-        private ICommand _ClearCacheCommand;
-
-        public ICommand ClearCacheCommand
-        {
-            get
-            {
-                if (_ClearCacheCommand == null)
-                {
-                    _ClearCacheCommand = new RelayCommand(ClearCache);
-                }
-
-                return _ClearCacheCommand;
-            }
-        }
-
         #endregion
 
 		#endregion
@@ -339,7 +267,14 @@ namespace Geowigo.ViewModels
 			// Synchronizes the cartridge store.
             Model.CartridgeStore.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnCartridgeStoreCollectionChanged);
             Model.CartridgeStore.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnCartridgeStorePropertyChanged);
-			Model.CartridgeStore.SyncFromIsoStore();
+            if (Model.Settings.SyncOnStartUp)
+            {
+                Model.CartridgeStore.SyncAll();
+            }
+            else
+            {
+                Model.CartridgeStore.SyncFromIsoStore(); 
+            }
 
             // Monitors the history.
             Model.History.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(OnHistoryCollectionChanged);
@@ -355,11 +290,11 @@ namespace Geowigo.ViewModels
         
         #region Menu Commands
 
-		private void ShowDeviceInfo()
-		{
-			// Shows the info!
-			App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
-		}
+        private void ShowSettings()
+        {
+            // Navigates.
+            App.Current.ViewModel.NavigationManager.NavigateToSettings();
+        }
 
         private void ShowCartridgeInfo(CartridgeTag cartTag)
         {
@@ -389,7 +324,7 @@ namespace Geowigo.ViewModels
 			else
 			{
 				// The provider is not linked: try to do it.
-				provider.BeginLink();
+                App.Current.ViewModel.NavigationManager.NavigateToProviderLinkWizard(provider);
 			}
 		}
 
@@ -452,19 +387,10 @@ namespace Geowigo.ViewModels
 
         }
 
-		private void SyncProviders()
+		private void SyncAll()
 		{
 			// Syncs providers that are not synced.
             Model.CartridgeStore.SyncAll();
-		}
-
-		private void ClearHistory()
-		{
-			// Asks for clearing the history.
-			if (System.Windows.MessageBox.Show("Do you want to delete all entries of the history?", "Clear history", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
-			{
-				App.Current.ViewModel.ClearHistory();
-			}
 		}
 
 		private void GoToForumThread()
@@ -474,42 +400,6 @@ namespace Geowigo.ViewModels
 			task.Uri = new Uri("http://forums.groundspeak.com/GC/index.php?showtopic=315741", UriKind.Absolute);
 			task.Show();
 		}
-
-		private void CalibrateCompass()
-		{
-			// Navigates to the right page.
-			App.Current.ViewModel.NavigationManager.NavigateToCompassCalibration();			
-		}
-
-		private bool CanCalibrateCompassExecute()
-		{
-			return Model.Core.IsCompassSupported;
-		}
-
-        private void SendBugReport()
-        {
-            // Bakes the report.
-            string report = DebugUtils.MakeDebugReport();
-
-            // Starts a mail task.
-            EmailComposeTask email = new EmailComposeTask()
-            {
-                To = "contact@cybisoft.net",
-                Subject = "Geowigo Bug Report",
-                Body = report
-            };
-            email.Show();
-        }
-
-        private void ClearCache()
-        {
-            // Cleans the cache.
-            DebugUtils.ClearCache();
-            Model.CartridgeStore.ClearCache();
-
-            // Rebuilds the cache.
-            Model.CartridgeStore.SyncFromIsoStore();
-        }
 
         #endregion
 
@@ -600,13 +490,9 @@ namespace Geowigo.ViewModels
 		private void RefreshAppBar()
 		{
             ApplicationBar = new ApplicationBar() { Mode = ApplicationBarMode.Minimized };
-			ApplicationBar.CreateAndAddMenuItem(ClearHistoryCommand, "clear history");
 			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
-			ApplicationBar.CreateAndAddMenuItem(ShowDeviceInfoCommand, "device info");
-			ApplicationBar.CreateAndAddMenuItem(CalibrateCompassCommand, "calibrate compass");
 			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
-            ApplicationBar.CreateAndAddMenuItem(SendBugReportCommand, "send bug report");
-            ApplicationBar.CreateAndAddMenuItem(ClearCacheCommand, "clear cache");
+            ApplicationBar.CreateAndAddMenuItem(ShowSettingsCommand, "settings");
 		}
     }
 }

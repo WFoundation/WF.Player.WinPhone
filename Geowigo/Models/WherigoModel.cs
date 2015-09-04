@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using WF.Player.Core;
 using System.IO.IsolatedStorage;
 using Geowigo.Utils;
+using System.ComponentModel;
 
 namespace Geowigo.Models
 {
@@ -36,15 +37,26 @@ namespace Geowigo.Models
         /// </summary>
         public History History { get; private set; }
 
+        /// <summary>
+        /// Gets the user settings.
+        /// </summary>
+        public Settings Settings { get; private set; }
+
 		#endregion
 
 		#region Constructors
 
 		public WherigoModel()
 		{
-			Core = new WFCoreAdapter();
+            Settings = new Models.Settings();
+            Settings.PropertyChanged += OnSettingsPropertyChanged;
+            
+            Core = new WFCoreAdapter();
 
-			CartridgeStore = new CartridgeStore();
+            CartridgeStore = new CartridgeStore()
+            {
+                AutoSyncProvidersOnLink = Settings.SyncOnStartUp
+            };
 
             History = Models.History.FromCacheOrCreate();
 		}
@@ -79,5 +91,13 @@ namespace Geowigo.Models
 			// A new Core for X-mas.
 			Core = new WFCoreAdapter();
 		}
+
+        private void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "SyncOnStartUp")
+            {
+                CartridgeStore.AutoSyncProvidersOnLink = Settings.SyncOnStartUp;
+            }
+        }
 	}
 }

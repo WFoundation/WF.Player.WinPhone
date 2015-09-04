@@ -9,6 +9,12 @@ namespace Geowigo.Utils
 	{
         public static void DeleteDirectoryRecursive(this IsolatedStorageFile storeFile, string dir)
         {
+            // Avoids an exception.
+            if (!storeFile.DirectoryExists(dir))
+            {
+                return;
+            }
+            
             // Goes in depth.
             foreach (string innerDir in storeFile.GetDirectoryNames(dir + "/*"))
             {

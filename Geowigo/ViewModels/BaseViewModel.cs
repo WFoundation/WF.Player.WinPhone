@@ -219,7 +219,13 @@ namespace Geowigo.ViewModels
 
 		public BaseViewModel()
 		{
-			// Base ressources construction.
+            if (DesignerProperties.IsInDesignTool)
+            {
+                // Prevents cast exceptions in editors.
+                return;
+            }
+            
+            // Base ressources construction.
 			Model = App.Current.Model;
 			Cartridge = Model.Core.Cartridge;
 
