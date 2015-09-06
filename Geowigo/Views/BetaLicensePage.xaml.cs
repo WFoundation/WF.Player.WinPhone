@@ -20,11 +20,7 @@ namespace Geowigo.Views
 		
 		public BetaLicensePage()
         {
-			VersionText = "Current Version: " + Version.Parse(Assembly.GetExecutingAssembly()
-						.GetCustomAttributes(false)
-						.OfType<AssemblyFileVersionAttribute>()
-						.First()
-						.Version);
+            VersionText = "Current Version: " + App.Current.ViewModel.AppVersion;
 			
 			InitializeComponent();
 

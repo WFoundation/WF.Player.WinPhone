@@ -67,7 +67,7 @@
 							<Button Content="send" HorizontalAlignment="Left" Command="{Binding SendDebugReportCommand, Mode=OneWay}"/>
 							<Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
 						</StackPanel>
-						<TextBlock TextWrapping="Wrap" Text="Geowigo Version: 1.0.23.0" Foreground="{StaticResource PhoneSubtleBrush}"/>
+                        <TextBlock TextWrapping="Wrap" Text="{Binding AppVersion, StringFormat='Geowigo Version: {0}'}" Foreground="{StaticResource PhoneSubtleBrush}"/>
 					</StackPanel>
 				</StackPanel>
 			</ScrollViewer>

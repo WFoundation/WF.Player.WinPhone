@@ -20,6 +20,7 @@ using Microsoft.Phone.Shell;
 using WF.Player.Core.Threading;
 using System.Text;
 using Geowigo.Utils;
+using System.Reflection;
 
 namespace Geowigo.ViewModels
 {	
@@ -112,6 +113,25 @@ namespace Geowigo.ViewModels
 		}
 
 		#endregion
+
+        #region AppVersion
+
+        /// <summary>
+        /// Gets the current version of the app.
+        /// </summary>
+        public string AppVersion
+        {
+            get
+            {
+                return Version.Parse(Assembly.GetExecutingAssembly()
+                        .GetCustomAttributes(false)
+                        .OfType<AssemblyFileVersionAttribute>()
+                        .First()
+                        .Version).ToString();
+            }
+        }
+
+        #endregion
 
 		#region InputManager
 

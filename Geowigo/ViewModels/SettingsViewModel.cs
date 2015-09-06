@@ -16,19 +16,6 @@ namespace Geowigo.ViewModels
     {
         #region DPs
 
-        #region AppTitle
-        /// <summary>
-        /// Gets the application title.
-        /// </summary>
-        public string AppTitle
-        {
-            get
-            {
-                return App.Current.ViewModel.AppTitle;
-            }
-        }
-        #endregion
-
         #region AreAdvancedSettingsDisplayed
 
 
@@ -111,6 +98,20 @@ namespace Geowigo.ViewModels
             DependencyProperty.Register("OneDriveProviderAdvancedStatus", typeof(string), typeof(SettingsViewModel), new PropertyMetadata(null));
 
 
+        #endregion
+
+        #endregion
+
+        #region Properties
+
+        #region AppVersion
+        public string AppVersion
+        {
+            get
+            {
+                return App.Current.ViewModel.AppVersion;
+            }
+        }
         #endregion
 
         #endregion
