@@ -232,6 +232,7 @@ namespace Geowigo.ViewModels
         private BackgroundWorker _clearCacheWorker;
         private bool _isReady;
         private ProgressAggregator _progress;
+        private Models.Settings _appSettings;
 
         #endregion
 
@@ -247,6 +248,8 @@ namespace Geowigo.ViewModels
             
             _clearCacheWorker = new BackgroundWorker();
             _clearCacheWorker.DoWork += ClearCartridgeCacheCore;
+
+            _appSettings = App.Current.Model.Settings;
 
             Model.CartridgeStore.PropertyChanged += OnCartridgeStorePropertyChanged;
         }
@@ -364,11 +367,21 @@ namespace Geowigo.ViewModels
             SkyDriveCartridgeProvider provider = GetSkyDriveProvider();
             if (provider == null)
             {
+                // We're sure the provider is not linked.
+                _appSettings.ProviderLinkedHint = false;
                 IsOneDriveProviderEnabled = false;
+            }
+            else if (provider.IsLinked)
+            {
+                // We know the provider is linked, keep this memory.
+                _appSettings.ProviderLinkedHint = true;
+                IsOneDriveProviderEnabled = true;
             }
             else
             {
-                IsOneDriveProviderEnabled = provider.IsLinked;
+                // We're not sure if the provider is unlinked, or if the internet is just off.
+                // Use previously stored data to figure it out.
+                IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
             }
 
             // Refresh simple status.
@@ -404,12 +417,12 @@ namespace Geowigo.ViewModels
 
                         if (!provider.CanDownload)
                         {
-                            advancedStatus += "Cannot download (folder /Geowigo not found). ";
+                            advancedStatus += "Cannot download (folder /Geowigo not found on your OneDrive). ";
                         }
 
                         if (!provider.CanUpload)
                         {
-                            advancedStatus += "Cannot upload (folder /Geowigo/Uploads not found). ";
+                            advancedStatus += "Cannot upload (folder /Geowigo/Uploads not found on your OneDrive). ";
                         }
                     }
                 }
@@ -417,7 +430,14 @@ namespace Geowigo.ViewModels
                 {
                     // Provider not linked but local content exists.
 
-                    advancedStatus = "Cartridges and savegames are not synchronized with the cloud unless you link your OneDrive account.";
+                    if (_appSettings.ProviderLinkedHint)
+                    {
+                        advancedStatus = "Cartridges and savegames will not be synchronized with the cloud until the device can reach the Internet.";
+                    }
+                    else
+                    {
+                        advancedStatus = "Cartridges and savegames are not synchronized with the cloud unless you link your OneDrive account.";
+                    }
                 }
             }
             OneDriveProviderAdvancedStatus = advancedStatus;
@@ -467,21 +487,31 @@ namespace Geowigo.ViewModels
             }
             
             SkyDriveCartridgeProvider provider = GetSkyDriveProvider();
-            
-            if (!newValue && provider.IsLinked)
+
+            if (!newValue && _appSettings.ProviderLinkedHint)
             {
                 // Coerce value.
                 if (MessageBox.Show("Geowigo will forget the link to your OneDrive account. Cartridges and savegames will be kept and playable until you link to OneDrive again.", "Unlink OneDrive", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
                 {
                     // Unlink.
-                    provider.Unlink();
+                    try
+                    {
+                        provider.Unlink();
+                        _appSettings.ProviderLinkedHint = false;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
+                        _appSettings.ProviderLinkedHint = true;
+                    }
                 }
                 else
                 {
-                    IsOneDriveProviderEnabled = true;
+                    // Restores the previous state.
+                    IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
                 }
             }
-            else if (newValue && !provider.IsLinked)
+            else if (newValue && !_appSettings.ProviderLinkedHint)
             {
                 // Starts linking.
                 RunSkyDriveProviderLinkWizard();
@@ -503,7 +533,8 @@ namespace Geowigo.ViewModels
             }
             else
             {
-                IsOneDriveProviderEnabled = false;
+                // Restores the previous state.
+                IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
             }
         }
 

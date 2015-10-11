@@ -53,6 +53,35 @@ namespace Geowigo.Models
 
         #endregion
 
+        #region ProviderLinkedHint
+
+        private static string ProviderLinkedHintSettingKey = "SkyDrive.LinkHint";
+
+        /// <summary>
+        /// Gets or sets if the provider is known to be linked.
+        /// </summary>
+        public bool ProviderLinkedHint
+        {
+            get
+            {
+                return _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey);
+            }
+
+            set
+            {
+                bool changed = value != _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey);
+
+                _settings.SetValueAndSave(ProviderLinkedHintSettingKey, value);
+
+                if (changed)
+                {
+                    RaisePropertyChanged("ProviderLinkedHint");
+                }
+            }
+        }
+
+        #endregion
+
         #endregion
 
         public Settings()
