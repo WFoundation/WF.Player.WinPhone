@@ -75,10 +75,6 @@
     <Reference Include="ImageTools.Utils">
       <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.Utils.dll</HintPath>
     </Reference>
-    <Reference Include="JeffWilcox.Maps, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\JeffWilcox.Maps.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Devices.Sensors" />
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Live">
@@ -384,6 +380,10 @@
     <ProjectReference Include="..\..\WF.Player.Core\Core\Core.WP7.csproj">
       <Project>{C72F81D8-6D7B-4ABF-888D-714044B60CDA}</Project>
       <Name>Core.WP7</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\wp-maps\src\JeffWilcox.Maps\JeffWilcox.Maps.csproj">
+      <Project>{0769A48C-216A-4E68-A522-E5CB5D40F0FA}</Project>
+      <Name>JeffWilcox.Maps</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

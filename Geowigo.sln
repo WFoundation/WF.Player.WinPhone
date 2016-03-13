@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoClassLibraries-wp7", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KopiLua-wp7", "..\..\NLua\KopiLua\KopiLua\KopiLua-wp7.csproj", "{330E0C63-4160-46E0-BBDA-325185A4AB7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JeffWilcox.Maps", "wp-maps\src\JeffWilcox.Maps\JeffWilcox.Maps.csproj", "{0769A48C-216A-4E68-A522-E5CB5D40F0FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{330E0C63-4160-46E0-BBDA-325185A4AB7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0769A48C-216A-4E68-A522-E5CB5D40F0FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,3 @@
+[submodule "wp-maps"]
+	path = wp-maps
+	url = git://github.com/jeffwilcox/wp-maps
