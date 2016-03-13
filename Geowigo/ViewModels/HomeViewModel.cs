@@ -286,6 +286,42 @@ namespace Geowigo.ViewModels
 
 			// Inits the app bar.
 			RefreshAppBar();
+
+            // Shows a warning message box about the version being obsolete.
+            if (!Model.Settings.IgnoreObsoleteVersionWarning)
+            {
+                // Makes a message box.
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                sb.AppendLine("This is the last version of Geowigo which supports Windows Phone 7.5 and 8.0.\n");
+                sb.AppendLine("Despite being fully able to run Wherigo 1.0 cartridges, the app does not support some of the features one would expect from a modern Wherigo app, such as offline maps...\n");
+                sb.AppendLine("If you can see this message, consider upgrading to Windows Phone 8.1 or later, or if you are already using a modern phone, make sure that Geowigo is up-to-date.\n");
+                sb.AppendLine("Thank you, and have fun.\nMangatome, for the Wherigo Foundation.");
+                CheckBox cb = new CheckBox()
+                {
+                    Content = "Never show this message again",
+                    IsChecked = false
+                };
+                CustomMessageBox cmb = new CustomMessageBox()
+                {
+                    Caption = "Compatibility Warning",
+                    IsFullScreen = true,
+                    Message = sb.ToString(),
+                    Content = cb,
+                    LeftButtonContent = "OK"
+                };
+
+                // Prepares an event handler for when the message box will be dismissed.
+                cmb.Dismissing += (o, e) =>
+                {
+                    this.ApplicationBar.IsVisible = true;
+
+                    Model.Settings.IgnoreObsoleteVersionWarning = cb.IsChecked.GetValueOrDefault();
+                };
+                
+                // Shows the message box.
+                this.ApplicationBar.IsVisible = false;
+                App.Current.ViewModel.MessageBoxManager.AcceptAndShow(cmb);
+            }
 		}
         
         #region Menu Commands

@@ -82,6 +82,35 @@ namespace Geowigo.Models
 
         #endregion
 
+        #region IgnoreObsoleteVersionWarning
+
+        private static string IgnoreObsoleteVersionWarningSettingKey = "IgnoreObsoleteVersionWarning";
+
+        /// <summary>
+        /// Gets or sets if a warning about the app version being obsolete should be displayed.
+        /// </summary>
+        public bool IgnoreObsoleteVersionWarning
+        {
+            get
+            {
+                return _settings.GetValueOrDefault<bool>(IgnoreObsoleteVersionWarningSettingKey);
+            }
+
+            set
+            {
+                bool changed = value != _settings.GetValueOrDefault<bool>(IgnoreObsoleteVersionWarningSettingKey);
+
+                _settings.SetValueAndSave(IgnoreObsoleteVersionWarningSettingKey, value);
+
+                if (changed)
+                {
+                    RaisePropertyChanged("IgnoreObsoleteVersionWarning");
+                }
+            }
+        }
+
+        #endregion
+
         #endregion
 
         public Settings()
