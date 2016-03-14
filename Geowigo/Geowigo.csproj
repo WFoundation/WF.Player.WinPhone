@@ -163,9 +163,6 @@
     <Compile Include="ViewModels\PlayerViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SystemTrayManager.cs" />
-    <Compile Include="Views\BetaLicensePage.xaml.cs">
-      <DependentUpon>BetaLicensePage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\BlockingContentPresenter.xaml.cs">
       <DependentUpon>BlockingContentPresenter.xaml</DependentUpon>
     </Compile>
@@ -261,10 +258,6 @@
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-    <ApplicationDefinition Include="Views\BetaLicensePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Controls\BlockingContentPresenter.xaml">
       <SubType>Designer</SubType>
