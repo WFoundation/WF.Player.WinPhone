@@ -719,7 +719,7 @@ namespace Geowigo.ViewModels
         /// </summary>
         public void NavigateToProviderLinkWizard(Models.Providers.ICartridgeProvider provider)
         {
-            if (provider == null || provider.GetType() != typeof(Models.Providers.SkyDriveCartridgeProvider))
+            if (provider == null || provider.GetType() != typeof(Models.Providers.OneDriveCartridgeProvider))
             {
                 throw new NotSupportedException();
             }

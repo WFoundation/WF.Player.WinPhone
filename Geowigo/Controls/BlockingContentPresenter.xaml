@@ -27,7 +27,7 @@
     	<Grid Background="{StaticResource PhoneSemitransparentBrush}" Visibility="{Binding IsProgressBarVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}">
     		<StackPanel VerticalAlignment="Center">
     			<TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" Text="{Binding ProgressBarStatusText}"/>
-    			<toolkit:PerformanceProgressBar IsIndeterminate="{Binding IsProgressBarVisible}" Margin="0,5,0,0"/>
+                <ProgressBar Background="{x:Null}" IsIndeterminate="{Binding IsProgressBarVisible}" Margin="0,5,0,0"/>
     		</StackPanel>
     	</Grid>
     </Grid>

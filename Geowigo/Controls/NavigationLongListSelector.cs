@@ -31,36 +31,16 @@ namespace Geowigo.Controls
 		
 		#endregion
 		
-		#region Fields
-		
-		private bool _isManipulating = false; 
-		
-		#endregion
-
         public NavigationLongListSelector()
 		{
 			// Defines event handlers.
 			SelectionChanged += new SelectionChangedEventHandler(OnSelectionChanged);
 		}
 
-		protected override void OnManipulationStarted(ManipulationStartedEventArgs e)
-		{
-			_isManipulating = true;
-
-			base.OnManipulationStarted(e);
-		}
-
-		protected override void OnManipulationCompleted(ManipulationCompletedEventArgs e)
-		{			
-			base.OnManipulationCompleted(e);
-
-			_isManipulating = false;
-		}
-
 		private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			// Avoid entering an infinite loop
-			if (e.AddedItems.Count == 0)
+			// Avoid entering an infinite loop.
+			if (e.AddedItems.Count == 0 || e.AddedItems[0] == null)
 			{
 				return;
 			}
@@ -68,13 +48,8 @@ namespace Geowigo.Controls
             LongListSelector lb = (LongListSelector)sender;
 
 			// Navigates to the details of the first selected item.
-			if (NavigationCommand != null && _isManipulating)
+			if (NavigationCommand != null)
 			{
-                // Considers that the manipulation is over, so that
-                // if the selected item changes during the execution of the
-                // navigation command, the command does not run again.
-                _isManipulating = false;
-                
                 // Gets the first selected item.
                 object target = e.AddedItems.OfType<object>().FirstOrDefault();
 				
@@ -84,9 +59,6 @@ namespace Geowigo.Controls
 					NavigationCommand.Execute(target);
 				} 
 			}
-
-            // The navigation cannot possibly be still happening.
-            _isManipulating = false;
 
 			// Clears the listbox selection.
 			((LongListSelector)sender).SelectedItem = null;

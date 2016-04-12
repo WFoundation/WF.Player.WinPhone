@@ -121,24 +121,29 @@
 				<TextBlock TextWrapping="Wrap" Text="{Binding Title, FallbackValue=&lt;Untitled&gt;}" FontFamily="{StaticResource PhoneFontFamilySemiLight}" FontSize="{StaticResource PhoneFontSizeExtraLarge}"/>
 			</StackPanel>
 		</DataTemplate>
-		<DataTemplate x:Key="CartridgeLongListGroupHeaderTemplate">
-			<Border Background="Transparent" Padding="5">
-			  <Border Background="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2" Width="62" 
+        <DataTemplate x:Key="CartridgeLongListGroupHeaderTemplate">
+            <Border Background="Transparent" Padding="5">
+                <Border Background="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneAccentBrush}" BorderThickness="2" Width="62" 
 				 Height="62" Margin="0,0,18,0" HorizontalAlignment="Left">
-				 <TextBlock Text="{Binding Mode=OneWay}" Foreground="{StaticResource PhoneForegroundBrush}" FontSize="48" Padding="6" 
+                    <TextBlock Text="{Binding Mode=OneWay}" Foreground="{StaticResource PhoneForegroundBrush}" FontSize="48" Padding="6" 
 					FontFamily="{StaticResource PhoneFontFamilySemiLight}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-			  </Border>
-			</Border>
-		</DataTemplate>
-		<ItemsPanelTemplate x:Key="CartridgeLongListGroupPanelTemplate">
-			<toolkit:WrapPanel/>
-		</ItemsPanelTemplate>
-		<DataTemplate x:Key="CartridgeLongListGroupItemTemplate">
-            <Border Width="96" Height="96" Margin="6" Background="{Binding Converter={StaticResource LongListSelectorBackgroundColorConverter}, Mode=OneWay}" >
-                <TextBlock Text="{Binding Key}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="48" Padding="6" VerticalAlignment="Bottom" Foreground="{Binding Converter={StaticResource LongListSelectorForegroundColorConverter}, Mode=OneWay}" HorizontalAlignment="Left"/>
+                </Border>
             </Border>
-		</DataTemplate>
-	</Geowigo_Views:BasePage.Resources>
+        </DataTemplate>
+        <Style x:Key="CartridgeLongListJumpListStyle" TargetType="phone:LongListSelector">
+            <Setter Property="GridCellSize"  Value="113,113"/>
+            <Setter Property="LayoutMode" Value="Grid" />
+            <Setter Property="ItemTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Border Background="{Binding Converter={StaticResource LongListSelectorBackgroundColorConverter}, Mode=OneWay}" Width="113" Height="113" Margin="6" >
+                            <TextBlock Text="{Binding Key}" FontFamily="{StaticResource PhoneFontFamilySemiBold}" FontSize="48" Padding="6" Foreground="{Binding Converter={StaticResource LongListSelectorForegroundColorConverter}, Mode=OneWay}" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+                        </Border>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Geowigo_Views:BasePage.Resources>
 
 	<phone:PhoneApplicationPage.FontFamily>
 		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
@@ -165,7 +170,7 @@
             <!--Élément deux de panorama-->
             <controls:PanoramaItem x:Name="AllCartridgesPanoramaItem" Header="all">
             	<Grid>
-            		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
+            		<ProgressBar Background="{x:Null}" VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
             		<StackPanel Margin="0,8,0,0" Orientation="Vertical" d:LayoutOverrides="Height">
             			<ScrollViewer x:Name="NoCartridgePanel" Width="420" Visibility="{Binding AreCartridgesVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Height="490">
             				<StackPanel Orientation="Vertical">
@@ -173,7 +178,7 @@
             					<Geowigo_Controls:NavigationListBox x:Name="CartridgeProviderList1" ItemTemplate="{StaticResource CartridgeProviderListItemTemplate}" ItemsSource="{Binding Model.CartridgeStore.Providers, Mode=OneWay}" NavigationCommand="{Binding RunProviderActionCommand, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
             				</StackPanel>
             			</ScrollViewer>
-            			<Geowigo_Controls:NavigationLongListSelector Height="450" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" ShowListHeader="False" ShowListFooter="False" GroupItemsPanel="{StaticResource CartridgeLongListGroupPanelTemplate}" GroupItemTemplate="{StaticResource CartridgeLongListGroupItemTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" Background="{x:Null}"/>
+                        <Geowigo_Controls:NavigationLongListSelector Height="450" ItemsSource="{Binding AlphaGroupedCartridges}" ItemTemplate="{StaticResource CartridgeLongListItemTemplate}" GroupHeaderTemplate="{StaticResource CartridgeLongListGroupHeaderTemplate}" JumpListStyle="{StaticResource CartridgeLongListJumpListStyle}" IsGroupingEnabled="True" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" Background="{x:Null}" HideEmptyGroups="True"/>
             		</StackPanel>
             	</Grid>
             </controls:PanoramaItem>
@@ -194,7 +199,7 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem x:Name="RecentPanoramaItem" Header="recent" Orientation="Horizontal" Visibility="{Binding IsRecentVisible, Converter={StaticResource ObjectToVisibilityConverter}, TargetNullValue=Collapsed}">
             	<Grid>
-            		<toolkit:PerformanceProgressBar VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
+                    <ProgressBar Background="{x:Null}" VerticalAlignment="Top" IsIndeterminate="{Binding Model.CartridgeStore.IsBusy}"/>
             		<StackPanel Margin="0,8,0,0" Orientation="Vertical" d:LayoutOverrides="Height">
             			<Geowigo_Controls:NavigationListBox x:Name="CartridgesListBox" ItemsPanel="{StaticResource RecentCartridgesItemPanelTemplate}" NavigationCommand="{Binding ShowCartridgeInfoCommand, Mode=OneWay}" ItemTemplate="{StaticResource RecentCartridgeListItemTemplate}" Height="450" ScrollViewer.VerticalScrollBarVisibility="Disabled" ItemsSource="{Binding RecentCartridges}"/>
             		</StackPanel>

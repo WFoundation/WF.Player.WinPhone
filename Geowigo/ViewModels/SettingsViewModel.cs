@@ -356,15 +356,15 @@ namespace Geowigo.ViewModels
             RefreshSkyDrive();
         }
 
-        private SkyDriveCartridgeProvider GetSkyDriveProvider()
+        private OneDriveCartridgeProvider GetSkyDriveProvider()
         {
-            return Model.CartridgeStore.Providers.OfType<SkyDriveCartridgeProvider>().FirstOrDefault();
+            return Model.CartridgeStore.Providers.OfType<OneDriveCartridgeProvider>().FirstOrDefault();
         }
 
         private void RefreshSkyDrive()
         {
             // Refresh provider info.
-            SkyDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
             if (provider == null)
             {
                 // We're sure the provider is not linked.
@@ -486,7 +486,7 @@ namespace Geowigo.ViewModels
                 return;
             }
             
-            SkyDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
 
             if (!newValue && _appSettings.ProviderLinkedHint)
             {
@@ -522,7 +522,7 @@ namespace Geowigo.ViewModels
 
         private void RunSkyDriveProviderLinkWizard()
         {
-            SkyDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
             
             // Coerce value.
             if (provider.CartridgeCount == 0 ||
