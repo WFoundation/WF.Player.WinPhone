@@ -8,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using Microsoft.Phone.Controls.Maps;
 using System.Collections.Generic;
 using WF.Player.Core;
 using System.Collections.ObjectModel;
@@ -18,22 +17,24 @@ using System.ComponentModel;
 using System.Device.Location;
 using System.Linq;
 using Geowigo.Controls;
+using Microsoft.Phone.Maps.Controls;
+using Microsoft.Phone.Maps.Toolkit;
 
 namespace Geowigo.ViewModels
 {
-	public class GameMapViewModel : BaseViewModel, INotifyPropertyChanged
+	public class GameMapViewModel : BaseViewModel //, INotifyPropertyChanged
 	{
 		#region Nested Classes
 
 		public class MapViewRequestedEventArgs : EventArgs
 		{
-			public LocationRect TargetBounds { get; private set; }
+			public LocationRectangle TargetBounds { get; private set; }
 
 			public GeoCoordinate TargetCenter { get; private set; }
 
 			public double TargetZoomLevel { get; private set; }
 
-			public MapViewRequestedEventArgs(LocationRect locRect)
+            public MapViewRequestedEventArgs(LocationRectangle locRect)
 			{
 				TargetBounds = locRect;
 			}
@@ -45,135 +46,99 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+        public class ZoneData
+        {
+            public GeoCoordinateCollection Points { get; private set; }
+
+            public string Name { get; private set; }
+
+            public GeoCoordinate NameAnchor { get; private set; }
+
+            public ZoneData(GeoCoordinateCollection points, GeoCoordinate anchor, string name)
+            {
+                Points = points;
+                NameAnchor = anchor;
+                Name = name;
+            }
+            
+        }
+
 		#endregion
+
+        #region Dependency Properties
+
+        #region PlayerLocation
+
+
+        public GeoCoordinate PlayerLocation
+        {
+            get { return (GeoCoordinate)GetValue(PlayerLocationProperty); }
+            set { SetValue(PlayerLocationProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for PlayerLocation.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty PlayerLocationProperty =
+            DependencyProperty.Register("PlayerLocation", typeof(GeoCoordinate), typeof(GameMapViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
+        #endregion
 
 		#region Properties
 
-		#region ZonePolygons
-		private IEnumerable<MapPolygon> _ZonePolygons;
-		public IEnumerable<MapPolygon> ZonePolygons
-		{
-			get
-			{
-				if (_ZonePolygons == null)
-				{
-					_ZonePolygons = new List<MapPolygon>();
-				}
+        #region Zones
+        private ObservableCollection<ZoneData> _Zones;
+        public ObservableCollection<ZoneData> Zones
+        {
+            get
+            {
+                if (_Zones == null)
+                {
+                    _Zones = new ObservableCollection<ZoneData>();
+                }
 
-				return _ZonePolygons;
-			}
+                return _Zones;
+            }
+        }
+        #endregion
 
-			private set
-			{
-				if (value != _ZonePolygons)
-				{
-					_ZonePolygons = value;
+        #region ThingGroups
+        private ObservableCollection<IGrouping<GeoCoordinate, Thing>> _ThingGroups;
+        public ObservableCollection<IGrouping<GeoCoordinate, Thing>> ThingGroups
+        {
+            get
+            {
+                if (_ThingGroups == null)
+                {
+                    _ThingGroups = new ObservableCollection<IGrouping<GeoCoordinate, Thing>>();
+                }
 
-					RaisePropertyChanged("ZonePolygons");
-				}
-			}
-		} 
-		#endregion
+                return _ThingGroups;
+            }
+        }
+        #endregion
 
-		#region ZoneLabels
+        #region PlayerAccuracyArea
+        private GeoCoordinateCollection _PlayerAccuracyArea;
+        public GeoCoordinateCollection PlayerAccuracyArea
+        {
+            get
+            {
+                return _PlayerAccuracyArea;
+            }
 
-		private IEnumerable<Pushpin> _ZoneLabels;
-		public IEnumerable<Pushpin> ZoneLabels
-		{
-			get
-			{
-				if (_ZoneLabels == null)
-				{
-					_ZoneLabels = new List<Pushpin>();
-				}
+            private set
+            {
+                if (_PlayerAccuracyArea != value)
+                {
+                    _PlayerAccuracyArea = value;
 
-				return _ZoneLabels;
-			}
-
-			private set
-			{
-				if (value != _ZoneLabels)
-				{
-					_ZoneLabels = value;
-
-					RaisePropertyChanged("ZoneLabels");
-				}
-			}
-		} 
-
-		#endregion
-
-		#region PlayerPushpin
-
-		private Pushpin _PlayerPushpin;
-		public Pushpin PlayerPushpin
-		{
-			get
-			{
-				return _PlayerPushpin;
-			}
-
-			private set
-			{
-				if (value != _PlayerPushpin)
-				{
-					_PlayerPushpin = value;
-
-					RaisePropertyChanged("PlayerPushpin");
-				}
-			}
-		}
-
-		#endregion
-
-		#region PlayerAccuracyPolygon
-
-		private MapPolygon _PlayerAccuracyPolygon;
-		public MapPolygon PlayerAccuracyPolygon
-		{
-			get
-			{
-				return _PlayerAccuracyPolygon;
-			}
-
-			private set
-			{
-				if (value != _PlayerAccuracyPolygon)
-				{
-					_PlayerAccuracyPolygon = value;
-
-					RaisePropertyChanged("PlayerAccuracyPolygon");
-				}
-			}
-		}
-
-		#endregion
-
-		#region ThingsPushpins
-		private IEnumerable<Pushpin> _ThingPushpins;
-		public IEnumerable<Pushpin> ThingPushpins
-		{
-			get
-			{
-				if (_ThingPushpins == null)
-				{
-					_ThingPushpins = new List<Pushpin>();
-				}
-
-				return _ThingPushpins;
-			}
-
-			private set
-			{
-				if (value != _ThingPushpins)
-				{
-					_ThingPushpins = value;
-
-					RaisePropertyChanged("ThingPushpins");
-				}
-			}
-		} 
-		#endregion
+                    RaisePropertyChanged("PlayerAccuracyArea");
+                }
+            }
+        }
+        #endregion
 
 		#endregion
 
@@ -198,7 +163,7 @@ namespace Geowigo.ViewModels
 
 		#region Events
 
-		public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
 		public event EventHandler<MapViewRequestedEventArgs> MapViewRequested;
 
@@ -216,33 +181,36 @@ namespace Geowigo.ViewModels
 
 		#region Fields
 
-		private Brush _polygonFillBrush;
-		private Brush _polygonStrokeBrush;
-		private Brush _playerPolygonFillBrush;
-		private Brush _playerPolygonStrokeBrush;
-		private DataTemplate _thingPushpinContentTemplate;
-		private DataTemplate _landmarkPushpinContentTemplate;
-		private ControlTemplate _noBorderButtonTemplate;
 		private WF.Player.Core.Utils.GeoMathHelper _geoMathHelper;
 
 		#endregion
 
 		public GameMapViewModel()
 		{
-			// Inits the brushes.
-			_polygonFillBrush = new SolidColorBrush(Colors.Cyan) { Opacity = 0.25 };
-			_polygonStrokeBrush = new SolidColorBrush(Colors.White);
-			_playerPolygonFillBrush = new SolidColorBrush(Colors.White) { Opacity = 0.25 };
-			_playerPolygonStrokeBrush = new SolidColorBrush(Colors.Black);
-
-			// Inits the templates.
-			_thingPushpinContentTemplate = (DataTemplate)App.Current.Resources["WherigoThingPushpinContentTemplate"];
-			_landmarkPushpinContentTemplate = (DataTemplate)App.Current.Resources["LandmarkPushpinContentTemplate"];
-			_noBorderButtonTemplate = (ControlTemplate)App.Current.Resources["NoBorderButtonTemplate"];
-
 			// Inits resources.
 			_geoMathHelper = new WF.Player.Core.Utils.GeoMathHelper();
 		}
+
+        internal void SetMapsCredentials(Microsoft.Phone.Maps.MapsApplicationContext ctx)
+        {
+            if (ctx == null)
+	        {
+                return;
+	        }
+            
+            try
+            {
+                // Gets the two keys from the app's resources.
+                ctx.ApplicationId = (string)App.Current.Resources["MapsApplicationId"];
+                ctx.AuthenticationToken = (string)App.Current.Resources["MapsApplicationId"];
+            }
+            catch (Exception)
+            {
+                // We couldn't retrieve the keys, so reset both properties.
+                ctx.ApplicationId = null;
+                ctx.AuthenticationToken = null;
+            }
+        }
 
 		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
 		{
@@ -273,83 +241,26 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-        internal CredentialsProvider GetMapsCredentialsProvider()
-        {
-            try
-            {
-                // Gets the api key from the app's resources.
-                string apiKey = (string)App.Current.Resources["BingMapsKey"];
-
-                // Return the provider.
-                return new ApplicationIdCredentialsProvider(apiKey);
-            }
-            catch (Exception)
-            {
-                // We couldn't retrieve the API key, so there's no credential provider to return.
-                return null;
-            }
-        }
-
 		private void RefreshPlayer()
 		{
-			// Gets the current position of the device.
-			GeoCoordinate playerPos = Model.Core.DeviceLocation;
+            // Gets the current position of the device.
+            GeoCoordinate playerPos = Model.Core.DeviceLocation;
 
-			// Makes a pushpin if there is a position of the device,
-			// removes it otherwise.
-			if (playerPos == null || playerPos.IsUnknown)
-			{
-				PlayerPushpin = null;
-				PlayerAccuracyPolygon = null;
-			}
-			else
-			{
-				// Creates or refreshes the pushpin.
-				if (PlayerPushpin == null)
-				{
-					Button btn = new Button()
-					{
-						Template = _noBorderButtonTemplate,
-						Content = Model.Core.Player,
-						ContentTemplate = _thingPushpinContentTemplate,
-						Command = ShowThingDetailsCommand,
-						CommandParameter = Model.Core.Player
-					};
-					
-					PlayerPushpin = new Pushpin()
-					{
-						Content = btn,
-						Location = playerPos
-					};
-				}
-				else
-				{
-					PlayerPushpin.Location = playerPos;
-				}
+            // Default values if the position is invalid.
+            if (playerPos == null || playerPos.IsUnknown)
+            {
+                PlayerLocation = null;
+                PlayerAccuracyArea = null;
+                return;
+            }
+            
+            // Updates the position.
+            PlayerLocation = playerPos;
 
-				// Creates or refreshes the accuracy polygon.
-				double acc = Math.Round(playerPos.HorizontalAccuracy);
-				if (PlayerAccuracyPolygon == null)
-				{					
-					// Creates the accuracy circle.
-					PlayerAccuracyPolygon = new MapPolygon()
-					{
-						Fill = _playerPolygonFillBrush,
-						Stroke = _playerPolygonStrokeBrush,
-						StrokeThickness = 2,
-						Locations = _geoMathHelper
-							.GetCircle(playerPos.ToZonePoint(), acc, ACCURACY_CIRCLE_SAMPLES)
-							.ToLocationCollection()
-					};
-				}
-				else
-				{
-					// Changes the points of the accuracy circle.
-					PlayerAccuracyPolygon.Locations = _geoMathHelper
-						.GetCircle(playerPos.ToZonePoint(), acc, ACCURACY_CIRCLE_SAMPLES)
-						.ToLocationCollection();
-				}
-			}
+            // Makes the accuracy polygon points.
+            PlayerAccuracyArea = _geoMathHelper
+                .GetCircle(playerPos.ToZonePoint(), Math.Round(playerPos.HorizontalAccuracy), ACCURACY_CIRCLE_SAMPLES)
+                .ToGeoCoordinateCollection();
 		}
 
 		private void RefreshBounds()
@@ -369,7 +280,7 @@ namespace Geowigo.ViewModels
 			MapViewRequestedEventArgs e = null;
 			if (bounds != null && bounds.IsValid)
 			{
-				e = new MapViewRequestedEventArgs(bounds.ToLocationRect());
+				e = new MapViewRequestedEventArgs(bounds.ToLocationRectangle());
 			}
 			else
 			{
@@ -402,83 +313,49 @@ namespace Geowigo.ViewModels
 
 		private void RefreshThings()
 		{
-			List<Pushpin> things = new List<Pushpin>();
-			
 			// Groups all active things by their location.
 			if (Model.Core.VisibleThings != null)
 			{
-				// Creates a pushpin for each group of non-Zone things that share 
-				// a valid location.
-				IEnumerable<IGrouping<GeoCoordinate, Thing>> thingsByLocation = Model.Core.VisibleThings
-						.Where(t => t.ObjectLocation != null && !(t is Zone))
-						.GroupBy(t => t.ObjectLocation.ToGeoCoordinate());
+                IEnumerable<IGrouping<GeoCoordinate, Thing>> groups = Model.Core.VisibleThings
+                        .Where(t => t.ObjectLocation != null && !(t is Zone))
+                        .GroupBy(t => t.ObjectLocation.ToGeoCoordinate());
 
-				foreach (IGrouping<GeoCoordinate, Thing> group in thingsByLocation)
-				{
-					// Creates a multiline content control for this group of things.
-					Geowigo.Controls.NavigationListBox control = new Controls.NavigationListBox()
-					{
-						ItemTemplate = _thingPushpinContentTemplate,
-						ItemsSource = group, // Zones are ignored
-						NavigationCommand = ShowThingDetailsCommand
-					};
-					control.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Disabled);
-
-					// Creates and adds a pushpin whose content is the control.
-					things.Add(new Pushpin()
-					{
-						Content = control,
-						Location = group.Key
-					});
-				}
+                ClearAndAddRange(ThingGroups, groups);
 			}
-
-			// This is the new list of pushpins.
-			ThingPushpins = things;
 		}
 
 		private void RefreshZones()
 		{
-			List<MapPolygon> polygons = new List<MapPolygon>();
-			List<Pushpin> labels = new List<Pushpin>();
-
 			// Creates a map polygon for each zone.
-			if (Model.Core.ActiveVisibleZones != null)
+            IEnumerable<Zone> zones = Model.Core.ActiveVisibleZones;
+			if (zones != null)
 			{
-				foreach (Zone zone in Model.Core.ActiveVisibleZones)
-				{
-					// Creates and adds the polygon.
-					polygons.Add(new MapPolygon()
-					{
-						Locations = zone.Points.ToLocationCollection(),
-						Fill = _polygonFillBrush,
-						Stroke = _polygonStrokeBrush,
-						StrokeThickness = 2
-					});
+				IEnumerable<ZoneData> data = zones.
+                    Select(z => new ZoneData(z.Points.ToGeoCoordinateCollection(), z.Bounds.Center.ToGeoCoordinate(), z.Name));
 
-					// Creates a landmark pushpin.
-					labels.Add(new Pushpin()
-					{
-						Content = zone.Name,
-						Location = zone.Bounds.Center.ToGeoCoordinate(),
-						ContentTemplate = _landmarkPushpinContentTemplate,
-						Background = null
-					});
-				} 
-			}
-
-			// Refreshes the collection of polygons.
-			ZonePolygons = polygons;
-			ZoneLabels = labels;
-		}
-
-		private void RaisePropertyChanged(string propName)
-		{
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propName));
+                ClearAndAddRange(Zones, data);
 			}
 		}
+
+        private void ClearAndAddRange<T>(ICollection<T> collec, IEnumerable<T> range)
+        {
+            // Clears.
+            collec.Clear();
+
+            // Adds range.
+            foreach (T item in range)
+            {
+                collec.Add(item);
+            }
+        }
+
+        private void RaisePropertyChanged(string propName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            }
+        }
 
 		#region Commands Impl
 

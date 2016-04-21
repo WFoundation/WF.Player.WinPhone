@@ -19,6 +19,8 @@
                 <!--
                 <Core:String x:Key="BingMapsKey">YOUR API KEY</Core:String>
                 <Core:String x:Key="LiveConnectClientID">YOUR CLIENT ID</Core:String>
+                <Core:String x:Key="MapsApplicationId">YOUR MAPS APP ID</Core:String>
+                <Core:String x:Key="MapsAuthenticationToken">YOUR MAPS AUTH TOKEN</Core:String>
                 -->
                 <ResourceDictionary Source="/Geowigo;component/PrivateResourceDictionary.xaml"/>
                 

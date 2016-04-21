@@ -10,9 +10,10 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Controls.Maps;
 using Geowigo.ViewModels;
 using Geowigo.Utils;
+using Microsoft.Phone.Maps.Controls;
+using Microsoft.Phone.Maps.Toolkit;
 
 namespace Geowigo.Views
 {
@@ -33,104 +34,178 @@ namespace Geowigo.Views
 		#endregion
 
 		#endregion
+
+        #region Fields
+
+        private Color _polygonFillColor;
+        private Color _polygonStrokeColor;
+        private Color _playerAccuracyFillColor;
+        private Color _playerAccuracyStrokeColor;
+        private bool _isMapReady;
+        private GameMapViewModel.MapViewRequestedEventArgs _delayedMapViewRequest;
+
+        #endregion
 		
 		public GameMapPage()
 		{
 			InitializeComponent();
 
-            // Sets the maps API key.
-            MapControl.CredentialsProvider = ViewModel.GetMapsCredentialsProvider();
+            // Inits the brushes.
+            _polygonFillColor = GetColorClone(Colors.Cyan, 64);
+            _polygonStrokeColor = Colors.White;
+            _playerAccuracyFillColor = GetColorClone(Colors.White, 64);
+            _playerAccuracyStrokeColor = Colors.Black;
 
-			MapControl.Mode = new Microsoft.Phone.Controls.Maps.AerialMode(true);
-
-			// Adds event listeners for collection changes in the View Model.
-			ViewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnViewModelPropertyChanged);
-			ViewModel.MapViewRequested += new EventHandler<GameMapViewModel.MapViewRequestedEventArgs>(OnViewModelMapViewRequested);
+            // Adds event listeners for collection changes in the View Model.
+            ViewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnViewModelPropertyChanged);
+            ViewModel.Zones.CollectionChanged += OnViewModelZonesCollectionChanged;
+            ViewModel.MapViewRequested += new EventHandler<GameMapViewModel.MapViewRequestedEventArgs>(OnViewModelMapViewRequested);
 		}
 
-		private void OnViewModelMapViewRequested(object sender, GameMapViewModel.MapViewRequestedEventArgs e)
-		{
-			// Updates the view according to the event.
-			if (e.TargetBounds != null)
-			{
-				// Sets the map to show the target bounds.
-				MapControl.SetView(e.TargetBounds);
+        private Color GetColorClone(Color color, byte alpha)
+        {
+            return Color.FromArgb(alpha, color.R, color.G, color.B);
+        }
 
-				// If the bounds are too small, makes sure the surroundings are shown
-				// to the player too.
-				if (MapControl.ZoomLevel > GameMapViewModel.MAX_AUTO_ZOOM_LEVEL)
-				{
-					MapControl.ZoomLevel = GameMapViewModel.MAX_AUTO_ZOOM_LEVEL;
-				}
-			}
-			else
-			{
-				// Sets the view using the target center and zoom level.
-				MapControl.SetView(e.TargetCenter, e.TargetZoomLevel);
-			}
-		}
+        #region Map Init
+        private MapLayer MakeLayer()
+        {
+            // Creates a layer.
+            MapLayer layer = new MapLayer();
 
-		private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == "ZonePolygons")
-			{
-				// Removes all current zones.
-				ZonesLayer.Children.Clear();
+            // Adds it to the map.
+            MapControl.Layers.Add(layer);
 
-				// Adds all new zone polygons.
-				foreach (MapPolygon poly in ViewModel.ZonePolygons)
-				{
-					ZonesLayer.Children.Add(poly);
-				}
-			}
-			else if (e.PropertyName == "ZoneLabels")
-			{
-				// Removes all current zones.
-				ZoneLabelsLayer.Children.Clear();
+            return layer;
+        }
 
-				// Adds all new zone polygons.
-				foreach (Pushpin pin in ViewModel.ZoneLabels)
-				{
-					ZoneLabelsLayer.Children.Add(pin);
-				}
-			}
-			else if (e.PropertyName == "PlayerPushpin")
-			{
-				// Restores the player layer objects.
-				RestorePlayerLayerObjects();
-			}
-			else if (e.PropertyName == "PlayerAccuracyPolygon")
-			{
-				// Restores the player layer objects.
-				RestorePlayerLayerObjects();
-			}
-			else if (e.PropertyName == "ThingPushpins")
-			{
-				// Removes all current things.
-				ItemsLayer.Children.Clear();
+        private void MapControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Injects the application's ID and Token.
+            ViewModel.SetMapsCredentials(Microsoft.Phone.Maps.MapsSettings.ApplicationContext);
 
-				// Adds all new things.
-				foreach (Pushpin pin in ViewModel.ThingPushpins)
-				{
-					ItemsLayer.Children.Add(pin);
-				}
-			}
-		}
+            // The map can only be used for some things a while after this event has fired.
+            Dispatcher.BeginInvoke(OnMapReady);
+        }
 
-		private void RestorePlayerLayerObjects()
-		{
-			// Remove all objects from the layer.
-			PlayerLayer.Children.Clear();
+        private void OnMapReady()
+        {
+            // Waits a bit for the map to be ready.
+            System.Threading.Tasks.Task.Delay(250).Wait();
 
-			// Selectively adds the right objects.
-			if (ViewModel.PlayerAccuracyPolygon != null)
-			{
-				PlayerLayer.Children.Add(ViewModel.PlayerAccuracyPolygon);
-			}
-			if (ViewModel.PlayerPushpin != null)
-			{
-				PlayerLayer.Children.Add(ViewModel.PlayerPushpin);
-			}
-		}
+            // The map is now ready.
+            _isMapReady = true;
+
+            // Initializes the map item controls.
+            BindMapItemsControlItemsSource("ThingsPushpins", ViewModel.ThingGroups);
+            BindMapItemsControlItemsSource("ZoneLabelsPushpins", ViewModel.Zones);
+
+            // Applies a map view request that was issued before the map was ready.
+            if (_delayedMapViewRequest != null)
+            {
+                SetMapView(_delayedMapViewRequest);
+
+                _delayedMapViewRequest = null;
+            }
+        }
+
+        private void BindMapItemsControlItemsSource(string name, System.Collections.IEnumerable source)
+        {
+            // Finds the right control.
+            MapItemsControl mapItemsControl = MapExtensions.GetChildren(MapControl)
+                .OfType<MapItemsControl>()
+                .FirstOrDefault(mic => mic.Name == name);
+            
+            // Binds the property.
+            mapItemsControl.ItemsSource = source;
+        }
+
+        #endregion
+
+        #region Bounds
+        private void OnViewModelMapViewRequested(object sender, GameMapViewModel.MapViewRequestedEventArgs e)
+        {
+            if (_isMapReady)
+            {
+                SetMapView(e);
+            }
+            else
+            {
+                // Delays this request for after the map is ready.
+                _delayedMapViewRequest = e;
+            }
+        }
+
+        private void SetMapView(GameMapViewModel.MapViewRequestedEventArgs e)
+        {
+            // Updates the view according to the event.
+            if (e.TargetBounds != null)
+            {
+                // Sets the map to show the target bounds.
+                MapControl.SetView(e.TargetBounds, MapAnimationKind.None);
+
+                // If the bounds are too small, makes sure the surroundings are shown
+                // to the player too.
+                if (MapControl.ZoomLevel > GameMapViewModel.MAX_AUTO_ZOOM_LEVEL)
+                {
+                    MapControl.ZoomLevel = GameMapViewModel.MAX_AUTO_ZOOM_LEVEL;
+                }
+            }
+            else
+            {
+                // Sets the view using the target center and zoom level.
+                MapControl.SetView(e.TargetCenter, e.TargetZoomLevel, MapAnimationKind.None);
+            }
+        } 
+        #endregion
+
+        private void OnViewModelZonesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RefreshMapElements();
+        }
+
+        private void OnViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "PlayerAccuracyArea")
+            {
+                RefreshMapElements();
+            }
+        }
+
+        private void RefreshMapElements()
+        {
+            // Clears map elements.
+            System.Collections.ObjectModel.Collection<MapElement> elements = MapControl.MapElements;
+            elements.Clear();
+
+            // Refresh player accuracy polygon.
+            GeoCoordinateCollection playerAccuracyArea = ViewModel.PlayerAccuracyArea;
+            if (playerAccuracyArea != null)
+            {
+                elements.Add(new MapPolygon()
+                {
+                    Path = playerAccuracyArea,
+                    StrokeThickness = 2,
+                    FillColor = _playerAccuracyFillColor,
+                    StrokeColor = _playerAccuracyStrokeColor
+                });
+            }
+            
+            // Refreshes zones.
+            IEnumerable<GameMapViewModel.ZoneData> zones = ViewModel.Zones;
+            if (zones != null)
+            {
+                foreach (GameMapViewModel.ZoneData zone in zones)
+                {
+                    elements.Add(new MapPolygon()
+                    {
+                        Path = zone.Points,
+                        FillColor = _polygonFillColor,
+                        StrokeColor = _polygonStrokeColor,
+                        StrokeThickness = 2
+                    });
+                }
+            }
+        }
 	}
 }

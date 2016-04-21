@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Device.Location;
 using WF.Player.Core;
-using Microsoft.Phone.Controls.Maps;
 using System.Collections.Generic;
+using Microsoft.Phone.Maps.Controls;
 
 namespace Geowigo.Utils
 {
@@ -64,13 +64,13 @@ namespace Geowigo.Utils
 		}
 
 		/// <summary>
-		/// Gets a LocationRect representing these CoordBounds.
+        /// Gets a LocationRectangle representing these CoordBounds.
 		/// </summary>
 		/// <param name="cb"></param>
 		/// <returns></returns>
-		public static LocationRect ToLocationRect(this CoordBounds cb)
+        public static LocationRectangle ToLocationRectangle(this CoordBounds cb)
 		{
-			return new LocationRect(cb.Top, cb.Left, cb.Bottom, cb.Right);
+            return new LocationRectangle(cb.Top, cb.Left, cb.Bottom, cb.Right);
 		}
 
 		/// <summary>
@@ -78,9 +78,9 @@ namespace Geowigo.Utils
 		/// </summary>
 		/// <param name="ezp"></param>
 		/// <returns></returns>
-		public static LocationCollection ToLocationCollection(this IEnumerable<ZonePoint> ezp)
+		public static GeoCoordinateCollection ToGeoCoordinateCollection(this IEnumerable<ZonePoint> ezp)
 		{
-			LocationCollection coll = new LocationCollection();
+            GeoCoordinateCollection coll = new GeoCoordinateCollection();
 
 			foreach (ZonePoint p in ezp)
 			{
