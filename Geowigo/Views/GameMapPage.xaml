@@ -17,7 +17,7 @@
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="480" x:Name="ThisGMP">
+    mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="480" x:Name="ThisGMP" ApplicationBar="{Binding ApplicationBar}">
 
     <Geowigo_Views:BasePage.Resources>
         <DataTemplate x:Key="ThingsPushpinsItemTemplate">

@@ -19,6 +19,7 @@ using System.Linq;
 using Geowigo.Controls;
 using Microsoft.Phone.Maps.Controls;
 using Microsoft.Phone.Maps.Toolkit;
+using Microsoft.Phone.Shell;
 
 namespace Geowigo.ViewModels
 {
@@ -34,15 +35,19 @@ namespace Geowigo.ViewModels
 
 			public double TargetZoomLevel { get; private set; }
 
-            public MapViewRequestedEventArgs(LocationRectangle locRect)
+            public MapAnimationKind Animation { get; private set; }
+
+            public MapViewRequestedEventArgs(LocationRectangle locRect, MapAnimationKind anim = MapAnimationKind.None)
 			{
 				TargetBounds = locRect;
+                Animation = anim;
 			}
 
-			public MapViewRequestedEventArgs(GeoCoordinate center, double zoomLevel)
+			public MapViewRequestedEventArgs(GeoCoordinate center, double zoomLevel, MapAnimationKind anim = MapAnimationKind.None)
 			{
 				TargetCenter = center;
 				TargetZoomLevel = zoomLevel;
+                Animation = anim;
 			}
 		}
 
@@ -159,6 +164,38 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+        #region MoveMapViewToPlayerCommand
+
+        private ICommand _MoveMapViewToPlayerCommand;
+
+        public ICommand MoveMapViewToPlayerCommand
+		{
+			get 
+			{
+                return _MoveMapViewToPlayerCommand ?? (_MoveMapViewToPlayerCommand = new RelayCommand(MoveMapViewToPlayer)); 
+			}
+		}
+
+
+		#endregion
+
+        #region MoveMapViewToOverviewCommand
+
+        private ICommand _MoveMapViewToOverviewCommand;
+
+        public ICommand MoveMapViewToOverviewCommand
+		{
+			get 
+			{
+                return _MoveMapViewToOverviewCommand ?? (_MoveMapViewToOverviewCommand = new RelayCommand(MoveMapViewToOverview)); 
+			}
+		}
+
+
+		#endregion
+
+        
+
 		#endregion
 
 		#region Events
@@ -173,7 +210,7 @@ namespace Geowigo.ViewModels
 
 		public const double DEFAULT_ZOOM_LEVEL = 16d;
 
-		public const double MAX_AUTO_ZOOM_LEVEL = 18d;
+        public const double PLAYER_ZOOM_LEVEL = 20d;
 
 		private const int ACCURACY_CIRCLE_SAMPLES = 50;
 
@@ -222,7 +259,10 @@ namespace Geowigo.ViewModels
 			RefreshPlayer();
 
 			// Refreshes the bounds of the map.
-			RefreshBounds();
+			RefreshBounds(MapAnimationKind.None);
+
+            // Refreshes the app bar.
+            RefreshApplicationBar();
 		}
 
 		protected override void OnCorePropertyChanged(string propName)
@@ -263,15 +303,16 @@ namespace Geowigo.ViewModels
                 .ToGeoCoordinateCollection();
 		}
 
-		private void RefreshBounds()
+		private void RefreshBounds(MapAnimationKind animation)
 		{
             if (Model == null || Model.Core == null || Model.Core.Cartridge == null)
             {
                 return;
             }
             
-            // Gets the current bounds of the engine.
+            // Gets the current location data out of the engine.
 			CoordBounds bounds = Model.Core.Bounds;
+            GeoCoordinate deviceLoc = Model.Core.DeviceLocation;
 
 			// Are the bounds valid?
 			// YES -> Computes a view around them.
@@ -280,7 +321,13 @@ namespace Geowigo.ViewModels
 			MapViewRequestedEventArgs e = null;
 			if (bounds != null && bounds.IsValid)
 			{
-				e = new MapViewRequestedEventArgs(bounds.ToLocationRectangle());
+				// Inflates the bounds to include the player.
+                if (deviceLoc != null && !deviceLoc.IsUnknown)
+                {
+                    bounds.Inflate(deviceLoc.ToZonePoint());
+                }
+                
+                e = new MapViewRequestedEventArgs(bounds.ToLocationRectangle(), animation);
 			}
 			else
 			{
@@ -291,16 +338,19 @@ namespace Geowigo.ViewModels
 				{
 					// If there is a current location of the player, use it as center.
 					// If not, do nothing more.
-					GeoCoordinate deviceLoc = Model.Core.DeviceLocation;
 					if (deviceLoc != null && !deviceLoc.IsUnknown)
 					{
-						e = new MapViewRequestedEventArgs(deviceLoc, DEFAULT_ZOOM_LEVEL);
+						e = new MapViewRequestedEventArgs(deviceLoc, DEFAULT_ZOOM_LEVEL, animation);
 					}
+                    else
+                    {
+                        return;
+                    }
 				}
 				else
 				{
 					// Makes the event.
-					e = new MapViewRequestedEventArgs(Model.Core.Cartridge.StartingLocation.ToGeoCoordinate(), DEFAULT_ZOOM_LEVEL);
+					e = new MapViewRequestedEventArgs(Model.Core.Cartridge.StartingLocation.ToGeoCoordinate(), DEFAULT_ZOOM_LEVEL, animation);
 				}
 			}
 
@@ -337,6 +387,30 @@ namespace Geowigo.ViewModels
 			}
 		}
 
+        private void RefreshApplicationBar()
+        {
+            if (ApplicationBar != null)
+            {
+                return;
+            }
+
+            // Creates the app bar.
+            IApplicationBar appBar = new ApplicationBar()
+            {
+                Mode = ApplicationBarMode.Default,
+                Opacity = 0.25,
+               
+            };
+
+            //appBar.CreateAndAddMenuItem(ShowMapSettingsCommand, "map settings...");
+
+            appBar.CreateAndAddButton("appbar.location.circle.png", MoveMapViewToPlayerCommand, "me");
+
+            appBar.CreateAndAddButton("appbar.location.checkin.png", MoveMapViewToOverviewCommand, "overview");
+
+            ApplicationBar = appBar;
+        }
+
         private void ClearAndAddRange<T>(ICollection<T> collec, IEnumerable<T> range)
         {
             // Clears.
@@ -364,6 +438,35 @@ namespace Geowigo.ViewModels
 			// Navigates to the details of this thing.
 			App.Current.ViewModel.NavigationManager.NavigateToView(thing);
 		}
+
+        private void MoveMapViewToOverview()
+        {
+            RefreshBounds(MapAnimationKind.Linear);
+        }
+
+        private void MoveMapViewToPlayer()
+        {
+            // Requests to move the map view to the player at a close zoom level.
+
+            MapViewRequestedEventArgs e;
+            
+            // Gets the player position. Cancels if there's none.
+            GeoCoordinate deviceLoc = Model.Core.DeviceLocation;
+            if (deviceLoc != null && !deviceLoc.IsUnknown)
+            {
+                e = new MapViewRequestedEventArgs(deviceLoc, PLAYER_ZOOM_LEVEL, MapAnimationKind.Linear);
+            }
+            else
+            {
+                return;
+            }
+
+            // Sends the event.
+            if (e != null && MapViewRequested != null)
+            {
+                MapViewRequested(this, e);
+            }
+        }
 
 		#endregion
 	}

@@ -142,19 +142,12 @@ namespace Geowigo.Views
             if (e.TargetBounds != null)
             {
                 // Sets the map to show the target bounds.
-                MapControl.SetView(e.TargetBounds, MapAnimationKind.None);
-
-                // If the bounds are too small, makes sure the surroundings are shown
-                // to the player too.
-                if (MapControl.ZoomLevel > GameMapViewModel.MAX_AUTO_ZOOM_LEVEL)
-                {
-                    MapControl.ZoomLevel = GameMapViewModel.MAX_AUTO_ZOOM_LEVEL;
-                }
+                MapControl.SetView(e.TargetBounds, e.Animation);
             }
             else
             {
                 // Sets the view using the target center and zoom level.
-                MapControl.SetView(e.TargetCenter, e.TargetZoomLevel, MapAnimationKind.None);
+                MapControl.SetView(e.TargetCenter, e.TargetZoomLevel, e.Animation);
             }
         } 
         #endregion
