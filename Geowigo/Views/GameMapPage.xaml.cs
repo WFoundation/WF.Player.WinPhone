@@ -60,6 +60,9 @@ namespace Geowigo.Views
             ViewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnViewModelPropertyChanged);
             ViewModel.Zones.CollectionChanged += OnViewModelZonesCollectionChanged;
             ViewModel.MapViewRequested += new EventHandler<GameMapViewModel.MapViewRequestedEventArgs>(OnViewModelMapViewRequested);
+            
+            // Adds map events.
+            MapControl.ZoomLevelChanged += OnMapZoomLevelChanged;
 		}
 
         private Color GetColorClone(Color color, byte alpha)
@@ -149,7 +152,14 @@ namespace Geowigo.Views
                 // Sets the view using the target center and zoom level.
                 MapControl.SetView(e.TargetCenter, e.TargetZoomLevel, e.Animation);
             }
-        } 
+        }
+
+        private void OnMapZoomLevelChanged(object sender, MapZoomLevelChangedEventArgs e)
+        {
+            // Alerts the view model.
+            ViewModel.OnMapZoomLevelChanged(MapControl.ZoomLevel, MapControl.Center);
+        }
+
         #endregion
 
         private void OnViewModelZonesCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

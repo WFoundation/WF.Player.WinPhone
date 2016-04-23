@@ -65,7 +65,50 @@ namespace Geowigo.ViewModels
                 NameAnchor = anchor;
                 Name = name;
             }
+        }
+
+        public interface IThingGroupData
+        {
+            GeoCoordinate Location { get; }
+
+            IEnumerable<Thing> Things { get; }
+        }
+
+        private class ThingGroupDataImpl : IThingGroupData
+        {
+            private List<Thing> _things = new List<Thing>();
             
+            public ThingGroupDataImpl(Thing thing)
+            {
+                Add(thing);
+            }
+
+            public GeoCoordinate Location { get; private set; }
+
+            public IEnumerable<Thing> Things
+            {
+                get { return _things; }
+            }
+
+            internal void Add(Thing thing)
+            {
+                // Adds this to the list.
+                _things.Add(thing);
+
+                // Computes the group's average location.
+                double lat = 0;
+                double lon = 0;
+                foreach (Thing t in _things)
+                {
+                    ZonePoint zp = t.ObjectLocation;
+
+                    lat += zp.Latitude;
+                    lon += zp.Longitude;
+                }
+                lat /= _things.Count;
+                lon /= _things.Count;
+                Location = new GeoCoordinate(lat, lon);
+            }
         }
 
 		#endregion
@@ -109,14 +152,14 @@ namespace Geowigo.ViewModels
         #endregion
 
         #region ThingGroups
-        private ObservableCollection<IGrouping<GeoCoordinate, Thing>> _ThingGroups;
-        public ObservableCollection<IGrouping<GeoCoordinate, Thing>> ThingGroups
+        private ObservableCollection<IThingGroupData> _ThingGroups;
+        public ObservableCollection<IThingGroupData> ThingGroups
         {
             get
             {
                 if (_ThingGroups == null)
                 {
-                    _ThingGroups = new ObservableCollection<IGrouping<GeoCoordinate, Thing>>();
+                    _ThingGroups = new ObservableCollection<IThingGroupData>();
                 }
 
                 return _ThingGroups;
@@ -208,17 +251,23 @@ namespace Geowigo.ViewModels
 
 		#region Constants
 
-		public const double DEFAULT_ZOOM_LEVEL = 16d;
+		private const double DEFAULT_ZOOM_LEVEL = 16d;
 
-        public const double PLAYER_ZOOM_LEVEL = 20d;
+        private const double PLAYER_ZOOM_LEVEL = 19d;
 
 		private const int ACCURACY_CIRCLE_SAMPLES = 50;
+
+        private const double MAX_THING_GROUP_DISTANCE_PX = 50;
+
+        private const int THING_GROUP_SLEEP_BEFORE_WORK_MS = 100;
 
 		#endregion
 
 		#region Fields
 
 		private WF.Player.Core.Utils.GeoMathHelper _geoMathHelper;
+        private double? _currentThingGroupingMaxDistance;
+        private BackgroundWorker _thingGroupingBackgroundWorker;
 
 		#endregion
 
@@ -247,6 +296,19 @@ namespace Geowigo.ViewModels
                 ctx.ApplicationId = null;
                 ctx.AuthenticationToken = null;
             }
+        }
+
+        public void OnMapZoomLevelChanged(double zoomLevel, GeoCoordinate center)
+        {
+            // Computes the current resolution of the map, in meters per pixel.
+            // See https://msdn.microsoft.com/en-us/library/aa940990.aspx
+            double resolution = 156543.04d * Math.Cos(center.Latitude * Math.PI / 180d) / Math.Pow(2, zoomLevel);
+
+            // Computes the max distance in meters allowed for grouping things.
+            _currentThingGroupingMaxDistance = resolution * MAX_THING_GROUP_DISTANCE_PX;
+
+            // Refreshes the things.
+            RefreshThings();
         }
 
 		protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -363,16 +425,109 @@ namespace Geowigo.ViewModels
 
 		private void RefreshThings()
 		{
-			// Groups all active things by their location.
-			if (Model.Core.VisibleThings != null)
-			{
-                IEnumerable<IGrouping<GeoCoordinate, Thing>> groups = Model.Core.VisibleThings
-                        .Where(t => t.ObjectLocation != null && !(t is Zone))
-                        .GroupBy(t => t.ObjectLocation.ToGeoCoordinate());
+			// Cancels the background worker if it's working.
+            if (_thingGroupingBackgroundWorker != null && !_thingGroupingBackgroundWorker.CancellationPending)  
+            {
+                _thingGroupingBackgroundWorker.CancelAsync();
+            }
 
-                ClearAndAddRange(ThingGroups, groups);
-			}
+            // Makes a worker.
+            _thingGroupingBackgroundWorker = new BackgroundWorker() { WorkerSupportsCancellation = true };
+            _thingGroupingBackgroundWorker.DoWork += (o, e) =>
+            {
+                // Waits for a while.
+                System.Threading.Thread.Sleep(THING_GROUP_SLEEP_BEFORE_WORK_MS);
+
+                // Stops if we're cancelled.
+                BackgroundWorker bw = (BackgroundWorker)o;
+                if (bw.CancellationPending)
+                {
+                    return;
+                }
+
+                // Groups all active things by their location.
+                if (Model.Core.VisibleThings != null)
+                {
+                    // Gets all things that have a location and are not a zone.
+                    IEnumerable<Thing> things = Model.Core.VisibleThings
+                        .Where(t => t.ObjectLocation != null && !(t is Zone));
+
+                    // Groups the things depending on distance.
+                    IEnumerable<IThingGroupData> groups;
+                    if (_currentThingGroupingMaxDistance.HasValue)
+                    {
+                        // Groups things according to a max distance. 
+                        groups = GetThingGroups(things, _currentThingGroupingMaxDistance.Value);
+                    }
+                    else
+                    {
+                        // Makes one group per thing.
+                        groups = things.Select(t => new ThingGroupDataImpl(t));
+                    }
+
+                    // Checks if the groups changed. If not, don't refresh,
+                    // because recreating pushpins is an expansive operation for the view.
+                    IEnumerable<IThingGroupData> currentGroups = ThingGroups;
+                    bool noNeedToRefresh = groups.All(g => currentGroups.Any(og => og.Location == g.Location && og.Things.OrderBy(ogt => ogt.ObjIndex).SequenceEqual(g.Things.OrderBy(gt => gt.ObjIndex))));
+                    if (noNeedToRefresh)
+                    {
+                        return;
+                    }
+
+                    // Sets the property.
+                    if (!bw.CancellationPending)
+                    {
+                        Dispatcher.BeginInvoke(() => ClearAndAddRange(ThingGroups, groups));
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            };
+
+            // Work.
+            _thingGroupingBackgroundWorker.RunWorkerAsync();
 		}
+
+        private IEnumerable<IThingGroupData> GetThingGroups(IEnumerable<Thing> things, double maxDistance)
+        {
+            // Makes a list of groups.
+            List<ThingGroupDataImpl> groups = new List<ThingGroupDataImpl>();
+
+            // For each thing, if it is close enough to a group, adds it.
+            foreach (Thing thing in things)
+            {
+                // Gets the location.
+                GeoCoordinate loc = thing.ObjectLocation.ToGeoCoordinate();
+                
+                // Is it close enough to a group?
+                ThingGroupDataImpl targetGroup = null;
+                foreach (ThingGroupDataImpl group in groups)
+                {
+                    // Adds this to the group if it's close enough to the group.
+                    if (group.Location.GetDistanceTo(loc) <= maxDistance)
+                    {
+                        targetGroup = group;
+                        break;
+                    }
+                }
+
+                if (targetGroup != null)
+                {
+                    // We found a suitable group.
+                    targetGroup.Add(thing);
+                }
+                else
+                {
+                    // No group worked for this, make one for it.
+                    groups.Add(new ThingGroupDataImpl(thing));
+                }
+            }
+
+            // We have our groups.
+            return groups.Cast<IThingGroupData>();
+        }
 
 		private void RefreshZones()
 		{

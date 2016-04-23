@@ -21,9 +21,9 @@
 
     <Geowigo_Views:BasePage.Resources>
         <DataTemplate x:Key="ThingsPushpinsItemTemplate">
-            <toolkit:Pushpin GeoCoordinate="{Binding Key}">
+            <toolkit:Pushpin GeoCoordinate="{Binding Location}">
                 <toolkit:Pushpin.Content>
-                    <Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource WherigoThingPushpinContentTemplate}" ItemsSource="{Binding}" NavigationCommand="{Binding DataContext.ShowThingDetailsCommand, ElementName=ThisGMP, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
+                    <Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource WherigoThingPushpinContentTemplate}" ItemsSource="{Binding Things}" NavigationCommand="{Binding DataContext.ShowThingDetailsCommand, ElementName=ThisGMP, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
                 </toolkit:Pushpin.Content>
             </toolkit:Pushpin>
         </DataTemplate>
