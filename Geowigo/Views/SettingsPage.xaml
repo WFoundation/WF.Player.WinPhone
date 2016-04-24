@@ -55,21 +55,22 @@
 					</toolkit:ToggleSwitch>
 					<TextBlock TextWrapping="Wrap" Text="{Binding OneDriveProviderAdvancedStatus}" Foreground="{StaticResource PhoneSubtleBrush}"/>
 					<CheckBox Content="Sync automatically on app start-up" IsChecked="{Binding Model.Settings.SyncOnStartUp, FallbackValue=True, Mode=TwoWay}"/>
+                    <CheckBox Content="Upload savegames and logs" IsChecked="{Binding Model.Settings.CanProviderUpload, FallbackValue=True, Mode=TwoWay}"/>
 					<Button Content="clear history" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding ClearHistoryCommand, Mode=OneWay}"/>
 					<TextBlock TextWrapping="Wrap" Text="Removes all data about which games you played recently. Does not delete cartridges or savegames." Foreground="{StaticResource PhoneSubtleBrush}"/>
 					<Button Content="location+compass" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding NavigateToDeviceInfoCommand, Mode=OneWay}"/>
 					<Button Content="advanced settings" HorizontalAlignment="Left" Margin="0,20" Command="{Binding DisplayAdvancedSettingsCommand, Mode=OneWay}" Visibility="{Binding AreAdvancedSettingsDisplayed, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
-					<StackPanel x:Name="AdvancedPanel" Orientation="Vertical" Margin="0,20,0,30" Visibility="{Binding AreAdvancedSettingsDisplayed, Converter={StaticResource ObjectToVisibilityConverter}}">
-						<Button Content="clear cartridge cache" HorizontalAlignment="Left" Command="{Binding ClearCartridgeCacheCommand, Mode=OneWay}"/>
-						<TextBlock TextWrapping="Wrap" Text="Clearing the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
-						<TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>
-						<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-							<Button Content="send" HorizontalAlignment="Left" Command="{Binding SendDebugReportCommand, Mode=OneWay}"/>
-							<Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
-						</StackPanel>
+                    <StackPanel x:Name="AdvancedPanel" Orientation="Vertical" Margin="0,20,0,30" Visibility="{Binding AreAdvancedSettingsDisplayed, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <Button Content="clear cartridge cache" HorizontalAlignment="Left" Command="{Binding ClearCartridgeCacheCommand, Mode=OneWay}"/>
+                        <TextBlock TextWrapping="Wrap" Text="Clearing the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
+                        <TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                            <Button Content="send" HorizontalAlignment="Left" Command="{Binding SendDebugReportCommand, Mode=OneWay}"/>
+                            <Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
+                        </StackPanel>
                         <TextBlock TextWrapping="Wrap" Text="{Binding AppVersion, StringFormat='Geowigo Version: {0}'}" Foreground="{StaticResource PhoneSubtleBrush}"/>
-					</StackPanel>
-				</StackPanel>
+                    </StackPanel>
+                </StackPanel>
 			</ScrollViewer>
 		</StackPanel>
 

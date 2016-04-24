@@ -26,7 +26,7 @@ namespace Geowigo.Models
 
         #region SyncOnStartUp
 
-        private static string SyncOnStartUpSettingKey = "SkyDrive.SyncOnStartUp";
+        private static string SyncOnStartUpSettingKey = "OneDrive.SyncOnStartUp";
 
         /// <summary>
         /// Gets or sets if cartridge providers sync automatically on start-up.
@@ -55,7 +55,7 @@ namespace Geowigo.Models
 
         #region ProviderLinkedHint
 
-        private static string ProviderLinkedHintSettingKey = "SkyDrive.LinkHint";
+        private static string ProviderLinkedHintSettingKey = "OneDrive.LinkHint";
 
         /// <summary>
         /// Gets or sets if the provider is known to be linked.
@@ -76,6 +76,35 @@ namespace Geowigo.Models
                 if (changed)
                 {
                     RaisePropertyChanged("ProviderLinkedHint");
+                }
+            }
+        }
+
+        #endregion
+
+        #region CanProviderUpload
+
+        private static string CanProviderUploadSettingKey = "OneDrive.CanUpload";
+
+        /// <summary>
+        /// Gets or sets if the provider can upload.
+        /// </summary>
+        public bool CanProviderUpload
+        {
+            get
+            {
+                return _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, true);
+            }
+
+            set
+            {
+                bool changed = value != _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, true);
+
+                _settings.SetValueAndSave(CanProviderUploadSettingKey, value);
+
+                if (changed)
+                {
+                    RaisePropertyChanged("CanProviderUpload");
                 }
             }
         }

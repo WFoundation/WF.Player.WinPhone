@@ -19,11 +19,12 @@ namespace Geowigo.Models.Providers
 	{
 		#region Constants
 
-        private static readonly string[] _Scopes = new string[] { "onedrive.appfolder", "wl.offline_access", "wl.signin" };
+        private static readonly string[] _Scopes = new string[] { "onedrive.readwrite", "wl.offline_access", "wl.signin" };
 
 		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
 
 		private static readonly string UploadFolderName = "Uploads";
+        private static readonly string RootFolderName = "Geowigo";
 
 		#endregion
 		
@@ -68,10 +69,12 @@ namespace Geowigo.Models.Providers
 		private LiveAuthClient _authClient;
 		private LiveConnectClient _liveClient;
 
-		private string _uploadsFolderId;
 		private IsolatedStorageFileStream _currentUlFileStream;
 
         private TaskScheduler _uiThreadTaskScheduler;
+
+        private string _rootFolderId;
+        private string _uploadsFolderId;
 
         private List<CancellationTokenSource> _activeCancellationTokenSources = new List<CancellationTokenSource>();
 
@@ -153,18 +156,6 @@ namespace Geowigo.Models.Providers
                 return false; // Microsoft.Devices.Environment.DeviceType != Microsoft.Devices.DeviceType.Emulator
             }
         }
-
-        /// <summary>
-        /// Gets if this provider is able to download.
-        /// </summary>
-        /// <remarks>The value only makes sense if IsLinked is true and IsSyncing is false.</remarks>
-        public bool CanDownload { get; private set; }
-
-        /// <summary>
-        /// Gets if this provider is able to upload.
-        /// </summary>
-        /// <remarks>The value only makes sense if IsLinked is true and IsSyncing is false.</remarks>
-        public bool CanUpload { get; private set; }
 
         /// <summary>
         /// Gets how many cartridges this provider provides.
@@ -468,11 +459,63 @@ namespace Geowigo.Models.Providers
 
             Log("Starts listing files in Geowigo");
             StartTaskAndContinueWith(
-                () => GetFolderChildrenAsync("Geowigo", "me/skydrive", true),
+                () => GetRootFolderChildrenAsync(RootFolderName),
                 OnLiveClientGetRootChildrenCompleted);
 		}
 
-        private async Task<LiveOperationResult> GetFolderChildrenAsync(string folderName, string parentFolder, bool ensureFolderExists)
+        private async Task<LiveOperationResult> GetRootFolderChildrenAsync(string folderName)
+        {
+            //string folderId = null;
+
+            //// Retrieves all the directories.
+            //var queryFolder = parentFolder + "/files?filter=folders,albums";
+            //var opResult = await _liveClient.GetAsync(queryFolder, CreateTimeoutCancellationToken(GetRequestTimeoutTimeSpan));
+            //dynamic result = opResult.Result;
+
+            //foreach (dynamic folder in result.data)
+            //{
+            //    // Checks if current folder has the passed name.
+            //    if (folder.name.ToLowerInvariant() == folderName.ToLowerInvariant())
+            //    {
+            //        folderId = folder.id;
+            //        break;
+            //    }
+            //}
+
+            //if (folderId == null)
+            //{
+            //    if (!ensureFolderExists)
+            //    {
+            //        throw new InvalidOperationException("Folder " + folderName + " does not exist on target drive.");
+            //    }
+
+            //    // Directory hasn't been found, so creates it using the PostAsync method.
+            //    var folderData = new Dictionary<string, object>();
+            //    folderData.Add("name", folderName);
+            //    opResult = await _liveClient.PostAsync(parentFolder, folderData);
+            //    result = opResult.Result;
+
+            //    // Retrieves the id of the created folder.
+            //    folderId = result.id;
+            //}
+
+            // Creates or gets the folder.
+            if (_rootFolderId == null)
+            {
+                _rootFolderId = await CreateDirectoryAsync(folderName, "me/skydrive");
+            }
+            if (_rootFolderId == null)
+            {
+                string message = "Cannot create or retrieve folder " + folderName + " on OneDrive.";
+                Log(message);
+                throw new InvalidOperationException(message);
+            }
+
+            // Gets the files in the folder.
+            return await _liveClient.GetAsync(_rootFolderId + "/files", CreateTimeoutCancellationToken(GetRequestTimeoutTimeSpan));
+        }
+
+        public async Task<string> CreateDirectoryAsync(string folderName, string parentFolder)
         {
             string folderId = null;
 
@@ -493,11 +536,6 @@ namespace Geowigo.Models.Providers
 
             if (folderId == null)
             {
-                if (!ensureFolderExists)
-                {
-                    throw new InvalidOperationException("Folder " + folderName + " does not exist on target drive.");
-                }
-
                 // Directory hasn't been found, so creates it using the PostAsync method.
                 var folderData = new Dictionary<string, object>();
                 folderData.Add("name", folderName);
@@ -508,8 +546,7 @@ namespace Geowigo.Models.Providers
                 folderId = result.id;
             }
 
-            // Gets the files in the folder.
-            return await _liveClient.GetAsync(folderId + "/files", CreateTimeoutCancellationToken(GetRequestTimeoutTimeSpan));
+            return folderId;
         }
 
 		private void BeginDownloadFile(OneDriveFile file)
@@ -566,10 +603,11 @@ namespace Geowigo.Models.Providers
 
             Log("Downloads done. Moving on.");
 
-			// Cancels everything if no Geowigo or upload folder was found.
-			if (_uploadsFolderId == null)
+			// Cancels everything if we shouldn't upload.
+			if (!App.Current.Model.Settings.CanProviderUpload)
 			{
-				EndSync();
+				Log("Upload disabled by user setting.");
+                EndSync();
 				return;
 			}
 
@@ -601,10 +639,31 @@ namespace Geowigo.Models.Providers
                 Log("Scheduled for upload " + item);
             }
 
-			// Starts uploading the first file. The next ones will be triggered once it finished uploading.
-			string firstFile = _ulFiles[0];
-            BeginUpload(firstFile);
+            // Starts uploads asynchronously.
+            Task.Factory.StartNew(BeginUploads);
 		}
+
+        private async void BeginUploads()
+        {
+            // Creates or fetches the upload folder.
+            if (_uploadsFolderId == null)
+            {
+                try
+                {
+                    _uploadsFolderId = await CreateDirectoryAsync(UploadFolderName, _rootFolderId);
+                }
+                catch (Exception e)
+                {
+                    Log("Error while ensuring Uploads folder.");
+                    EndSync();
+                    return;
+                }
+            }
+
+            // Starts uploading the first file. The next ones will be triggered once it finished uploading.
+            string firstFile = _ulFiles[0];
+            BeginUpload(firstFile);
+        }
 
 		private void EndSync()
 		{
@@ -792,14 +851,6 @@ namespace Geowigo.Models.Providers
                         Log("Marked as extra file to download: " + name);
                         extraFiles.Add(new OneDriveFile((string)content["id"], name, IsoStoreCartridgeContentPath));
                     }
-                }
-                else if ("folder".Equals(type) && UploadFolderName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    // We found the uploads folder.
-                    // Stores its id.
-                    Log("Found Uploads folder.");
-                    _uploadsFolderId = (string)content["id"];
-                    CanUpload = true;
                 }
             }
 

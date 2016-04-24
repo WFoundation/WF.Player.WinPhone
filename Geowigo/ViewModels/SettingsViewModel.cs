@@ -338,7 +338,7 @@ namespace Geowigo.ViewModels
                 {
                     // A wizard should be performed if needed.
 
-                    if (!IsOneDriveProviderEnabled && GetSkyDriveProvider().ServiceName == providerServiceName)
+                    if (!IsOneDriveProviderEnabled && GetOneDriveProvider().ServiceName == providerServiceName)
                     {
                         // A wizard is needed.
                         RunSkyDriveProviderLinkWizard();
@@ -353,18 +353,18 @@ namespace Geowigo.ViewModels
 
             RefreshLogView();
 
-            RefreshSkyDrive();
+            RefreshOneDrive();
         }
 
-        private OneDriveCartridgeProvider GetSkyDriveProvider()
+        private OneDriveCartridgeProvider GetOneDriveProvider()
         {
             return Model.CartridgeStore.Providers.OfType<OneDriveCartridgeProvider>().FirstOrDefault();
         }
 
-        private void RefreshSkyDrive()
+        private void RefreshOneDrive()
         {
             // Refresh provider info.
-            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetOneDriveProvider();
             if (provider == null)
             {
                 // We're sure the provider is not linked.
@@ -415,14 +415,15 @@ namespace Geowigo.ViewModels
                     {
                         advancedStatus = "Synchronized. ";
 
-                        if (!provider.CanDownload)
-                        {
-                            advancedStatus += "Cannot download (folder /Geowigo not found on your OneDrive). ";
-                        }
+                        advancedStatus += "Downloads from OneDrive folder /Geowigo. ";
 
-                        if (!provider.CanUpload)
+                        if (Model.Settings.CanProviderUpload)
                         {
-                            advancedStatus += "Cannot upload (folder /Geowigo/Uploads not found on your OneDrive). ";
+                            advancedStatus += "Uploads to OneDrive folder /Geowigo/Uploads. ";
+                        }
+                        else
+                        {
+                            advancedStatus += "Upload disabled. ";
                         }
                     }
                 }
@@ -486,7 +487,7 @@ namespace Geowigo.ViewModels
                 return;
             }
             
-            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetOneDriveProvider();
 
             if (!newValue && _appSettings.ProviderLinkedHint)
             {
@@ -517,12 +518,12 @@ namespace Geowigo.ViewModels
                 RunSkyDriveProviderLinkWizard();
             }
 
-            RefreshSkyDrive();
+            RefreshOneDrive();
         }
 
         private void RunSkyDriveProviderLinkWizard()
         {
-            OneDriveCartridgeProvider provider = GetSkyDriveProvider();
+            OneDriveCartridgeProvider provider = GetOneDriveProvider();
             
             // Coerce value.
             if (provider.CartridgeCount == 0 ||
