@@ -321,7 +321,10 @@ namespace Geowigo.ViewModels
 			RefreshPlayer();
 
 			// Refreshes the bounds of the map.
-			RefreshBounds(MapAnimationKind.None);
+            if (nav.NavigationMode != System.Windows.Navigation.NavigationMode.Back)
+            {
+                RefreshBounds(MapAnimationKind.None); 
+            }
 
             // Refreshes the app bar.
             RefreshApplicationBar();
