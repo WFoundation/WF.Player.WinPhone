@@ -250,6 +250,7 @@ namespace Geowigo.ViewModels
             _clearCacheWorker.DoWork += ClearCartridgeCacheCore;
 
             _appSettings = App.Current.Model.Settings;
+            _appSettings.PropertyChanged += OnAppSettingsPropertyChanged;
 
             Model.CartridgeStore.PropertyChanged += OnCartridgeStorePropertyChanged;
         }
@@ -417,7 +418,7 @@ namespace Geowigo.ViewModels
 
                         advancedStatus += "Downloads from OneDrive folder /Geowigo. ";
 
-                        if (Model.Settings.CanProviderUpload)
+                        if (_appSettings.CanProviderUpload)
                         {
                             advancedStatus += "Uploads to OneDrive folder /Geowigo/Uploads. ";
                         }
@@ -463,6 +464,14 @@ namespace Geowigo.ViewModels
                 IsProgressBarVisible = isVisible;
                 ProgressBarStatusText = message;
             });
+        }
+
+        private void OnAppSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "CanProviderUpload")
+            {
+                RefreshOneDrive();
+            }
         }
 
         private void OnCartridgeStorePropertyChanged(object sender, PropertyChangedEventArgs e)
