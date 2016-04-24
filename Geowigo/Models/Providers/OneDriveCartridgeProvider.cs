@@ -465,40 +465,6 @@ namespace Geowigo.Models.Providers
 
         private async Task<LiveOperationResult> GetRootFolderChildrenAsync(string folderName)
         {
-            //string folderId = null;
-
-            //// Retrieves all the directories.
-            //var queryFolder = parentFolder + "/files?filter=folders,albums";
-            //var opResult = await _liveClient.GetAsync(queryFolder, CreateTimeoutCancellationToken(GetRequestTimeoutTimeSpan));
-            //dynamic result = opResult.Result;
-
-            //foreach (dynamic folder in result.data)
-            //{
-            //    // Checks if current folder has the passed name.
-            //    if (folder.name.ToLowerInvariant() == folderName.ToLowerInvariant())
-            //    {
-            //        folderId = folder.id;
-            //        break;
-            //    }
-            //}
-
-            //if (folderId == null)
-            //{
-            //    if (!ensureFolderExists)
-            //    {
-            //        throw new InvalidOperationException("Folder " + folderName + " does not exist on target drive.");
-            //    }
-
-            //    // Directory hasn't been found, so creates it using the PostAsync method.
-            //    var folderData = new Dictionary<string, object>();
-            //    folderData.Add("name", folderName);
-            //    opResult = await _liveClient.PostAsync(parentFolder, folderData);
-            //    result = opResult.Result;
-
-            //    // Retrieves the id of the created folder.
-            //    folderId = result.id;
-            //}
-
             // Creates or gets the folder.
             if (_rootFolderId == null)
             {
@@ -611,40 +577,29 @@ namespace Geowigo.Models.Providers
 				return;
 			}
 
-			// Makes a list of files to upload.
-			List<string> toUpload;
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-			{
-				toUpload = isf.GetAllFiles("/*.gws")
-					.Union(isf.GetAllFiles("/*.gwl")
-					.Where(s => ("/"+s).StartsWith(IsoStoreCartridgeContentPath)))
-					.ToList();
-			}
-
-			// Returns if there is nothing to upload.
-			if (toUpload.Count < 1)
-			{
-				EndSync();
-				return;
-			}
-
-			// Stores the list of files to upload.
-			lock (_syncRoot)
-			{
-				_ulFiles = toUpload;
-			}
-
-            foreach (string item in toUpload)
-            {
-                Log("Scheduled for upload " + item);
-            }
-
             // Starts uploads asynchronously.
             Task.Factory.StartNew(BeginUploads);
 		}
 
         private async void BeginUploads()
         {
+            // Makes a list of files to upload.
+            Dictionary<string, DateTime> uploadCandidates;
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                uploadCandidates = isf.GetAllFiles("/*.gws")
+                    .Union(isf.GetAllFiles("/*.gwl")
+                    .Where(s => ("/" + s).StartsWith(IsoStoreCartridgeContentPath)))
+                    .ToDictionary(s => s, s => isf.GetLastWriteTime(s).DateTime.ToUniversalTime());
+            }
+
+            // Returns if there is nothing to upload.
+            if (uploadCandidates.Count < 1)
+            {
+                EndSync();
+                return;
+            }
+
             // Creates or fetches the upload folder.
             if (_uploadsFolderId == null)
             {
@@ -652,12 +607,67 @@ namespace Geowigo.Models.Providers
                 {
                     _uploadsFolderId = await CreateDirectoryAsync(UploadFolderName, _rootFolderId);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Log("Error while ensuring Uploads folder.");
                     EndSync();
                     return;
                 }
+            }
+
+            // Gets the list of files currently in the Uploads folder and removes from the upload candidates
+            // the files that are identical to their remote counterpart.
+            LiveOperationResult r = await _liveClient.GetAsync(_uploadsFolderId + "/files", CreateTimeoutCancellationToken(GetRequestTimeoutTimeSpan));
+            dynamic result = r.Result;
+            foreach (dynamic file in result.data)
+            {
+                // We only consider files in the upload directory.
+                if (file.type != "file")
+                {
+                    continue;
+                }
+
+                // If the file name has no match in the upload candidates, go on.
+                KeyValuePair<string, DateTime> candidate = uploadCandidates
+                    .FirstOrDefault(kvp => Path.GetFileName(kvp.Key) == file.name);
+                if (candidate.Key == null)
+                {
+                    continue;
+                }
+
+                // We have a match. If the remote file is more recent than the local file,
+                // removes the candidate from the list of candidates.
+                try
+                {
+                    DateTime remoteLastModified = DateTime.Parse(file.updated_time).ToUniversalTime();
+                    if (remoteLastModified >= candidate.Value)
+                    {
+                        uploadCandidates.Remove(candidate.Key);
+                        Log("Won't upload " + candidate.Key + " because it is same as, or older than remote file.");
+                    }
+                }
+                catch (Exception)
+                {
+                    // We ignore exceptions and let this file be uploaded.
+                }
+            }
+
+            // Returns if there is nothing to upload.
+            if (uploadCandidates.Count < 1)
+            {
+                EndSync();
+                return;
+            }
+
+            // Stores the list of files to upload.
+            lock (_syncRoot)
+            {
+                _ulFiles = uploadCandidates.Keys.ToList();
+            }
+
+            foreach (string item in uploadCandidates.Keys)
+            {
+                Log("Scheduled for upload " + item);
             }
 
             // Starts uploading the first file. The next ones will be triggered once it finished uploading.
