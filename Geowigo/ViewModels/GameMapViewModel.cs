@@ -76,34 +76,39 @@ namespace Geowigo.ViewModels
 
         private class ThingGroupDataImpl : IThingGroupData
         {
-            private List<Thing> _things = new List<Thing>();
+            private Dictionary<Thing, GeoCoordinate> _things = new Dictionary<Thing, GeoCoordinate>();
             
             public ThingGroupDataImpl(Thing thing)
             {
-                Add(thing);
+                Add(thing, thing.ObjectLocation.ToGeoCoordinate());
+            }
+
+            public ThingGroupDataImpl(Thing thing, GeoCoordinate location)
+            {
+                Add(thing, location);
             }
 
             public GeoCoordinate Location { get; private set; }
 
             public IEnumerable<Thing> Things
             {
-                get { return _things; }
+                get { return _things.Keys; }
             }
 
-            internal void Add(Thing thing)
+            internal void Add(Thing thing, GeoCoordinate location)
             {
                 // Adds this to the list.
-                _things.Add(thing);
+                _things.Add(thing, location);
 
                 // Computes the group's average location.
                 double lat = 0;
                 double lon = 0;
-                foreach (Thing t in _things)
+                foreach (KeyValuePair<Thing, GeoCoordinate> kvp in _things)
                 {
-                    ZonePoint zp = t.ObjectLocation;
+                    GeoCoordinate gc = kvp.Value;
 
-                    lat += zp.Latitude;
-                    lon += zp.Longitude;
+                    lat += gc.Latitude;
+                    lon += gc.Longitude;
                 }
                 lat /= _things.Count;
                 lon /= _things.Count;
@@ -476,7 +481,7 @@ namespace Geowigo.ViewModels
                 {
                     // Gets all things that have a location and are not a zone.
                     IEnumerable<Thing> things = Model.Core.VisibleThings
-                        .Where(t => t.ObjectLocation != null && !(t is Zone));
+                        .Where(t => !(t is Zone));
 
                     // Groups the things depending on distance.
                     IEnumerable<IThingGroupData> groups;
@@ -488,7 +493,7 @@ namespace Geowigo.ViewModels
                     else
                     {
                         // Makes one group per thing.
-                        groups = things.Select(t => new ThingGroupDataImpl(t));
+                        groups = things.Where(t => t.ObjectLocation != null).Select(t => new ThingGroupDataImpl(t));
                     }
 
                     // Checks if the groups changed. If not, don't refresh,
@@ -524,8 +529,31 @@ namespace Geowigo.ViewModels
             // For each thing, if it is close enough to a group, adds it.
             foreach (Thing thing in things)
             {
-                // Gets the location.
-                GeoCoordinate loc = thing.ObjectLocation.ToGeoCoordinate();
+                // Gets the location of this thing, or its container.
+                GeoCoordinate loc = null;
+                Thing container = thing;
+                while (container != null && loc == null)
+                {
+                    if (container is Zone)
+                    {
+                        loc = ((Zone)container).Bounds.Center.ToGeoCoordinate();
+                        break;
+                    }
+                    else if (container.ObjectLocation != null)
+                    {
+                        loc = container.ObjectLocation.ToGeoCoordinate();
+                        break;
+                    }
+                    else
+                    {
+                        container = container.Container;
+                    }
+                }
+                if (loc == null)
+                {
+                    // Ignores this thing, which has no valid location in the world.
+                    continue;
+                }
                 
                 // Is it close enough to a group?
                 ThingGroupDataImpl targetGroup = null;
@@ -542,12 +570,12 @@ namespace Geowigo.ViewModels
                 if (targetGroup != null)
                 {
                     // We found a suitable group.
-                    targetGroup.Add(thing);
+                    targetGroup.Add(thing, loc);
                 }
                 else
                 {
                     // No group worked for this, make one for it.
-                    groups.Add(new ThingGroupDataImpl(thing));
+                    groups.Add(new ThingGroupDataImpl(thing, loc));
                 }
             }
 
