@@ -5,13 +5,15 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
 	xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
 	xmlns:maps="clr-namespace:Microsoft.Phone.Maps.Controls;assembly=Microsoft.Phone.Maps" 
     xmlns:System_Device_Location="clr-namespace:System.Device.Location;assembly=System.Device"
 	xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
     xmlns:System="clr-namespace:System;assembly=mscorlib"
-    xmlns:toolkit="clr-namespace:Microsoft.Phone.Maps.Toolkit;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:toolkitMaps="clr-namespace:Microsoft.Phone.Maps.Toolkit;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:toolkitControls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
 	x:Class="Geowigo.Views.GameMapPage"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
@@ -21,17 +23,23 @@
 
     <Geowigo_Views:BasePage.Resources>
         <DataTemplate x:Key="ThingsPushpinsItemTemplate">
-            <toolkit:Pushpin GeoCoordinate="{Binding Location}">
-                <toolkit:Pushpin.Content>
+            <toolkitMaps:Pushpin GeoCoordinate="{Binding Location}">
+                <toolkitMaps:Pushpin.Content>
                     <Geowigo_Controls:NavigationListBox ItemTemplate="{StaticResource WherigoThingPushpinContentTemplate}" ItemsSource="{Binding Things}" NavigationCommand="{Binding DataContext.ShowThingDetailsCommand, ElementName=ThisGMP, Mode=OneWay}" ScrollViewer.VerticalScrollBarVisibility="Disabled" />
-                </toolkit:Pushpin.Content>
-            </toolkit:Pushpin>
+                </toolkitMaps:Pushpin.Content>
+            </toolkitMaps:Pushpin>
         </DataTemplate>
         <DataTemplate x:Key="ZoneLabelsPushpinsItemTemplate">
-            <toolkit:Pushpin GeoCoordinate="{Binding NameAnchor}" Content="{Binding Name}" ContentTemplate="{StaticResource LandmarkPushpinContentTemplate}" Background="{x:Null}" />
+            <toolkitMaps:Pushpin GeoCoordinate="{Binding NameAnchor}" Content="{Binding Name}" ContentTemplate="{StaticResource LandmarkPushpinContentTemplate}" Background="{x:Null}" />
         </DataTemplate>
         <DataTemplate x:Key="Prout">
-            <toolkit:Pushpin GeoCoordinate="45.651390839766, 5.86409479379654" Content="Prout" />
+            <toolkitMaps:Pushpin GeoCoordinate="45.651390839766, 5.86409479379654" Content="Prout" />
+        </DataTemplate>
+        <sys:String x:Key="ListPickerFullModeHeader">Select map background</sys:String>
+        <DataTemplate x:Key="CartographicModeListPickerItemTemplate">
+            <Grid>
+                <TextBlock Text="{Binding}" FontSize="{StaticResource PhoneFontSizeExtraLarge}" Margin="0,0,0,20" FontFamily="{StaticResource PhoneFontFamilySemiLight}"/>
+            </Grid>
         </DataTemplate>
     </Geowigo_Views:BasePage.Resources>
 
@@ -46,18 +54,19 @@
         </Grid.RowDefinitions>
 
         <Grid x:Name="ContentPanel" Grid.Row="1">
-            <maps:Map x:Name="MapControl" ZoomLevel="16" CartographicMode="Hybrid" ColorMode="Light" Loaded="MapControl_Loaded">
-                <toolkit:MapExtensions.Children>
-                    <toolkit:UserLocationMarker x:Name="PlayerLocationMarker" GeoCoordinate="{Binding PlayerLocation}" Foreground="{StaticResource PhoneAccentBrush}" />
-                    <toolkit:MapItemsControl Name="ZoneLabelsPushpins" ItemTemplate="{StaticResource ZoneLabelsPushpinsItemTemplate}" />
-                    <toolkit:Pushpin x:Name="PlayerPushpin" GeoCoordinate="{Binding PlayerLocation}">
-                        <toolkit:Pushpin.Content>
+            <maps:Map x:Name="MapControl" ZoomLevel="16" CartographicMode="{Binding Model.Settings.MapCartographicMode, Mode=TwoWay}" ColorMode="Light" Loaded="MapControl_Loaded">
+                <toolkitMaps:MapExtensions.Children>
+                    <toolkitMaps:UserLocationMarker x:Name="PlayerLocationMarker" GeoCoordinate="{Binding PlayerLocation}" Foreground="{StaticResource PhoneAccentBrush}" />
+                    <toolkitMaps:MapItemsControl Name="ZoneLabelsPushpins" ItemTemplate="{StaticResource ZoneLabelsPushpinsItemTemplate}" />
+                    <toolkitMaps:Pushpin x:Name="PlayerPushpin" GeoCoordinate="{Binding PlayerLocation}">
+                        <toolkitMaps:Pushpin.Content>
                             <Button Template="{StaticResource NoBorderButtonTemplate}" Content="{Binding Model.Core.Player}" ContentTemplate="{StaticResource WherigoThingPushpinContentTemplate}" Command="{Binding ShowThingDetailsCommand}" CommandParameter="{Binding Model.Core.Player}" />
-                        </toolkit:Pushpin.Content>
-                    </toolkit:Pushpin>
-                    <toolkit:MapItemsControl Name="ThingsPushpins" ItemTemplate="{StaticResource ThingsPushpinsItemTemplate}" />
-                </toolkit:MapExtensions.Children>
+                        </toolkitMaps:Pushpin.Content>
+                    </toolkitMaps:Pushpin>
+                    <toolkitMaps:MapItemsControl Name="ThingsPushpins" ItemTemplate="{StaticResource ThingsPushpinsItemTemplate}" />
+                </toolkitMaps:MapExtensions.Children>
             </maps:Map>
+            <toolkitControls:ListPicker x:Name="CartographicModeListPicker" Visibility="Collapsed" ExpansionMode="FullScreenOnly" FullModeHeader="{StaticResource ListPickerFullModeHeader}" PickerPageUri="/Microsoft.Phone.Controls.Toolkit;component/ListPicker/ListPickerPage.xaml" FullModeItemTemplate="{StaticResource CartographicModeListPickerItemTemplate}" ItemsSource="{Binding CartographicModes}" SelectedItem="{Binding Model.Settings.MapCartographicMode, Mode=TwoWay}" d:LayoutOverrides="Width"/>
         </Grid>
     </Grid>
 

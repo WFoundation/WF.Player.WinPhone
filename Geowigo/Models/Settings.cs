@@ -140,6 +140,33 @@ namespace Geowigo.Models
 
         #endregion
 
+        #region MapCartographicMode
+        private static string MapCartographicModeSettingKey = "Map.CartographicMode";
+
+        /// <summary>
+        /// Gets or sets the preferred cartographic mode of the map.
+        /// </summary>
+        public Microsoft.Phone.Maps.Controls.MapCartographicMode MapCartographicMode
+        {
+            get
+            {
+                return _settings.GetValueOrDefault<Microsoft.Phone.Maps.Controls.MapCartographicMode>(MapCartographicModeSettingKey, Microsoft.Phone.Maps.Controls.MapCartographicMode.Hybrid);
+            }
+
+            set
+            {
+                bool changed = value != _settings.GetValueOrDefault<Microsoft.Phone.Maps.Controls.MapCartographicMode>(MapCartographicModeSettingKey, Microsoft.Phone.Maps.Controls.MapCartographicMode.Hybrid);
+
+                _settings.SetValueAndSave(MapCartographicModeSettingKey, value);
+
+                if (changed)
+                {
+                    RaisePropertyChanged("MapCartographicMode");
+                }
+            }
+        }
+        #endregion
+
         #endregion
 
         public Settings()

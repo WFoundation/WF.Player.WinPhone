@@ -188,6 +188,16 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+        #region CartographicModes
+        public Array CartographicModes
+        {
+            get
+            {
+                return Enum.GetValues(typeof(MapCartographicMode));
+            }
+        }
+        #endregion
+
 		#endregion
 
 		#region Commands
@@ -234,10 +244,21 @@ namespace Geowigo.ViewModels
 			}
 		}
 
-
 		#endregion
 
-        
+        #region SelectMapCartographicModeCommand
+
+        private ICommand _SelectMapCartographicModeCommand;
+
+        public ICommand SelectMapCartographicModeCommand
+        {
+            get
+            {
+                return _SelectMapCartographicModeCommand ?? (_SelectMapCartographicModeCommand = new RelayCommand(SelectMapCartographicMode));
+            }
+        }
+
+        #endregion
 
 		#endregion
 
@@ -247,6 +268,8 @@ namespace Geowigo.ViewModels
 
 		public event EventHandler<MapViewRequestedEventArgs> MapViewRequested;
 
+        public event EventHandler SelectCartographicModeRequested;
+
 		#endregion
 
 		#region Constants
@@ -255,7 +278,7 @@ namespace Geowigo.ViewModels
 
         private const double PLAYER_ZOOM_LEVEL = 19d;
 
-		private const int ACCURACY_CIRCLE_SAMPLES = 50;
+		private const int ACCURACY_CIRCLE_SAMPLES = 25;
 
         private const double MAX_THING_GROUP_DISTANCE_PX = 50;
 
@@ -556,11 +579,11 @@ namespace Geowigo.ViewModels
             IApplicationBar appBar = new ApplicationBar()
             {
                 Mode = ApplicationBarMode.Default,
-                Opacity = 0.25,
+                Opacity = 0.5,
                
             };
 
-            //appBar.CreateAndAddMenuItem(ShowMapSettingsCommand, "map settings...");
+            appBar.CreateAndAddMenuItem(SelectMapCartographicModeCommand, "change map background");
 
             appBar.CreateAndAddButton("appbar.location.circle.png", MoveMapViewToPlayerCommand, "me");
 
@@ -623,6 +646,14 @@ namespace Geowigo.ViewModels
             if (e != null && MapViewRequested != null)
             {
                 MapViewRequested(this, e);
+            }
+        }
+
+        private void SelectMapCartographicMode()
+        {
+            if (SelectCartographicModeRequested != null)
+            {
+                SelectCartographicModeRequested(this, EventArgs.Empty);
             }
         }
 

@@ -60,7 +60,8 @@ namespace Geowigo.Views
             ViewModel.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(OnViewModelPropertyChanged);
             ViewModel.Zones.CollectionChanged += OnViewModelZonesCollectionChanged;
             ViewModel.MapViewRequested += new EventHandler<GameMapViewModel.MapViewRequestedEventArgs>(OnViewModelMapViewRequested);
-            
+            ViewModel.SelectCartographicModeRequested += ViewModel_SelectCartographicModeRequested;
+
             // Adds map events.
             MapControl.ZoomLevelChanged += OnMapZoomLevelChanged;
 		}
@@ -117,7 +118,7 @@ namespace Geowigo.Views
             // Finds the right control.
             MapItemsControl mapItemsControl = MapExtensions.GetChildren(MapControl)
                 .OfType<MapItemsControl>()
-                .FirstOrDefault(mic => mic.Name == name);
+                .First(mic => mic.Name == name);
             
             // Binds the property.
             mapItemsControl.ItemsSource = source;
@@ -210,5 +211,14 @@ namespace Geowigo.Views
                 }
             }
         }
+
+        #region Cartographic Mode Picker
+
+        private void ViewModel_SelectCartographicModeRequested(object sender, EventArgs e)
+        {
+            // Opens the list picker to pick a mode.
+            CartographicModeListPicker.Open();
+        } 
+        #endregion
 	}
 }

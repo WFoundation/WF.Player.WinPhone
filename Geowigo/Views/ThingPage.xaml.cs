@@ -58,7 +58,7 @@ namespace Geowigo.Views
 		#region Command Target Selection
 		private void ViewModel_CommandTargetRequested(object sender, ThingViewModel.CommandTargetRequestedEventArgs e)
 		{
-			// Tags the list picker with the current command for latter use.
+			// Tags the list picker with the current command for later use.
 			_CommandTargetListPicker.Tag = e;
 
 			// Creates the list picker collection with a first collapsed null item,
