@@ -400,7 +400,7 @@ namespace Geowigo.ViewModels
 				int entriesToRemove = 0;
 				foreach (JournalEntry item in backStack)
 				{
-					if (item.Source.OriginalString == source.OriginalString)
+					if (item.Source.OriginalString.Replace("//", "/") == source.OriginalString)
 					{
 						hasSimilarUri = true;
 						break;
