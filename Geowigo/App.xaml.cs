@@ -12,12 +12,49 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using Windows.Phone.Storage.SharedAccess;
 
 namespace Geowigo
 {
     public partial class App : Application
     {
-		#region Fields
+        #region Nested Classes
+        internal class AppUriMapper : UriMapperBase
+        {
+            public override Uri MapUri(Uri uri)
+            {
+                string tempUri = uri.ToString();
+
+                // File association launch
+                if (tempUri.Contains("/FileTypeAssociation"))
+                {
+                    // Get the file ID (after "fileToken=").
+                    int fileIDIndex = tempUri.IndexOf("fileToken=") + 10;
+                    string fileID = tempUri.Substring(fileIDIndex);
+
+                    // Get the file name.
+                    string incomingFileName = SharedStorageAccessManager.GetSharedFileName(fileID);
+
+                    // Get the file extension.
+                    string incomingFileType = System.IO.Path.GetExtension(incomingFileName);
+
+                    // Map the recognized files to different pages.
+                    switch (incomingFileType)
+                    {
+                        case ".gwc":
+                            return new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}", ViewModels.CartridgeInfoViewModel.FileTokenKey, fileID), UriKind.Relative);
+                        default:
+                            return new Uri("/MainPage.xaml", UriKind.Relative);
+                    }
+                }
+
+                // Otherwise perform normal launch.
+                return uri;
+            }
+        }
+        #endregion
+        
+        #region Fields
 
 		private ViewModels.AppViewModel _appViewModel;
 
@@ -183,6 +220,9 @@ namespace Geowigo
             // démarrage de rester actif jusqu'à ce que l'application soit prête pour le rendu.
             RootFrame = new PhoneApplicationFrame();
             RootFrame.Navigated += CompleteInitializePhoneApplication;
+
+            // Assign the URI-mapper class to the application frame.
+            RootFrame.UriMapper = new AppUriMapper();
 
             // Gérer les erreurs de navigation
             RootFrame.NavigationFailed += RootFrame_NavigationFailed;

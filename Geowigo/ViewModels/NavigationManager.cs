@@ -9,6 +9,7 @@ using System.Windows.Navigation;
 using WF.Player.Core.Threading;
 using System.Collections.Generic;
 using System.Threading;
+using Geowigo.Utils;
 
 namespace Geowigo.ViewModels
 {
@@ -380,6 +381,16 @@ namespace Geowigo.ViewModels
 
 			#region Back Stack Conforming
 
+            private void ClearBackStack()
+            {
+                int entriesToRemove = _rootFrame.BackStack.Count();
+                for (int i = 0; i < entriesToRemove; i++)
+                {
+                    // Not at the right page yet, removes the entry.
+                    _rootFrame.RemoveBackEntry();
+                }
+            }
+
 			private bool ClearBackStackFor(Uri source)
 			{
 				// Makes a list of back stack journal entries.
@@ -400,7 +411,7 @@ namespace Geowigo.ViewModels
 				int entriesToRemove = 0;
 				foreach (JournalEntry item in backStack)
 				{
-					if (item.Source.OriginalString.Replace("//", "/") == source.OriginalString)
+					if (item.Source.ToNormalizedString() == source.OriginalString)
 					{
 						hasSimilarUri = true;
 						break;
@@ -435,14 +446,20 @@ namespace Geowigo.ViewModels
 				// GameExtra -> Do not change anything.
 				// App -> Removes all entries up to and including the previous
 				//		entry for this page only if the stack contains this.
-				// Others -> Do not change anything.
+                // Others -> Do not change anything.
 				PageScope latestPageScope = _parent.GetPageScope(latestNavigatedUri);
 
 				if (latestPageScope == PageScope.App)
 				{
-					// If the page Uri can be found in the back stack,
-					// clears entries up to and including the back stack.
-					if (ClearBackStackFor(latestNavigatedUri))
+					// If this is the home page, empties the whole back stack, in order 
+                    // to leave the home page as the root page of the app.
+                    if (latestNavigatedUri.ToNormalizedString().StartsWith("/Views/HomePage.xaml"))
+                    {
+                        ClearBackStack();
+                    }
+                    
+                    // If the page Uri can be found in the back stack, clears entries up to and including the back stack.
+					else if (ClearBackStackFor(latestNavigatedUri))
 					{
 						_rootFrame.RemoveBackEntry();
 					}
@@ -472,7 +489,7 @@ namespace Geowigo.ViewModels
 				{
 					_rootFrame.RemoveBackEntry();
 				}
-			} 
+			}
 
 			#endregion
 
@@ -539,7 +556,7 @@ namespace Geowigo.ViewModels
 
 		private PageScope GetPageScope(Uri pageUri)
 		{
-			string pageName = pageUri.ToString().Replace("//", "/");
+			string pageName = pageUri.ToNormalizedString();
 			string prefix = "/Views/";
 
 			PageScope scope = PageScope.Unknown;
@@ -563,7 +580,8 @@ namespace Geowigo.ViewModels
 			{
 				scope = PageScope.GameExtra;
 			}
-			else if (pageName.StartsWith(prefix + "BetaLicensePage.xaml"))
+			else if (pageName.StartsWith(prefix + "BetaLicensePage.xaml")
+                || pageName.StartsWith("/FileTypeAssociation"))
 			{
 				scope = PageScope.OneShot;
 			}

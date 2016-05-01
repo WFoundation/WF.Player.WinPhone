@@ -177,6 +177,7 @@
     <Compile Include="Utils\ConverterExtensions.cs" />
     <Compile Include="Utils\IsolatedStorageExtensions.cs" />
     <Compile Include="Utils\ProgressAggregator.cs" />
+    <Compile Include="Utils\SystemExtensions.cs" />
     <Compile Include="Utils\WherigoExtensions.cs" />
     <Compile Include="ViewModels\GameMapViewModel.cs" />
     <Compile Include="ViewModels\InputManager.cs" />
@@ -409,6 +410,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\BadgeLogo.png" />
+    <Content Include="Assets\File_GWC_Large.png" />
+    <Content Include="Assets\File_GWC_Medium.png" />
+    <Content Include="Assets\File_GWC_Small.png" />
     <Content Include="Assets\Logo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\SquareTile150x150.png" />

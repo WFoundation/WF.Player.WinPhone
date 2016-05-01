@@ -74,7 +74,7 @@ namespace Geowigo.Models
                 if (_tag == null)
                 {
                     // Binds the cartridge tag.
-                    _tag = App.Current.Model.CartridgeStore.GetCartridgeTagOrDefault(RelatedCartridgeFilename, RelatedCartridgeGuid);
+                    _tag = App.Current.Model.CartridgeStore.GetCartridgeTag(RelatedCartridgeFilename, RelatedCartridgeGuid);
                 }
 
                 return _tag;

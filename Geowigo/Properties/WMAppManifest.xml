@@ -36,6 +36,18 @@
         </TemplateFlip>
       </PrimaryToken>
     </Tokens>
+    <Extensions>
+      <FileTypeAssociation Name="Groundspeak Wherigo File" TaskID="_default" NavUriFragment="fileToken=%s">
+        <Logos>
+          <Logo Size="small" IsRelative="true">Assets/File_GWC_Small.png</Logo>
+          <Logo Size="medium" IsRelative="true">Assets/File_GWC_Medium.png</Logo>
+          <Logo Size="large" IsRelative="true">Assets/File_GWC_Large.png</Logo>
+        </Logos>
+        <SupportedFileTypes>
+          <FileType ContentType="application/gwc">.gwc</FileType>
+        </SupportedFileTypes>
+      </FileTypeAssociation>
+    </Extensions>
     <ScreenResolutions>
       <ScreenResolution Name="ID_RESOLUTION_WVGA" />
       <ScreenResolution Name="ID_RESOLUTION_WXGA" />

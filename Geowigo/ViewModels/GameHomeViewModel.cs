@@ -449,7 +449,7 @@ namespace Geowigo.ViewModels
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filename))
 			{
 				// Gets the cartridge tag for this cartridge.
-				CartridgeTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filename);
+				CartridgeTag = Model.CartridgeStore.GetCartridgeTag(filename);
 				
 				string gwsFilename;
 

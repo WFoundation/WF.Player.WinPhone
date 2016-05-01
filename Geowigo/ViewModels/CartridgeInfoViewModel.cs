@@ -39,7 +39,8 @@ namespace Geowigo.ViewModels
         
         #region Constants
         public static readonly string CartridgeFilenameKey = "filename";
-        public static readonly string CartridgeIdKey = "cid"; 
+        public static readonly string CartridgeIdKey = "cid";
+        public static readonly string FileTokenKey = "fileToken";
         #endregion
 		
 		#region Dependency Properties
@@ -269,29 +270,55 @@ namespace Geowigo.ViewModels
 		protected override void InitFromNavigation(NavigationInfo nav)
 		{
 			System.Windows.Navigation.NavigationContext navCtx = nav.NavigationContext;
+            bool shouldCancel = false;
+
+            // Shows a progress bar.
+            IsProgressBarVisible = true;
+            ProgressBarStatusText = null;
 
 			// Parses the cartridge guid parameter and tries to get its tag.
 			string filenameParam;
 			string cidParam;
+            string fileTokenParam;
 			if (navCtx.QueryString.TryGetValue(CartridgeFilenameKey, out filenameParam) && 
 				navCtx.QueryString.TryGetValue(CartridgeIdKey, out cidParam))
 			{
-				CartridgeTag = Model.CartridgeStore.GetCartridgeTagOrDefault(filenameParam, cidParam);
-
-				if (CartridgeTag != null)
-				{
-					Cartridge = CartridgeTag.Cartridge;
-					WherigoObject = CartridgeTag.Cartridge;
-				}
-
-				// TODO: Handle case where CartridgeTag == null
-
-				// Refreshes content.
-				RefreshAppBar();
-                RefreshStaticContent();
-                RefreshLocatedContent();
-                RefreshSavegames();
+				// Opens a cartridge from filename.
+                CartridgeTag = Model.CartridgeStore.GetCartridgeTag(filenameParam, cidParam);
 			}
+            else if (navCtx.QueryString.TryGetValue(FileTokenKey, out fileTokenParam))
+            {
+                // Opens a cartridge from file association token.
+
+                CartridgeTag = Model.CartridgeStore.GetCartridgeTagFromFileAssociation(fileTokenParam);
+            }
+
+            // Quits if the tag is null.
+            if (CartridgeTag == null)
+            {
+                shouldCancel = true;
+                MessageBox.Show("Sorry, Geowigo cannot open this cartridge.", "Error", MessageBoxButton.OK);
+            }
+
+            // Leave now if we need to cancel.
+            if (shouldCancel)
+            {
+                App.Current.ViewModel.NavigationManager.NavigateBack();
+                return;
+            }
+
+            // The progress bar is not needed anymore.
+            IsProgressBarVisible = false;
+
+            // Inits the data context.
+            Cartridge = CartridgeTag.Cartridge;
+            WherigoObject = CartridgeTag.Cartridge;
+
+            // Refreshes content.
+            RefreshAppBar();
+            RefreshStaticContent();
+            RefreshLocatedContent();
+            RefreshSavegames();
 		}
 
         #region Savegames Long List
@@ -337,7 +364,7 @@ namespace Geowigo.ViewModels
         private bool CanCartridgeRun(WF.Player.Core.Cartridge cart)
         {
             bool canCartridgeRun = true;
-            
+
             // Checks if a good location is available.
             double? locationAccuracy = null;
             if (Model.Core.DeviceLocation != null)
@@ -399,7 +426,12 @@ namespace Geowigo.ViewModels
 
         private bool CanNavigateToStartExecute()
         {
-            return !Cartridge.IsPlayAnywhere;
+            if (System.ComponentModel.DesignerProperties.IsInDesignTool)
+            {
+                return false;
+            }
+            
+            return Cartridge != null && !Cartridge.IsPlayAnywhere;
         }
 
 		#endregion
@@ -444,6 +476,11 @@ namespace Geowigo.ViewModels
 
         private void RefreshLocatedContent()
         {
+            if (Cartridge == null)
+            {
+                return;
+            }
+
             // Starting point.
             if (Cartridge.IsPlayAnywhere)
             {

@@ -6,7 +6,7 @@ using System.IO;
 namespace Geowigo.Utils
 {
 	public static class IsolatedStorageExtensions
-	{
+	{        
         public static void DeleteDirectoryRecursive(this IsolatedStorageFile storeFile, string dir)
         {
             // Avoids an exception.

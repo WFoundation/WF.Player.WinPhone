@@ -15,8 +15,15 @@ namespace Geowigo.Converters
             ZonePoint zp = value as ZonePoint;
             if (zp == null)
             {
-                return null;
-            }
+                if (parameter != "NoNull")
+                {
+                    return null;
+                }
+                else
+                {
+                    zp = new ZonePoint(0, 0, 0);
+                }
+            } 
 
             return zp.ToGeoCoordinate();
         }

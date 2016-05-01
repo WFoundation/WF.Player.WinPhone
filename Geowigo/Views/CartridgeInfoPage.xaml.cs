@@ -30,6 +30,9 @@ namespace Geowigo.Views
 		public CartridgeInfoPage()
 		{
 			InitializeComponent();
+
+            // Adds a blocking content presenter for cartridge loading.
+            AddBlockingContentPresenter();
 		}
 
 		private void StaticMap_StatusChanged(object sender, JeffWilcox.Controls.StaticMapStatusChangedEventArgs e)

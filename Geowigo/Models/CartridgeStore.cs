@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Collections.Specialized;
 using Geowigo.Models.Providers;
 using Geowigo.Utils;
+using Windows.Phone.Storage.SharedAccess;
+using Windows.Storage;
 
 namespace Geowigo.Models
 {
@@ -68,6 +70,17 @@ namespace Geowigo.Models
 				return "/Cartridges";
 			}
 		}
+
+        /// <summary>
+        /// Gets the path to the folder containing data from cartridges imported from file association in the isolated storage.
+        /// </summary>
+        public string IsoStoreFileAssociationCartridgesPath
+        {
+            get
+            {
+                return IsoStoreCartridgesPath + "/FileAssociation";
+            }
+        }
 		
 		/// <summary>
 		/// Gets if this instance is busy loading cartridges.
@@ -131,7 +144,7 @@ namespace Geowigo.Models
 		/// </summary>
 		/// <param name="cartridge">The Cartridge to get the tag for.</param>
 		/// <returns></returns>
-		public CartridgeTag GetCartridgeTagOrDefault(Cartridge cartridge)
+		public CartridgeTag GetCartridgeTag(Cartridge cartridge)
 		{
 			lock (_syncRoot)
 			{
@@ -148,7 +161,7 @@ namespace Geowigo.Models
 		/// <param name="filename">Filename of the cartridge.</param>
 		/// <param name="guid">Guid of the Cartridge to get.</param>
 		/// <returns>Null if the tag was not found or the GUIDs didn't match.</returns>
-		public CartridgeTag GetCartridgeTagOrDefault(string filename, string guid)
+		public CartridgeTag GetCartridgeTag(string filename, string guid)
 		{
 			CartridgeTag tag = null;
 			lock (_syncRoot)
@@ -176,10 +189,57 @@ namespace Geowigo.Models
 		/// <param name="filename">Filename of the cartridge.</param>
 		/// <returns>The single cartridge tag to match this filename, or null if 
 		/// the cartridge was not found.</returns>
-		public CartridgeTag GetCartridgeTagOrDefault(string filename)
+		public CartridgeTag GetCartridgeTag(string filename)
 		{
 			return AcceptCartridge(filename);
 		}
+
+        /// <summary>
+        /// Gets the single tag for a cartridge imported from a file association token.
+        /// </summary>
+        /// <param name="fileToken"></param>
+        /// <returns>The single cartridge tag to match this token, or null if 
+        /// the cartridge could not be imported.</returns>
+        public CartridgeTag GetCartridgeTagFromFileAssociation(string fileToken)
+        {
+            try
+            {
+                // Gets the target filename.
+                string filename = SharedStorageAccessManager.GetSharedFileName(fileToken);
+                if (System.IO.Path.GetExtension(filename) != ".gwc")
+                {
+                    return null;
+                }
+                string filepath = System.IO.Path.Combine(IsoStoreFileAssociationCartridgesPath, fileToken, filename);
+
+                // Copies the file to isostore.
+                SharedStorageAccessManager.CopySharedFileAsync(
+                    ApplicationData.Current.LocalFolder,
+                    filename,
+                    NameCollisionOption.ReplaceExisting,
+                    fileToken)
+                    .AsTask()
+                    .Wait();
+
+                // Creates the target directory in the isostore.
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    // Creates the folder.
+                    isf.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
+
+                    // Copies the file to its destination.
+                    // We overwrite because we assume that tokens are unique for each file.
+                    isf.CopyFile(filename, filepath, true);
+                }
+
+                // Accepts the file.
+                return AcceptCartridge(filepath);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
 
 		#endregion
 
@@ -204,14 +264,14 @@ namespace Geowigo.Models
 			// Opens the isolated storage.
 			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 			{
-				// Makes sure the folder exists.
+                // Makes sure the folder exists.
 				isf.CreateDirectory(IsoStoreCartridgesPath);
 
 				// Goes through all the sub-directories and accepts the cartridge files.
 				IEnumerable<string> dirs = GetAllDirectoryNames(isf, IsoStoreCartridgesPath);
 				foreach (string dir in dirs)
 				{
-					// Imports all GWC files from the directory.
+                    // Imports all GWC files from the directory.
 					foreach (string filename in isf.GetFileNames(dir + "/*.gwc"))
 					{
 						string filepath = dir + "/" + filename;

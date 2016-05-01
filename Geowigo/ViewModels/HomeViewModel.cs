@@ -501,12 +501,13 @@ namespace Geowigo.ViewModels
 
         private void RefreshRecentCartridges()
         {
-            IEnumerable<CartridgeTag> recentCarts = Model.History
+            CartridgeTag[] recentCarts = Model.History
                 .OrderByDescending(he => he.Timestamp)
                 .GroupBy(he => he.RelatedCartridgeFilename)
                 .Take(8)
-                .Select(ig => Model.CartridgeStore.GetCartridgeTagOrDefault(ig.Key))
-                .Where(ct => ct != null);
+                .Select(ig => Model.CartridgeStore.GetCartridgeTag(ig.Key))
+                .Where(ct => ct != null)
+                .ToArray();
 
             RecentCartridges = recentCarts.Count() > 0 ? recentCarts : null;
         }
