@@ -74,11 +74,11 @@ namespace Geowigo.Models
         /// <summary>
         /// Gets the path to the folder containing data from cartridges imported from file association in the isolated storage.
         /// </summary>
-        public string IsoStoreFileAssociationCartridgesPath
+        public string IsoStoreFileTypeAssociationCartridgesPath
         {
             get
             {
-                return IsoStoreCartridgesPath + "/FileAssociation";
+                return IsoStoreCartridgesPath + "/FileTypeAssociation";
             }
         }
 		
@@ -204,13 +204,12 @@ namespace Geowigo.Models
         {
             try
             {
-                // Gets the target filename.
+                // Gets the source filename.
                 string filename = SharedStorageAccessManager.GetSharedFileName(fileToken);
                 if (System.IO.Path.GetExtension(filename) != ".gwc")
                 {
                     return null;
                 }
-                string filepath = System.IO.Path.Combine(IsoStoreFileAssociationCartridgesPath, fileToken, filename);
 
                 // Copies the file to isostore.
                 SharedStorageAccessManager.CopySharedFileAsync(
@@ -222,14 +221,43 @@ namespace Geowigo.Models
                     .Wait();
 
                 // Creates the target directory in the isostore.
+                string filepath;
                 using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
                 {
-                    // Creates the folder.
+                    // Gets the cartridge guid.
+                    Cartridge cart = new Cartridge(filename);
+                    using (IsolatedStorageFileStream isfs = isf.OpenFile(filename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    {
+                        try
+                        {
+                            WF.Player.Core.Formats.CartridgeLoaders.LoadMetadata(isfs, cart);
+                        }
+                        catch (Exception ex)
+                        {
+                            // This cartridge seems improper to load.
+                            // Let's just dump the exception and return.
+                            DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+                            System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Loading failed, ignored : " + filename);
+                            return null;
+                        }
+                    } 
+
+                    // Sanity check.
+                    if (String.IsNullOrWhiteSpace(cart.Guid)) 
+                    {
+                        return null;
+                    }
+                    
+                    // Creates the folder for the file.
+                    // Shared file tokens are not unique for each file, so we need the cartridge guid to distinguish unique
+                    // files.
+                    filepath = System.IO.Path.Combine(IsoStoreFileTypeAssociationCartridgesPath, cart.Guid, filename);
                     isf.CreateDirectory(System.IO.Path.GetDirectoryName(filepath));
 
-                    // Copies the file to its destination.
-                    // We overwrite because we assume that tokens are unique for each file.
+                    // Moves the file to its destination.
+                    // We overwrite because the cartridge GUID+filename should ensure unicity of the file.
                     isf.CopyFile(filename, filepath, true);
+                    isf.DeleteFile(filename);
                 }
 
                 // Accepts the file.

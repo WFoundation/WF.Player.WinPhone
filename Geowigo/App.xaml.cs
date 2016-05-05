@@ -26,25 +26,32 @@ namespace Geowigo
                 string tempUri = uri.ToString();
 
                 // File association launch
-                if (tempUri.Contains("/FileTypeAssociation"))
+                if (tempUri.StartsWith("/FileTypeAssociation"))
                 {
-                    // Get the file ID (after "fileToken=").
-                    int fileIDIndex = tempUri.IndexOf("fileToken=") + 10;
-                    string fileID = tempUri.Substring(fileIDIndex);
-
-                    // Get the file name.
-                    string incomingFileName = SharedStorageAccessManager.GetSharedFileName(fileID);
-
-                    // Get the file extension.
-                    string incomingFileType = System.IO.Path.GetExtension(incomingFileName);
-
-                    // Map the recognized files to different pages.
-                    switch (incomingFileType)
+                    try
                     {
-                        case ".gwc":
-                            return new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}", ViewModels.CartridgeInfoViewModel.FileTokenKey, fileID), UriKind.Relative);
-                        default:
-                            return new Uri("/MainPage.xaml", UriKind.Relative);
+                        // Get the file ID (after "fileToken=").
+                        int fileIDIndex = tempUri.IndexOf("fileToken=") + 10;
+                        string fileID = tempUri.Substring(fileIDIndex);
+
+                        // Get the file name.
+                        string incomingFileName = SharedStorageAccessManager.GetSharedFileName(fileID);
+
+                        // Get the file extension.
+                        string incomingFileType = System.IO.Path.GetExtension(incomingFileName);
+
+                        // Map the recognized files to different pages.
+                        switch (incomingFileType)
+                        {
+                            case ".gwc":
+                                return new Uri(String.Format("/Views/CartridgeInfoPage.xaml?{0}={1}", ViewModels.CartridgeInfoViewModel.FileTokenKey, fileID), UriKind.Relative);
+                            default:
+                                return new Uri("/MainPage.xaml", UriKind.Relative);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        return uri;
                     }
                 }
 
