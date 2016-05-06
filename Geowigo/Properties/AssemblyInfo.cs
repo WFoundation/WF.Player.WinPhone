@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("Geowigo")]
 [assembly: AssemblyDescription("Wherigo Player for Windows Phone")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wherigo Foundation")]
+[assembly: AssemblyCompany("Mangatome")]
 [assembly: AssemblyProduct("Geowigo")]
-[assembly: AssemblyCopyright("Copyright Brice Clocher & Wherigo Foundation ©  2012 - 2014")]
+[assembly: AssemblyCopyright("Copyright Mangatome & Wherigo Foundation ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
