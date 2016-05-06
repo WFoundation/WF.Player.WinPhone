@@ -408,6 +408,15 @@ namespace Geowigo.Models
 
                 // Clears cache.
                 tag.ClearCache(); 
+
+                // Deletes the file.
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (isf.FileExists(filename))
+                    {
+                        isf.DeleteFile(filename);
+                    }
+                }
             }
 
             // Removes the tag.
