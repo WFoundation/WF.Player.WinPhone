@@ -295,7 +295,7 @@ namespace Geowigo.ViewModels
                 sb.AppendLine("This is the last version of Geowigo which supports Windows Phone 7.5 and 8.0.\n");
                 sb.AppendLine("Despite being fully able to run Wherigo 1.0 cartridges, this version does not support some of the features one would expect from a modern Wherigo app, such as offline maps...\n");
                 sb.AppendLine("If you can see this message, consider upgrading to Windows Phone 8.1 or later, or if you are already using a modern phone, make sure that Geowigo is up-to-date.\n");
-                sb.AppendLine("Thank you, and have fun.\nMangatome, for the Wherigo Foundation.");
+                sb.AppendLine("Thank you, and have fun.\nMangatome");
                 CheckBox cb = new CheckBox()
                 {
                     Content = "Never show this message again",
