@@ -9,9 +9,9 @@ using System.Resources;
 [assembly: AssemblyTitle("Geowigo")]
 [assembly: AssemblyDescription("Wherigo Player for Windows Phone")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wherigo Foundation")]
+[assembly: AssemblyCompany("Mangatome")]
 [assembly: AssemblyProduct("Geowigo")]
-[assembly: AssemblyCopyright("Copyright Brice Clocher & Wherigo Foundation ©  2012 - 2014")]
+[assembly: AssemblyCopyright("Copyright Mangatome & Wherigo Foundation ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,6 +32,6 @@ using System.Resources;
 //
 // Vous pouvez spécifier toutes les valeurs ou indiquer les numéros de révision et de build par défaut 
 // en utilisant '*', comme indiqué ci-dessous :
-[assembly: AssemblyVersion("1.0.25")]
-[assembly: AssemblyFileVersion("1.0.25")]
+[assembly: AssemblyVersion("1.0.25.1")]
+[assembly: AssemblyFileVersion("1.0.25.1")]
 [assembly: NeutralResourcesLanguageAttribute("en")]
