@@ -366,6 +366,16 @@ namespace Geowigo.Models
 			}
 		}
 
+        /// <summary>
+        /// Gets the provider which a cartridge comes from, if any.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public ICartridgeProvider GetCartridgeTagProvider(CartridgeTag tag)
+        {
+            return Providers.FirstOrDefault(p => tag.Cartridge.Filename.StartsWith(p.IsoStoreCartridgesPath));
+        }
+
 		#endregion
 
         public void SyncAll()
@@ -375,6 +385,37 @@ namespace Geowigo.Models
         }
 
 		#region Tag Acceptance
+
+        /// <summary>
+        /// Removes a cartridge from the store, optionally deleting its contents from the isolated
+        /// storage.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="deleteContents"></param>
+        public void RemoveCartridgeTag(CartridgeTag tag, bool deleteContents)
+        {
+            string filename = tag.Cartridge.Filename;
+            System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to delete cartridge " + filename);
+            
+            // Updates the progress.
+            string businessTag = "delete:" + filename;
+            _isBusyAggregator[businessTag] = true;
+
+            if (deleteContents)
+            {
+                // Clears savegames.
+                tag.RemoveAllSavegames();
+
+                // Clears cache.
+                tag.ClearCache(); 
+            }
+
+            // Removes the tag.
+            RejectCartridge(filename);
+
+            // We're done!
+            _isBusyAggregator[businessTag] = false;
+        }
 
 		/// <summary>
 		/// Ensures that a cartridge is not present in the store.
@@ -387,7 +428,7 @@ namespace Geowigo.Models
 			System.Diagnostics.Debug.WriteLine("CartridgeStore: Trying to reject cartridge " + filename);
 
 			// Updates the progress.
-			string businessTag = "reject" + filename;
+			string businessTag = "reject:" + filename;
 			_isBusyAggregator[businessTag] = true;
 
 			lock (_syncRoot)

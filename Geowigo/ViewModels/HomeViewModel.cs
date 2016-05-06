@@ -260,6 +260,23 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+        #region DeleteCartridgeCommand
+        private ICommand _DeleteCartridgeCommand;
+
+        public ICommand DeleteCartridgeCommand
+        {
+            get
+            {
+                if (_DeleteCartridgeCommand == null)
+                {
+                    _DeleteCartridgeCommand = new RelayCommand<CartridgeTag>(DeleteCartridge);
+                }
+
+                return _DeleteCartridgeCommand;
+            }
+        }
+        #endregion
+
 		#endregion
 
 		protected override void InitFromNavigation(NavigationInfo nav)
@@ -431,6 +448,49 @@ namespace Geowigo.ViewModels
 			task.Uri = new Uri("http://forums.groundspeak.com/GC/index.php?showtopic=315741", UriKind.Absolute);
 			task.Show();
 		}
+
+        private void DeleteCartridge(CartridgeTag tag)
+        {
+            /// Makes a confirmation message.
+
+            ICartridgeProvider provider = Model.CartridgeStore.GetCartridgeTagProvider(tag);
+            int savegameCount = tag.Savegames.Count();
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            sb.AppendFormat("Geowigo will delete {0} and all its contents", tag.Title);
+            if (savegameCount > 0)
+            {
+                sb.AppendFormat(", including {0} savegames.", savegameCount);
+            }
+            else
+            {
+                sb.Append(".");
+            }
+            sb.AppendLine();
+            sb.AppendLine();
+
+            if (provider != null)
+            {
+                sb.AppendFormat(
+                    "Since {0} was downloaded from {1}, it may be downloaded again the next time Geowigo will sync with {1}, unless you remove it from the Geowigo folder on your {1}.",
+                    tag.Title,
+                    provider.ServiceName);
+                sb.AppendLine();
+                sb.AppendLine();
+            }
+
+            sb.AppendLine("Do you want to continue?");
+
+            /// Asks for confirmation.
+            if (System.Windows.MessageBox.Show(sb.ToString(), "Delete " + tag.Title, MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK)
+            {
+                // Cancels.
+                return;
+            }
+
+            /// Deletes everything.
+            Model.DeleteCartridgeAndContent(tag);
+        }
 
         #endregion
 

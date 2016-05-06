@@ -412,6 +412,21 @@ namespace Geowigo.Models
         }
 
         /// <summary>
+        /// Removes all savegames' contents from this tag and the isolated storage.
+        /// </summary>
+        public void RemoveAllSavegames()
+        {
+            foreach (CartridgeSavegame cs in _savegames)
+            {
+                cs.RemoveFromIsoStore();
+            }
+
+            _savegames.Clear();
+
+            RaisePropertyChanged("Savegames");
+        }
+
+        /// <summary>
         /// Gets a savegame of this cartridge by name, or null if none
         /// is found.
         /// </summary>
@@ -425,6 +440,17 @@ namespace Geowigo.Models
 		#endregion
 
 		#region Cache (Core)
+
+        /// <summary>
+        /// Removes all cache entries in the isolated storage.
+        /// </summary>
+        public void ClearCache()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                isf.DeleteDirectoryRecursive(PathToCache);
+            }
+        }
 
 		private string GetCachePathCore(string filename)
 		{

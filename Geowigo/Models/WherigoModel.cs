@@ -92,6 +92,20 @@ namespace Geowigo.Models
 			Core = new WFCoreAdapter();
 		}
 
+        /// <summary>
+        /// Removes a cartridge from the store, and wipes all its related content, including
+        /// cache, logs and savegames.
+        /// </summary>
+        /// <param name="tag"></param>
+        public void DeleteCartridgeAndContent(CartridgeTag tag)
+        {
+            // Clears the history for this tag.
+            History.RemoveAllOf(tag.Guid);
+            
+            // Removes it from the store.
+            CartridgeStore.RemoveCartridgeTag(tag, true);
+        }
+
         private void OnSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "SyncOnStartUp")
