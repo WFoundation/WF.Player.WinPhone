@@ -15,7 +15,7 @@ namespace Geowigo.Converters
             ZonePoint zp = value as ZonePoint;
             if (zp == null)
             {
-                if (parameter != "NoNull")
+                if (!(parameter is string) || (string)parameter != "NoNull")
                 {
                     return null;
                 }
