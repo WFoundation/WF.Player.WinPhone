@@ -105,27 +105,29 @@
       <HintPath>..\packages\BugSense.WP8.3.6.8.0\lib\wp8\BugSense-WP8.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZLib.Phone, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ICSharpCode.SharpZLib.Phone.dll</HintPath>
+    <Reference Include="ICSharpCode.SharpZipLib.Portable">
+      <HintPath>..\libs\ICSharpCode.SharpZipLib.Portable.dll</HintPath>
     </Reference>
-    <Reference Include="ImageTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.dll</HintPath>
+    <Reference Include="ImageTools.Controls.Phone">
+      <HintPath>..\libs\ImageTools.Controls.Phone.dll</HintPath>
     </Reference>
-    <Reference Include="ImageTools.Filtering, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.Filtering.dll</HintPath>
+    <Reference Include="ImageTools.Filtering.Phone">
+      <HintPath>..\libs\ImageTools.Filtering.Phone.dll</HintPath>
     </Reference>
-    <Reference Include="ImageTools.IO.Gif, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.IO.Gif.dll</HintPath>
+    <Reference Include="ImageTools.IO.Bmp.Phone">
+      <HintPath>..\libs\ImageTools.IO.Bmp.Phone.dll</HintPath>
     </Reference>
-    <Reference Include="ImageTools.IO.Png">
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.IO.Png.dll</HintPath>
+    <Reference Include="ImageTools.IO.Gif.Phone">
+      <HintPath>..\libs\ImageTools.IO.Gif.Phone.dll</HintPath>
     </Reference>
-    <Reference Include="ImageTools.Utils">
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\ImageTools.Utils.dll</HintPath>
+    <Reference Include="ImageTools.IO.Png.Phone">
+      <HintPath>..\libs\ImageTools.IO.Png.Phone.dll</HintPath>
+    </Reference>
+    <Reference Include="ImageTools.Phone">
+      <HintPath>..\libs\ImageTools.Phone.dll</HintPath>
+    </Reference>
+    <Reference Include="ImageTools.Utils.Phone">
+      <HintPath>..\libs\ImageTools.Utils.Phone.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Drawing" />
     <Reference Include="Microsoft.Live, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -144,10 +146,6 @@
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="PhoneCodeContractsAssemblies, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ImageTools.0.3.1\lib\sl3-wp\PhoneCodeContractsAssemblies.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\sl4-windowsphone71\System.Net.Http.dll</HintPath>

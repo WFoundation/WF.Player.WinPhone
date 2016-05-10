@@ -182,7 +182,6 @@ namespace Geowigo.Utils
 			return image;
 		}
 
-        //public static ImageSource SaveThumbnail(IsolatedStorageFile isoStore, string filename, Media prefered, Media fallback = null, int minWidth = -1, bool blur = false)
         public static ImageSource SaveThumbnail(ThumbnailOptions options)
 		{
 			// Make sure this method runs in the UI thread.
@@ -190,7 +189,6 @@ namespace Geowigo.Utils
 			{
 				return Deployment.Current.Dispatcher.Invoke<ImageSource>(() => 
 				{
-                    //return SaveThumbnail(isoStore, filename, prefered, fallback, minWidth, blur);
                     return SaveThumbnail(options);
 				});
 			}
@@ -245,7 +243,7 @@ namespace Geowigo.Utils
                 {
                     _gaussianBlurFilter = new ImageTools.Filtering.GaussianBlur() { Variance = 2d };
                 }
-                targetExtendedImage = ExtendedImage.Apply(targetExtendedImage, _gaussianBlurFilter);
+                targetExtendedImage = ExtendedImage.ApplyFilters(targetExtendedImage, _gaussianBlurFilter);
             }
 
             // Crops the image if needed.
