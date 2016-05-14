@@ -269,7 +269,10 @@ namespace Geowigo.Utils
                 crop.Y = (int)((double)crop.Y * scaleFactor);
 
                 // Crops the image.
-                targetExtendedImage = ExtendedImage.Crop(targetExtendedImage, crop);
+                if (crop.Width > 0 && crop.Height > 0)
+                {
+                    targetExtendedImage = ExtendedImage.Crop(targetExtendedImage, crop); 
+                }
 
                 // Stores the final dimensions of the image for later scaling.
                 targetWidth = conformedCropWidth;
@@ -284,10 +287,13 @@ namespace Geowigo.Utils
 			// Saves the image.
 			try
 			{
-				using (IsolatedStorageFileStream stream = options.IsoStoreFile.OpenFile(options.Filename, FileMode.Create, FileAccess.ReadWrite))
-				{
-                    targetImage.SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
-				}
+                if (targetWidth > 0 && targetHeight > 0)
+                {
+                    using (IsolatedStorageFileStream stream = options.IsoStoreFile.OpenFile(options.Filename, FileMode.Create, FileAccess.ReadWrite))
+                    {
+                        targetImage.SaveJpeg(stream, targetWidth, targetHeight, 0, 100);
+                    } 
+                }
 			}
 			catch (ArgumentException ex)
 			{
