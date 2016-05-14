@@ -295,29 +295,34 @@ namespace Geowigo.ViewModels
 		/// <param name="isRecoveringFromTombstone"></param>
 		public void HandleAppActivated(bool isRecoveringFromTombstone)
 		{
-			// If the app was tombstoned, goes back to app's home and show
+            // Marks the session as being recovered from tombstone.
+            HasRecoveredFromTombstone = isRecoveringFromTombstone;
+            
+            // If the app was tombstoned, goes back to app's home and show
 			// a message.
 			if (isRecoveringFromTombstone)
 			{
-				// Marks the session as being recovered from tombstone.
-				HasRecoveredFromTombstone = true;
+                // When an app recovers from tombstone, an uncancellable 
+                // navigation occurs to display the last page on the stack.
+                // Let us therefore alert the navigation manager about this
+                // incoming navigation event.
+                NavigationManager.PauseUntilNextNavigation();
+                
+                // Runs the following in a dispatcher frame because message boxes cannot 
+                // be displayed before the first navigation event in the app.
+                App.Current.RootFrame.Dispatcher.BeginInvoke(() =>
+                {
+                    // Displays a message.
+                    System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was tombstoned by your phone.\n\n" +
+                        "This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
+                        "Cannot resume game",
+                        MessageBoxButton.OK);
+
+                    // Schedules the app to navigate towards the app home
+                    // once the tombstone recovery is over.
+                    NavigationManager.NavigateToAppHome(true);
+                });
 				
-				// Displays a message.
-				System.Windows.MessageBox.Show("Geowigo could not resume the game because the app was tombstoned by Windows Phone.\n\n" +
-					"This is likely to happen when the app remains in the background for too long, or if your phone's battery is low.",
-					"Cannot resume game",
-					MessageBoxButton.OK);
-
-				// When an app recovers from tombstone, an uncancellable 
-				// navigation occurs to display the last page on the stack.
-				// Let us therefore alert the navigation manager about this
-				// incoming navigation event.
-				NavigationManager.PauseUntilNextNavigation();
-
-				// Schedules the app to navigate towards the app home
-				// once the tombstone recovery is over.
-				NavigationManager.NavigateToAppHome(true);
-
 				return;
 			}
 			
