@@ -51,7 +51,7 @@
 		<DataTemplate x:Key="SavegameListGroupItemTemplate">
 			<StackPanel d:DesignWidth="72" d:DesignHeight="65" Margin="0,0,0,40">
 				<TextBlock TextWrapping="Wrap" Text="{Binding Key, ConverterParameter=uppercase, Converter={StaticResource LongDateConverter}, FallbackValue=DATE}" Style="{StaticResource ListHeaderTextBlockStyle}" d:LayoutOverrides="Width" Margin="0,0,0,15"/>
-				<Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, ElementName=ThisCIP, Mode=OneWay}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
+                <Geowigo_Controls:NavigationListBox toolkit:TiltEffect.SuppressTilt="False" ItemsSource="{Binding}" ItemTemplate="{StaticResource SavegameListGroupItemInnerTemplate}" NavigationCommand="{Binding DataContext.ResumeGameCommand, ElementName=LayoutRoot}" Margin="0" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
 			</StackPanel>
 		</DataTemplate>
 	</Geowigo_Views:BasePage.Resources>
