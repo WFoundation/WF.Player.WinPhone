@@ -249,7 +249,16 @@ namespace Geowigo.Models.Providers
             string log = errorLogMessagePrefix;
             if (task.Exception != null)
             {
-                log += " " + task.Exception.Message;
+                // Adds an aggregation of inner exception messages to the log.
+                log += " " + task.Exception.Message + "(";
+                foreach (Exception e in task.Exception.Flatten().InnerExceptions)
+                {
+                    log += e.Message + " ; ";
+                }
+                log += ")";
+
+                // Dumps the aggregate exception.
+                DebugUtils.DumpException(task.Exception, errorLogMessagePrefix, false);
             }
             Log(log);
 

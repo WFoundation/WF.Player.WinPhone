@@ -114,7 +114,7 @@ namespace Geowigo.Utils
 				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "ex_stacktrace.txt"))
 				{
-					DumpException(ex, stream);
+					DumpException((dynamic)ex, stream, null);
 				}
 			}
 		}
@@ -152,12 +152,12 @@ namespace Geowigo.Utils
 				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "stacktrace.txt"))
 				{
-					DumpException(ex, stream, customMessage);
+					DumpException((dynamic)ex, stream, customMessage);
 				}
 			}
 		}
 
-		private static void DumpException(Exception ex, Stream stream, string header = null)
+		private static void DumpException(Exception ex, Stream stream, string header)
 		{
 			using (StreamWriter sw = new StreamWriter(stream))
 			{
@@ -183,6 +183,29 @@ namespace Geowigo.Utils
 				}
 			}
 		}
+
+        private static void DumpException(AggregateException ex, Stream stream, string header)
+        {
+            AggregateException flat = ex.Flatten();
+            
+            using (StreamWriter sw = new StreamWriter(stream))
+            {
+                if (header != null)
+                {
+                    sw.WriteLine("Custom header message:");
+                    sw.WriteLine(header);
+                    sw.WriteLine("---");
+                }
+
+                sw.WriteLine("Aggregate Exception: " + ex.Message);
+                sw.WriteLine("---");
+
+                foreach (Exception eo in ex.InnerExceptions)
+                {
+                    DumpException(eo, stream, null);
+                }
+            }
+        }
 
 		private static void DumpStack(StreamWriter sw)
 		{
