@@ -28,32 +28,6 @@ namespace Geowigo.Utils
 
         #endregion
 
-        /// <summary>
-        /// Gets how many files are involved in the debug report.
-        /// </summary>
-        public static int ReportFileCount
-        {
-            get
-            {
-                try
-                {
-                    using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-                    {
-                        if (!isf.DirectoryExists("/Debug"))
-                        {
-                            return 0;
-                        }
-                        
-                        return isf.GetFileNames("/Debug/").Length;
-                    }
-                }
-                catch (Exception)
-                {
-                    return 0;
-                }
-            }
-        }
-
         #region Dumps
 
 		/// <summary>
@@ -292,17 +266,12 @@ namespace Geowigo.Utils
                 using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
                 {
                     // Enumerates files in /Debug.
-                    foreach (string filePath in isf.GetFileNames("/Debug/").Select(s => System.IO.Path.Combine("\\Debug", s)))
+                    foreach (string filePath in GetDebugFiles(isf, includeRawData).Select(s => System.IO.Path.Combine("\\Debug", s)))
                     {
                         // Got a file.
                         sb.AppendLine();
                         sb.AppendLine("===========");
                         sb.AppendLine(filePath);
-                        if (!includeRawData && filePath.Contains("rawdata"))
-                        {
-                            sb.AppendLine("Ignored in this report.");
-                            continue;
-                        }
 
                         // Let's output the file.
                         sb.AppendLine();
@@ -332,6 +301,35 @@ namespace Geowigo.Utils
             sb.AppendLine("End of report.");
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets how many files are involved in the debug report.
+        /// </summary>
+        public static int GetDebugReportFileCount(bool includeRawData = false) 
+        {
+            try
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (!isf.DirectoryExists("/Debug"))
+                    {
+                        return 0;
+                    }
+
+                    return GetDebugFiles(isf, includeRawData).Count();
+                }
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        private static IEnumerable<string> GetDebugFiles(IsolatedStorageFile isf, bool includeRawData)
+        {
+            return isf.GetFileNames("/Debug/")
+                .Where(s => includeRawData || !s.Contains("rawdata"));
         }
 
         #endregion

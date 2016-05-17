@@ -6,9 +6,11 @@ using System.Text;
 using System.Windows;
 using Geowigo.Utils;
 using System.ComponentModel;
-using Microsoft.Phone.Tasks;
 using Geowigo.Models.Providers;
 using System.IO.IsolatedStorage;
+using Windows.ApplicationModel.Email;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace Geowigo.ViewModels
 {
@@ -264,26 +266,48 @@ namespace Geowigo.ViewModels
             RefreshLogView();
         }
 
-        private void SendDebugReport()
+        private async void SendDebugReport()
         {
             // Bakes the report.
             string report = DebugUtils.MakeDebugReport();
 
-            // Starts a mail task.
-            EmailComposeTask email = new EmailComposeTask()
+            // Copies the report to a file.
+            string filename = "report.txt";
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                To = "contact@cybisoft.net",
+                using (IsolatedStorageFileStream fs = isf.OpenFile(filename, System.IO.FileMode.Create))
+                {
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs))
+                    {
+                        sw.WriteLine(report);
+                    }
+                }
+            }
+
+            // Gets the file.
+            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(filename);
+
+            // Makes an e-mail.
+            EmailMessage email = new EmailMessage()
+            {
                 Subject = "Geowigo Bug Report",
-                Body = report
+                Body = "An error report is attached with this e-mail. Feel free to write below additional details about the problem you encountered."
             };
-            email.Show();
+            email.To.Add(new EmailRecipient("contact@cybisoft.net"));
+            email.Attachments.Add(new EmailAttachment(filename, RandomAccessStreamReference.CreateFromFile(file)));
+
+            // Prompts the user to send the e-mail.
+            await EmailManager.ShowComposeNewEmailAsync(email);
+
+            // Clears the debug files if it worked out.
+            DebugUtils.ClearCache();
 
             RefreshLogView();
         }
 
         private bool CanDebugReportCommandExecute()
         {
-            return DebugUtils.ReportFileCount > 0;
+            return DebugUtils.GetDebugReportFileCount() > 0;
         }
 
         private void DisplayAdvancedSettings()
@@ -447,7 +471,7 @@ namespace Geowigo.ViewModels
 
         private void RefreshLogView()
         {
-            LogFileCount = DebugUtils.ReportFileCount;
+            LogFileCount = DebugUtils.GetDebugReportFileCount();
             SendDebugReportCommand.RefreshCanExecute();
             ClearDebugReportCommand.RefreshCanExecute();
         }
