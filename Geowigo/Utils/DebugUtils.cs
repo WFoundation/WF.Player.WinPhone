@@ -21,7 +21,6 @@ namespace Geowigo.Utils
 {
 	public class DebugUtils
 	{
-        
         #region Fields
 
         private static Dictionary<string, string> _LogSessions = new Dictionary<string, string>();
@@ -88,7 +87,10 @@ namespace Geowigo.Utils
 				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "ex_stacktrace.txt"))
 				{
-					DumpException((dynamic)ex, stream, null);
+                    using (StreamWriter sw = new StreamWriter(stream))
+                    {
+                        DumpException((dynamic)ex, sw, null);
+                    }
 				}
 			}
 		}
@@ -126,58 +128,55 @@ namespace Geowigo.Utils
 				// Dumps the stack trace.
 				using (IsolatedStorageFileStream stream = isf.CreateFile(prefix + "stacktrace.txt"))
 				{
-					DumpException((dynamic)ex, stream, customMessage);
+                    using (StreamWriter sw = new StreamWriter(stream))
+                    {
+                        DumpException((dynamic)ex, sw, customMessage);
+                    }
 				}
 			}
 		}
 
-		private static void DumpException(Exception ex, Stream stream, string header)
+		private static void DumpException(Exception ex, StreamWriter sw, string header)
 		{
-			using (StreamWriter sw = new StreamWriter(stream))
+			if (header != null)
 			{
-				if (header != null)
-				{
-					sw.WriteLine("Custom header message:");
-					sw.WriteLine(header);
-					sw.WriteLine("---");
-				}
-
-				sw.WriteLine("Main Exception: " + ex.GetType().FullName);
+				sw.WriteLine("Custom header message:");
+				sw.WriteLine(header);
 				sw.WriteLine("---");
-				sw.WriteLine(ex);
+			}
+
+			sw.WriteLine("Main Exception: " + ex.GetType().FullName);
+			sw.WriteLine("---");
+			sw.WriteLine(ex);
+			sw.WriteLine("---");
+
+			Exception eo = ex.InnerException;
+			while (eo != null)
+			{
+				sw.WriteLine(eo);
 				sw.WriteLine("---");
 
-				Exception eo = ex.InnerException;
-				while (eo != null)
-				{
-					sw.WriteLine(eo);
-					sw.WriteLine("---");
-
-					eo = eo.InnerException;
-				}
+				eo = eo.InnerException;
 			}
 		}
 
-        private static void DumpException(AggregateException ex, Stream stream, string header)
+        private static void DumpException(AggregateException ex, StreamWriter sw, string header)
         {
             AggregateException flat = ex.Flatten();
             
-            using (StreamWriter sw = new StreamWriter(stream))
+            if (header != null)
             {
-                if (header != null)
-                {
-                    sw.WriteLine("Custom header message:");
-                    sw.WriteLine(header);
-                    sw.WriteLine("---");
-                }
-
-                sw.WriteLine("Aggregate Exception: " + ex.Message);
+                sw.WriteLine("Custom header message:");
+                sw.WriteLine(header);
                 sw.WriteLine("---");
+            }
 
-                foreach (Exception eo in ex.InnerExceptions)
-                {
-                    DumpException(eo, stream, null);
-                }
+            sw.WriteLine("Aggregate Exception: " + ex.Message);
+            sw.WriteLine("---");
+
+            foreach (Exception eo in ex.InnerExceptions)
+            {
+                DumpException(eo, sw, null);
             }
         }
 
