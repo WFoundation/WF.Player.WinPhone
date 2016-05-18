@@ -19,7 +19,7 @@ namespace Geowigo.Models.Providers
 	{
 		#region Constants
 
-        private static readonly string[] _Scopes = new string[] { "onedrive.readwrite", "wl.offline_access", "wl.signin" };
+        private static readonly string[] _Scopes = new string[] { "wl.skydrive", "onedrive.readwrite", "wl.offline_access", "wl.signin" };
 
 		private static readonly TimeSpan GetRequestTimeoutTimeSpan = TimeSpan.FromSeconds(20d);
 
