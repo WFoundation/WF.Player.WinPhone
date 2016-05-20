@@ -295,6 +295,11 @@ namespace Geowigo.Utils
                     } 
                 }
 			}
+            catch (IsolatedStorageException ex)
+            {
+                // Nothing to do, let's just dump this for further analysis.
+                DebugUtils.DumpException(ex, string.Format("OpenFile(f:{0})", options.Filename), true);
+            }
 			catch (ArgumentException ex)
 			{
 				// Nothing to do, let's just dump this for further analysis.
