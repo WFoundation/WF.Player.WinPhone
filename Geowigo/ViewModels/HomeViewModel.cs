@@ -125,38 +125,6 @@ namespace Geowigo.ViewModels
         #endregion
 
         #endregion
-        
-        #region Properties
-
-		#region AppTitle
-
-		public string AppTitle
-		{
-			get
-			{
-				return App.Current.ViewModel.AppTitle;
-			}
-		}
-
-		#endregion
-
-		#region ApplicationBar
-
-
-		public IApplicationBar ApplicationBar
-		{
-			get { return (IApplicationBar)GetValue(ApplicationBarProperty); }
-			set { SetValue(ApplicationBarProperty, value); }
-		}
-
-		// Using a DependencyProperty as the backing store for ApplicationBar.  This enables animation, styling, binding, etc...
-		public static readonly DependencyProperty ApplicationBarProperty =
-			DependencyProperty.Register("ApplicationBar", typeof(IApplicationBar), typeof(HomeViewModel), new PropertyMetadata(null));
-
-
-		#endregion
-
-		#endregion
 
 		#region Commands
 
