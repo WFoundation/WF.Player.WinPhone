@@ -9,10 +9,12 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Maps;
+using Microsoft.Phone.Maps.Controls;
 
 namespace Geowigo.Utils
 {
-    public static class ShellExtensions
+    public static class ControlExtensions
     {
         /// <summary>
         /// Creates a button and adds it to an application bar.
@@ -84,6 +86,37 @@ namespace Geowigo.Utils
             appBar.MenuItems.Add(mi);
 
             return mi;
+        }
+
+        /// <summary>
+        /// Applies map credentials to this map control.
+        /// </summary>
+        /// <param name="mapControl"></param>
+        internal static void ApplyCredentials(this Map mapControl)
+        {
+            // This method does not actually use the mapControl, but is made as an extension method
+            // in order to make sure that Views which will need to perform this operation do not need
+            // to make more assumptions than necessary.
+            
+            MapsApplicationContext ctx = MapsSettings.ApplicationContext;
+            
+            if (ctx == null)
+            {
+                return;
+            }
+            
+            try
+            {
+                // Gets the two keys from the app's resources.
+                ctx.ApplicationId = (string)App.Current.Resources["MapsApplicationId"];
+                ctx.AuthenticationToken = (string)App.Current.Resources["MapsApplicationId"];
+            }
+            catch (Exception)
+            {
+                // We couldn't retrieve the keys, so reset both properties.
+                ctx.ApplicationId = null;
+                ctx.AuthenticationToken = null;
+            }
         }
     }
 }

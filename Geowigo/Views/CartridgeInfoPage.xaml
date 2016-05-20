@@ -9,7 +9,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels" xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
-    xmlns:JeffWilcox_Controls="clr-namespace:JeffWilcox.Controls;assembly=JeffWilcox.Maps" 
+    xmlns:maps="clr-namespace:Microsoft.Phone.Maps.Controls;assembly=Microsoft.Phone.Maps" 
+    xmlns:toolkitMaps="clr-namespace:Microsoft.Phone.Maps.Toolkit;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" 
 	x:Name="ThisCIP" 
     x:Class="Geowigo.Views.CartridgeInfoPage"
@@ -104,13 +105,16 @@
                 <StackPanel Orientation="Vertical" d:LayoutOverrides="Height">
             		<TextBlock TextWrapping="Wrap" Text="STARTING LOCATION" Style="{StaticResource ListHeaderTextBlockStyle}" Margin="0,0,0,8"/>
             		<Grid Height="150" Margin="-12,0,-12,8" Background="{StaticResource PhoneInactiveBrush}">
-            			<Button Template="{StaticResource NoBorderButtonTemplate}" Command="{Binding NavigateToStartCommand, Mode=OneWay}" Background="{x:Null}">
-                            <JeffWilcox_Controls:StaticMap Foreground="{StaticResource PhoneAccentBrush}" IsSensorCoordinate="False" MapCenter="{Binding StartingCoordinate, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" StatusChanged="StaticMap_StatusChanged" MapCenterVisibility="{Binding IsMapCenterVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
-            			</Button>
-            			<TextBlock HorizontalAlignment="Center" TextWrapping="Wrap" Text="Unable to download map of starting location." VerticalAlignment="Center" Style="{StaticResource PhoneTextSmallStyle}" Visibility="{Binding IsMapErrorMessageVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}"/>
-                        <ProgressBar Background="{x:Null}" VerticalAlignment="Center" Height="10" IsIndeterminate="{Binding IsMapProgressBarVisible}"/>
+                        <Button Template="{StaticResource NoBorderButtonTemplate}" Command="{Binding NavigateToStartCommand, Mode=OneWay}" Background="{x:Null}">
+                            <maps:Map x:Name="StaticMap" Height="150" CartographicMode="Road" ColorMode="Light" ZoomLevel="16" Foreground="{StaticResource PhoneAccentBrush}" Center="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}, Mode=TwoWay}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Loaded="StaticMap_Loaded">
+                                <toolkitMaps:MapExtensions.Children>
+                                    <toolkitMaps:UserLocationMarker x:Name="PlayerLocationMarker" GeoCoordinate="{Binding Model.Core.DeviceLocation}" Foreground="{StaticResource PhoneAccentBrush}" Visibility="{Binding Model.Core.DeviceLocation, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                    <toolkitMaps:Pushpin x:Name="StartPushpin" GeoCoordinate="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}}" Visibility="{Binding IsStartPushpinVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                </toolkitMaps:MapExtensions.Children>
+                            </maps:Map>
+                        </Button>
             		</Grid>
-            		<TextBlock TextWrapping="Wrap" Text="{Binding StartingCoordinate, Converter={StaticResource ZonePointToStringConverter}}" Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding StartCoordinates, Converter={StaticResource ZonePointToStringConverter}}" Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
             		<TextBlock TextWrapping="Wrap" Text="You can play this cartridge anywhere." Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
             		<ScrollViewer Margin="0,16,0,-280">
             			<StackPanel Orientation="Vertical">

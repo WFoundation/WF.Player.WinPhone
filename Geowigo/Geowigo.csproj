@@ -227,7 +227,7 @@
     <Compile Include="Models\CartridgeStore.cs" />
     <Compile Include="Utils\DebugUtils.cs" />
     <Compile Include="Utils\ImageUtils.cs" />
-    <Compile Include="Utils\ShellExtensions.cs" />
+    <Compile Include="Utils\ControlExtensions.cs" />
     <Compile Include="Utils\ThreadingExtensions.cs" />
     <Compile Include="Utils\VisualTreeExtensions.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
@@ -450,10 +450,6 @@
     <Resource Include="Views\windowsphone_grid_red_transparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Mangatome\wp-maps\src\JeffWilcox.Maps\JeffWilcox.Maps-wp81sl.csproj">
-      <Project>{d8d918b4-28f5-42ea-b843-b243790bda7f}</Project>
-      <Name>JeffWilcox.Maps-wp81sl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\WF.Player.Core\Core\Core.WP81SL.csproj">
       <Project>{43ba84c1-586e-4073-82a6-a67a90688959}</Project>
       <Name>Core.WP81SL</Name>

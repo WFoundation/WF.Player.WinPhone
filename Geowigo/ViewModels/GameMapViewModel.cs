@@ -305,27 +305,6 @@ namespace Geowigo.ViewModels
 			_geoMathHelper = new WF.Player.Core.Utils.GeoMathHelper();
 		}
 
-        internal void SetMapsCredentials(Microsoft.Phone.Maps.MapsApplicationContext ctx)
-        {
-            if (ctx == null)
-	        {
-                return;
-	        }
-            
-            try
-            {
-                // Gets the two keys from the app's resources.
-                ctx.ApplicationId = (string)App.Current.Resources["MapsApplicationId"];
-                ctx.AuthenticationToken = (string)App.Current.Resources["MapsApplicationId"];
-            }
-            catch (Exception)
-            {
-                // We couldn't retrieve the keys, so reset both properties.
-                ctx.ApplicationId = null;
-                ctx.AuthenticationToken = null;
-            }
-        }
-
         public void OnMapZoomLevelChanged(double zoomLevel, GeoCoordinate center)
         {
             // Computes the current resolution of the map, in meters per pixel.

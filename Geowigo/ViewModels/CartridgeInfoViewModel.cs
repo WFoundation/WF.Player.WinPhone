@@ -77,18 +77,34 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
-        #region StartingCoordinate
+        #region StartCoordinates
 
 
-        public WF.Player.Core.ZonePoint StartingCoordinate
+        public WF.Player.Core.ZonePoint StartCoordinates
         {
-            get { return (WF.Player.Core.ZonePoint)GetValue(StartingCoordinateProperty); }
-            set { SetValue(StartingCoordinateProperty, value); }
+            get { return (WF.Player.Core.ZonePoint)GetValue(StartCoordinatesProperty); }
+            set { SetValue(StartCoordinatesProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for StartingCoordinate.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty StartingCoordinateProperty =
-            DependencyProperty.Register("StartingCoordinate", typeof(WF.Player.Core.ZonePoint), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+        public static readonly DependencyProperty StartCoordinatesProperty =
+            DependencyProperty.Register("StartCoordinates", typeof(WF.Player.Core.ZonePoint), typeof(CartridgeInfoViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
+        #region IsStartPushpinVisible
+
+
+        public bool IsStartPushpinVisible
+        {
+            get { return (bool)GetValue(IsStartPushpinVisibleProperty); }
+            set { SetValue(IsStartPushpinVisibleProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for IsStartPushpinVisible.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsStartPushpinVisibleProperty =
+            DependencyProperty.Register("IsStartPushpinVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
 
 
         #endregion
@@ -142,55 +158,6 @@ namespace Geowigo.ViewModels
 
 
 		#endregion
-
-        #region IsMapCenterVisible
-
-
-        public bool IsMapCenterVisible
-        {
-            get { return (bool)GetValue(IsMapCenterVisibleProperty); }
-            set { SetValue(IsMapCenterVisibleProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for IsMapCenterVisible.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsMapCenterVisibleProperty =
-            DependencyProperty.Register("IsMapCenterVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
-
-
-        #endregion
-
-        #region IsMapProgressBarVisible
-
-
-        public bool IsMapProgressBarVisible
-        {
-            get { return (bool)GetValue(IsMapProgressBarVisibleProperty); }
-            set { SetValue(IsMapProgressBarVisibleProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for IsMapProgressBarVisible.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsMapProgressBarVisibleProperty =
-            DependencyProperty.Register("IsMapProgressBarVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
-
-
-
-        #endregion
-
-        #region IsMapErrorMessageVisible
-
-
-        public bool IsMapErrorMessageVisible
-        {
-            get { return (bool)GetValue(IsMapErrorMessageVisibleProperty); }
-            set { SetValue(IsMapErrorMessageVisibleProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for IsMapErrorMessageVisible.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsMapErrorMessageVisibleProperty =
-            DependencyProperty.Register("IsMapErrorMessageVisible", typeof(bool), typeof(CartridgeInfoViewModel), new PropertyMetadata(false));
-
-
-        #endregion
 
         #region VectorToStartingCoordinate
 
@@ -416,8 +383,8 @@ namespace Geowigo.ViewModels
         {
             // Creates a new Bing Maps task.
             BingMapsTask task = new BingMapsTask();
-            task.Center = StartingCoordinate.ToGeoCoordinate();
-            task.SearchTerm = String.Format("{0}", StartingCoordinate.ToString(WF.Player.Core.GeoCoordinateUnit.DecimalDegrees));
+            task.Center = StartCoordinates.ToGeoCoordinate();
+            task.SearchTerm = String.Format("{0}", StartCoordinates.ToString(WF.Player.Core.GeoCoordinateUnit.DecimalDegrees));
             task.ZoomLevel = 2;
 
             // Starts the task.
@@ -484,37 +451,39 @@ namespace Geowigo.ViewModels
             // Starting point.
             if (Cartridge.IsPlayAnywhere)
             {
-                // In play anywhere, displays the device's location.
+                // Start pushpin -> hidden
+                // Player marker -> visible
+                // Map center -> player position
 
+                // Sets the start location from device location, so that the map center reflects
+                // the player position.
                 if (Model.Core.DeviceLocation == null)
                 {
                     // No location yet: display a default.
-                    StartingCoordinate = WF.Player.Core.ZonePoint.Zero;
+                    StartCoordinates = WF.Player.Core.ZonePoint.Zero;
                 }
                 else
                 {
                     // Change the current coordinates if it is far enough from the last one.
-                    if (StartingCoordinate == null || Model.Core.DeviceLocation.GetDistanceTo(StartingCoordinate.ToGeoCoordinate()) > 50)
+                    if (StartCoordinates == null || Model.Core.DeviceLocation.GetDistanceTo(StartCoordinates.ToGeoCoordinate()) > 50)
                     {
-                        StartingCoordinate = Model.Core.DeviceLocation.ToZonePoint();
+                        StartCoordinates = Model.Core.DeviceLocation.ToZonePoint();
                     }
                 }
 
+                IsStartPushpinVisible = false;
                 VectorToStartingCoordinate = null;
             }
             else
             {
-                // Displays the cartridge's start location.
-                StartingCoordinate = Cartridge.StartingLocation;
-                VectorToStartingCoordinate = Model.Core.DeviceLocation == null ? null : Model.Core.DeviceLocation.ToZonePoint().GetVectorTo(StartingCoordinate);
-            }
-        }
+                // Start pushpin -> visible
+                // Player marker -> visible
+                // Map center -> start location
 
-        public void OnStaticMapStatusChanged(JeffWilcox.Controls.StaticMapStatus status)
-        {
-            IsMapCenterVisible = status == JeffWilcox.Controls.StaticMapStatus.Done;
-            IsMapErrorMessageVisible = status == JeffWilcox.Controls.StaticMapStatus.Failed;
-            IsMapProgressBarVisible = status == JeffWilcox.Controls.StaticMapStatus.Downloading;
+                StartCoordinates = Cartridge.StartingLocation;
+                IsStartPushpinVisible = true;
+                VectorToStartingCoordinate = Model.Core.DeviceLocation == null ? null : Model.Core.DeviceLocation.ToZonePoint().GetVectorTo(StartCoordinates);
+            }
         }
 
         protected override void OnModelChanging(WherigoModel oldValue, WherigoModel newValue)

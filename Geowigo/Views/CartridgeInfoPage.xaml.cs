@@ -10,6 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using Microsoft.Phone.Maps.Controls;
+using Geowigo.Utils;
 
 namespace Geowigo.Views
 {
@@ -35,9 +37,10 @@ namespace Geowigo.Views
             AddBlockingContentPresenter();
 		}
 
-		private void StaticMap_StatusChanged(object sender, JeffWilcox.Controls.StaticMapStatusChangedEventArgs e)
-		{
-            ViewModel.OnStaticMapStatusChanged(e.Status);
-		}
+        private void StaticMap_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Injects the application's ID and Token.
+            ((Map)sender).ApplyCredentials();
+        }
 	}
 }

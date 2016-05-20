@@ -86,7 +86,7 @@ namespace Geowigo.Views
         private void MapControl_Loaded(object sender, RoutedEventArgs e)
         {
             // Injects the application's ID and Token.
-            ViewModel.SetMapsCredentials(Microsoft.Phone.Maps.MapsSettings.ApplicationContext);
+            ((Map)sender).ApplyCredentials();
 
             // The map can only be used for some things a while after this event has fired.
             Dispatcher.BeginInvoke(OnMapReady);
