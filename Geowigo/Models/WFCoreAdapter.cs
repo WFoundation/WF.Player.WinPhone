@@ -80,6 +80,7 @@ namespace Geowigo.Models
 		private double? _LastKnownHeading;
 		private double? _LastKnownHeadingAccuracy;
 		private bool _HasLastKnownHeadingChanged;
+        private bool _IsDisposed;
 
 		private WF.Player.Core.Formats.GWL _Logger;
 
@@ -279,7 +280,12 @@ namespace Geowigo.Models
 
 		protected override void DisposeOverride(bool disposeManagedResources)
 		{
-			if (disposeManagedResources)
+            lock (_SyncRoot)
+            {
+                _IsDisposed = true;
+            }
+            
+            if (disposeManagedResources)
 			{
 				DisposeLogger();
 
@@ -649,7 +655,15 @@ namespace Geowigo.Models
 
 		private void GeoWatcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
 		{
-			// Debug log.
+            lock (_SyncRoot)
+            {
+                if (_IsDisposed)
+                {
+                    return;
+                }
+            }
+
+            // Debug log.
 			LogDebug(String.Format("Location service status changed to {0}.", e.Status.ToString()));
 
 			switch (e.Status)
