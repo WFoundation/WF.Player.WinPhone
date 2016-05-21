@@ -106,12 +106,15 @@
             		<TextBlock TextWrapping="Wrap" Text="STARTING LOCATION" Style="{StaticResource ListHeaderTextBlockStyle}" Margin="0,0,0,8"/>
             		<Grid Height="150" Margin="-12,0,-12,8" Background="{StaticResource PhoneInactiveBrush}">
                         <Button Template="{StaticResource NoBorderButtonTemplate}" Command="{Binding NavigateToStartCommand, Mode=OneWay}" Background="{x:Null}">
-                            <maps:Map x:Name="StaticMap" Height="150" CartographicMode="Road" ColorMode="Light" ZoomLevel="16" Foreground="{StaticResource PhoneAccentBrush}" Center="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}, Mode=TwoWay}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Loaded="StaticMap_Loaded">
-                                <toolkitMaps:MapExtensions.Children>
-                                    <toolkitMaps:UserLocationMarker x:Name="PlayerLocationMarker" GeoCoordinate="{Binding Model.Core.DeviceLocation}" Foreground="{StaticResource PhoneAccentBrush}" Visibility="{Binding Model.Core.DeviceLocation, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                    <toolkitMaps:Pushpin x:Name="StartPushpin" GeoCoordinate="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}}" Visibility="{Binding IsStartPushpinVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
-                                </toolkitMaps:MapExtensions.Children>
-                            </maps:Map>
+                            <Grid Height="150">
+                                <Rectangle Fill="Transparent" />
+                                <maps:Map x:Name="StaticMap" CartographicMode="Road" ColorMode="Light" ZoomLevel="16" Foreground="{StaticResource PhoneAccentBrush}" Center="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}, Mode=TwoWay}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Loaded="StaticMap_Loaded" IsEnabled="False" IsHitTestVisible="False">
+                                    <toolkitMaps:MapExtensions.Children>
+                                        <toolkitMaps:UserLocationMarker x:Name="PlayerLocationMarker" GeoCoordinate="{Binding Model.Core.DeviceLocation}" Foreground="{StaticResource PhoneAccentBrush}" Visibility="{Binding Model.Core.DeviceLocation, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                        <toolkitMaps:Pushpin x:Name="StartPushpin" GeoCoordinate="{Binding StartCoordinates, ConverterParameter=NoNull, Converter={StaticResource ZonePointToGeoCoordinateConverter}}" Visibility="{Binding IsStartPushpinVisible, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed}" />
+                                    </toolkitMaps:MapExtensions.Children>
+                                </maps:Map>
+                            </Grid>
                         </Button>
             		</Grid>
                     <TextBlock TextWrapping="Wrap" Text="{Binding StartCoordinates, Converter={StaticResource ZonePointToStringConverter}}" Style="{StaticResource MessageBoxDefaultTextStyle}" Visibility="{Binding Cartridge.IsPlayAnywhere, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}, FallbackValue=Collapsed, Mode=OneWay}"/>
