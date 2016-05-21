@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2014/deployment" AppPlatformVersion="8.1">
   <DefaultLanguage xmlns="" code="" />
-  <App xmlns="" ProductID="{a4d3826a-6eb5-47d1-b1b2-3075bbd5cd64}" Title="Geowigo" RuntimeType="Silverlight" Version="1.0.28.0" Genre="apps.normal" Author="Mangatome and the Wherigo Foundation" Description="Play Wherigo cartridges on the go!" Publisher="Mangatome" PublisherID="{7f805f2a-1032-4b9b-aa42-7a9331d6dcce}">
+  <App xmlns="" ProductID="{a4d3826a-6eb5-47d1-b1b2-3075bbd5cd64}" Title="Geowigo" RuntimeType="Silverlight" Version="1.0.28.1" Genre="apps.normal" Author="Mangatome and the Wherigo Foundation" Description="Play Wherigo cartridges on the go!" Publisher="Mangatome" PublisherID="{7f805f2a-1032-4b9b-aa42-7a9331d6dcce}">
     <IconPath IsRelative="true" IsResource="false">ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_IDENTITY_USER" />
