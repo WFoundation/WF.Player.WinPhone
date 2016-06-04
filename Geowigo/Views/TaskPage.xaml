@@ -59,7 +59,7 @@
     		<TextBlock x:Name="PageTitle" Text="{Binding WherigoObject.Name, Converter={StaticResource LowercaseStringConverter}, FallbackValue=task}" Margin="9,-10,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
     	</StackPanel>
         <ScrollViewer x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
-        	<StackPanel>
+        	<StackPanel Margin="0,0,0,15">
         		<Image Source="{Binding WherigoObject.Media.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
         		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,5" Style="{StaticResource ThingTitleTextStyle}"/>
         		<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}" Style="{StaticResource ThingTitleTextStyle}"/>

@@ -23,7 +23,7 @@ using Microsoft.Phone.Shell;
 
 namespace Geowigo.ViewModels
 {
-	public class GameMapViewModel : BaseViewModel //, INotifyPropertyChanged
+	public class GameMapViewModel : BaseViewModel
 	{
 		#region Nested Classes
 
