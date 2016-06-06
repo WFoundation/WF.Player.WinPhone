@@ -271,37 +271,6 @@ namespace Geowigo.ViewModels
 
 			// Inits the app bar.
 			RefreshAppBar();
-
-            // Shows a warning message box about the version being obsolete.
-            if (!Model.Settings.IgnoreObsoleteVersionWarning)
-            {
-                // Makes a message box.
-                CheckBox cb = new CheckBox()
-                {
-                    Content = "Never show this message again",
-                    IsChecked = false
-                };
-                CustomMessageBox cmb = new CustomMessageBox()
-                {
-                    Caption = "Beta Disclamer",
-                    IsFullScreen = false,
-                    Message = "This is a preview version of Geowigo.\nIf you notice anything wrong or bad, leave a message to the author (see \"talk/get support\" in the menu).\n\nHave fun.\nMangatome & the Wherigo Foundation",
-                    Content = cb,
-                    LeftButtonContent = "OK"
-                };
-
-                // Prepares an event handler for when the message box will be dismissed.
-                cmb.Dismissing += (o, e) =>
-                {
-                    this.ApplicationBar.IsVisible = true;
-
-                    Model.Settings.IgnoreObsoleteVersionWarning = cb.IsChecked.GetValueOrDefault();
-                };
-                
-                // Shows the message box.
-                this.ApplicationBar.IsVisible = false;
-                App.Current.ViewModel.MessageBoxManager.AcceptAndShow(cmb);
-            }
 		}
         
         #region Menu Commands
