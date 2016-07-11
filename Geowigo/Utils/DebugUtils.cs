@@ -21,6 +21,26 @@ namespace Geowigo.Utils
 {
 	public class DebugUtils
 	{
+        #region Nested Classes
+
+        public class BugReport
+        {
+            public string Report { get; private set; }
+
+            public int FileCount { get; private set; }
+
+            public bool IncludesRawData { get; private set; }
+
+            public BugReport(string report, int count, bool includesRawData)
+            {
+                Report = report;
+                FileCount = count;
+                IncludesRawData = includesRawData;
+            }
+        }
+
+        #endregion
+        
         #region Fields
 
         private static Dictionary<string, string> _LogSessions = new Dictionary<string, string>();
@@ -253,13 +273,14 @@ namespace Geowigo.Utils
         /// Compiles all generated debug file into one string.
         /// </summary>
         /// <returns></returns>
-        public static string MakeDebugReport(bool includeRawData = false)
+        public static BugReport MakeDebugReport(bool includeRawData = false)
         {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("Geowigo v" + GetVersion());
             sb.AppendLine("Report generated on " + DateTime.UtcNow);
 
+            int count = 0;
             try
             {
                 using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
@@ -267,6 +288,8 @@ namespace Geowigo.Utils
                     // Enumerates files in /Debug.
                     foreach (string filePath in GetDebugFiles(isf, includeRawData).Select(s => System.IO.Path.Combine("\\Debug", s)))
                     {
+                        count++;
+                        
                         // Got a file.
                         sb.AppendLine();
                         sb.AppendLine("===========");
@@ -299,7 +322,7 @@ namespace Geowigo.Utils
             sb.AppendLine("===========");
             sb.AppendLine("End of report.");
 
-            return sb.ToString();
+            return new BugReport(sb.ToString(), count, includeRawData);
         }
 
         /// <summary>

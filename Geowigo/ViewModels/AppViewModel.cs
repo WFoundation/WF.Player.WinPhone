@@ -43,7 +43,7 @@ namespace Geowigo.ViewModels
 		}
 
 		#endregion
-		
+
 		#region Fields
 
 		private MessageBoxManager _MBManagerInstance;
@@ -57,6 +57,8 @@ namespace Geowigo.ViewModels
 		private InputManager _InputManagerInstance;
 
 		private NavigationManager _NavigationManagerInstance;
+
+        private LicensingManager _LicensingManagerInstance;
 
         private ActionPump _actionPump;
 
@@ -166,6 +168,21 @@ namespace Geowigo.ViewModels
 			}
 		}
 		#endregion
+
+        #region LicensingManager
+
+        /// <summary>
+        /// Gets the licensing manager for this view model.
+        /// </summary>
+        public LicensingManager LicensingManager
+        {
+            get
+            {
+                return _LicensingManagerInstance ?? (_LicensingManagerInstance = new LicensingManager());
+            }
+        }
+
+        #endregion
 
 		#region MessageBoxManager
 

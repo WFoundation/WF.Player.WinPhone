@@ -206,7 +206,7 @@ namespace Geowigo.ViewModels
 		{
 			get
 			{
-				return _GetHelpCommand ?? (_GetHelpCommand = new RelayCommand(GoToForumThread));
+				return _GetHelpCommand ?? (_GetHelpCommand = new RelayCommand(NavigateToGetHelp));
 			}
 		}
 		#endregion
@@ -378,12 +378,9 @@ namespace Geowigo.ViewModels
             Model.CartridgeStore.SyncAll();
 		}
 
-		private void GoToForumThread()
+		private void NavigateToGetHelp()
 		{
-			// Navigates to the forum thread.
-			WebBrowserTask task = new WebBrowserTask();
-			task.Uri = new Uri("http://forums.groundspeak.com/GC/index.php?showtopic=315741", UriKind.Absolute);
-			task.Show();
+            App.Current.ViewModel.NavigationManager.NavigateToHelp();
 		}
 
         private void DeleteCartridge(CartridgeTag tag)
@@ -520,7 +517,7 @@ namespace Geowigo.ViewModels
 		{
             ApplicationBar = new ApplicationBar() { Mode = ApplicationBarMode.Minimized };
 			ApplicationBar.CreateAndAddMenuItem(SyncProvidersCommand, "sync cartridges");
-			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "talk & get support");
+			ApplicationBar.CreateAndAddMenuItem(GetHelpCommand, "get support");
             ApplicationBar.CreateAndAddMenuItem(ShowSettingsCommand, "settings");
 		}
     }

@@ -569,7 +569,8 @@ namespace Geowigo.ViewModels
 			}
 			else if (pageName.StartsWith(prefix + "HomePage.xaml") ||
                 pageName.StartsWith(prefix + "CartridgeInfoPage.xaml") || 
-                pageName.StartsWith(prefix + "SettingsPage.xaml"))
+                pageName.StartsWith(prefix + "SettingsPage.xaml") ||
+                pageName.StartsWith(prefix + "HelpPage.xaml"))
 			{
 				scope = PageScope.App;
 			}
@@ -730,6 +731,14 @@ namespace Geowigo.ViewModels
         public void NavigateToSettings()
         {
             NavigateCore(new Uri("/Views/SettingsPage.xaml", UriKind.Relative));
+        }
+
+        /// <summary>
+        /// Navigates the app to the help page.
+        /// </summary>
+        public void NavigateToHelp()
+        {
+            NavigateCore(new Uri("/Views/HelpPage.xaml", UriKind.Relative));
         }
 
         /// <summary>

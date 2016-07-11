@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:Core="clr-namespace:System;assembly=mscorlib"
     xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls" 
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     mc:Ignorable="d">
     <ControlTemplate x:Key="NoBorderButtonTemplate" TargetType="Button">
         <Grid>
@@ -125,4 +126,9 @@
 
     <Geowigo_Converters:LongListSelectorColorConverter x:Key="LongListSelectorForegroundColorConverter" NotEmptyBrush="{StaticResource PhoneForegroundBrush}" EmptyBrush="{StaticResource PhoneTextBoxReadOnlyBrush}" />
 
+    <Style x:Key="ListPickerNativeStyle" TargetType="toolkit:ListPicker">
+        <Setter Property="Background" Value="{StaticResource PhoneContrastBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource PhoneContrastForegroundBrush}" />
+    </Style>
+    
 </ResourceDictionary>

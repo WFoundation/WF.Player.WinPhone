@@ -65,7 +65,7 @@
                         <TextBlock TextWrapping="Wrap" Text="Clearing the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
                         <TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <Button Content="send" HorizontalAlignment="Left" Command="{Binding SendDebugReportCommand, Mode=OneWay}"/>
+                            <Button Content="get support" HorizontalAlignment="Left" Command="{Binding GetSupportCommand, Mode=OneWay}"/>
                             <Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
                         </StackPanel>
                         <TextBlock TextWrapping="Wrap" Text="{Binding AppVersion, StringFormat='Geowigo Version: {0}'}" Foreground="{StaticResource PhoneSubtleBrush}"/>
