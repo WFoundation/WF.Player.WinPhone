@@ -27,6 +27,7 @@ namespace Geowigo.Models
         #region SyncOnStartUp
 
         private static string SyncOnStartUpSettingKey = "OneDrive.SyncOnStartUp";
+        private static bool SyncOnStartUpSettingDefaultValue = true;
 
         /// <summary>
         /// Gets or sets if cartridge providers sync automatically on start-up.
@@ -35,12 +36,12 @@ namespace Geowigo.Models
         {
             get
             {
-                return _settings.GetValueOrDefault<bool>(SyncOnStartUpSettingKey, true);
+                return _settings.GetValueOrDefault<bool>(SyncOnStartUpSettingKey, SyncOnStartUpSettingDefaultValue);
             }
 
             set
             {
-                bool changed = value != _settings.GetValueOrDefault<bool>(SyncOnStartUpSettingKey, true);
+                bool changed = value != _settings.GetValueOrDefault<bool>(SyncOnStartUpSettingKey, SyncOnStartUpSettingDefaultValue);
                 
                 _settings.SetValueAndSave(SyncOnStartUpSettingKey, value);
 
@@ -56,6 +57,7 @@ namespace Geowigo.Models
         #region ProviderLinkedHint
 
         private static string ProviderLinkedHintSettingKey = "OneDrive.LinkHint";
+        private static bool ProviderLinkedHintSettingDefaultValue = false;
 
         /// <summary>
         /// Gets or sets if the provider is known to be linked.
@@ -64,12 +66,12 @@ namespace Geowigo.Models
         {
             get
             {
-                return _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey);
+                return _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey, ProviderLinkedHintSettingDefaultValue);
             }
 
             set
             {
-                bool changed = value != _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey);
+                bool changed = value != _settings.GetValueOrDefault<bool>(ProviderLinkedHintSettingKey, ProviderLinkedHintSettingDefaultValue);
 
                 _settings.SetValueAndSave(ProviderLinkedHintSettingKey, value);
 
@@ -85,6 +87,7 @@ namespace Geowigo.Models
         #region CanProviderUpload
 
         private static string CanProviderUploadSettingKey = "OneDrive.CanUpload";
+        private static bool CanProviderUploadSettingDefaultValue = true;
 
         /// <summary>
         /// Gets or sets if the provider can upload.
@@ -93,12 +96,12 @@ namespace Geowigo.Models
         {
             get
             {
-                return _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, true);
+                return _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, CanProviderUploadSettingDefaultValue);
             }
 
             set
             {
-                bool changed = value != _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, true);
+                bool changed = value != _settings.GetValueOrDefault<bool>(CanProviderUploadSettingKey, CanProviderUploadSettingDefaultValue);
 
                 _settings.SetValueAndSave(CanProviderUploadSettingKey, value);
 
@@ -133,6 +136,34 @@ namespace Geowigo.Models
                 if (changed)
                 {
                     RaisePropertyChanged("MapCartographicMode");
+                }
+            }
+        }
+        #endregion
+
+        #region CanGenerateCartridgeLog
+        private static string CanGenerateCartridgeLogSettingKey = "Engine.CanGenerateCartridgeLog";
+        private static bool CanGenerateCartridgeLogSettingDefaultValue = true;
+
+        /// <summary>
+        /// Gets or sets if the game engine can generate cartridge logs (GWL).
+        /// </summary>
+        public bool CanGenerateCartridgeLog
+        {
+            get
+            {
+                return _settings.GetValueOrDefault<bool>(CanGenerateCartridgeLogSettingKey, CanGenerateCartridgeLogSettingDefaultValue);
+            }
+
+            set
+            {
+                bool changed = value != _settings.GetValueOrDefault<bool>(CanGenerateCartridgeLogSettingKey, CanGenerateCartridgeLogSettingDefaultValue);
+
+                _settings.SetValueAndSave(CanGenerateCartridgeLogSettingKey, value);
+
+                if (changed)
+                {
+                    RaisePropertyChanged("CanGenerateCartridgeLog");
                 }
             }
         }

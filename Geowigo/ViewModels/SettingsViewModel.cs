@@ -11,6 +11,8 @@ using System.IO.IsolatedStorage;
 using Windows.ApplicationModel.Email;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using Microsoft.Phone.Tasks;
+using Geowigo.Models;
 
 namespace Geowigo.ViewModels
 {
@@ -98,6 +100,38 @@ namespace Geowigo.ViewModels
         // Using a DependencyProperty as the backing store for OneDriveProviderAdvancedStatus.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty OneDriveProviderAdvancedStatusProperty =
             DependencyProperty.Register("OneDriveProviderAdvancedStatus", typeof(string), typeof(SettingsViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
+        #region CustomSupportStatus
+
+
+        public string CustomSupportStatus
+        {
+            get { return (string)GetValue(CustomSupportStatusProperty); }
+            set { SetValue(CustomSupportStatusProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CustomSupportStatus.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CustomSupportStatusProperty =
+            DependencyProperty.Register("CustomSupportStatus", typeof(string), typeof(SettingsViewModel), new PropertyMetadata(null));
+
+
+        #endregion
+
+        #region CartridgeLogFileCount
+
+
+        public int CartridgeLogFileCount
+        {
+            get { return (int)GetValue(CartridgeLogFileCountProperty); }
+            set { SetValue(CartridgeLogFileCountProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for CartridgeLogFileCount.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CartridgeLogFileCountProperty =
+            DependencyProperty.Register("CartridgeLogFileCount", typeof(int), typeof(SettingsViewModel), new PropertyMetadata(0));
 
 
         #endregion
@@ -222,6 +256,40 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+        #region NavigateToPrivacyPolicyCommand
+        private RelayCommand _NavigateToPrivacyPolicyCommand;
+
+        public RelayCommand NavigateToPrivacyPolicyCommand
+        {
+            get
+            {
+                if (_NavigateToPrivacyPolicyCommand == null)
+                {
+                    _NavigateToPrivacyPolicyCommand = new RelayCommand(NavigateToPrivacyPolicy);
+                }
+
+                return _NavigateToPrivacyPolicyCommand;
+            }
+        }
+        #endregion
+
+        #region DeleteCartridgeLogsCommand
+        private RelayCommand _DeleteCartridgeLogsCommand;
+
+        public RelayCommand DeleteCartridgeLogsCommand
+        {
+            get
+            {
+                if (_DeleteCartridgeLogsCommand == null)
+                {
+                    _DeleteCartridgeLogsCommand = new RelayCommand(DeleteCartridgeLogs, CanDeleteCartridgeLogsCommandExecute);
+                }
+
+                return _DeleteCartridgeLogsCommand;
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Constants
@@ -276,14 +344,30 @@ namespace Geowigo.ViewModels
             return DebugUtils.GetDebugReportFileCount() > 0;
         }
 
-        private void DisplayAdvancedSettings()
+        private async void DisplayAdvancedSettings()
         {
+            // Fetches some potentially expansive data now.
+            LicensingManager licensingManager = App.Current.ViewModel.LicensingManager;
+            CustomSupportStatus = "Custom Support IAP: "
+                + (await licensingManager.ValidateCustomSupportLicense() ? "Yes" : "No")
+                + (licensingManager.HasCustomSupportCertificate ? ", Installed" : "");
+            
+            // Displays!
             AreAdvancedSettingsDisplayed = true;
         }
 
         private void NavigateToDeviceInfo()
         {
             App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
+        }
+
+        private void NavigateToPrivacyPolicy()
+        {
+            WebBrowserTask task = new WebBrowserTask()
+            {
+                Uri = new Uri("http://mangatome.net/tools/geowigo/privacy.html", UriKind.Absolute)
+            };
+            task.Show();
         }
 
         private void ClearCartridgeCache()
@@ -315,6 +399,23 @@ namespace Geowigo.ViewModels
             }
         }
 
+        private void DeleteCartridgeLogs()
+        {
+            // Deletes all logs.
+            foreach (CartridgeTag tag in Model.CartridgeStore)
+            {
+                tag.RemoveAllLogs();
+            }
+
+            // Refreshes the view.
+            RefreshCartridgeLogView();
+        }
+
+        private bool CanDeleteCartridgeLogsCommandExecute()
+        {
+            return CartridgeLogFileCount > 0;
+        }
+
         #endregion
 
         protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -343,6 +444,8 @@ namespace Geowigo.ViewModels
             RefreshCartridgeStore();
 
             RefreshLogView();
+
+            RefreshCartridgeLogView();
 
             RefreshOneDrive();
         }
@@ -439,6 +542,12 @@ namespace Geowigo.ViewModels
         {
             LogFileCount = DebugUtils.GetDebugReportFileCount();
             ClearDebugReportCommand.RefreshCanExecute();
+        }
+
+        private void RefreshCartridgeLogView()
+        {
+            CartridgeLogFileCount = Model.CartridgeStore.Aggregate<CartridgeTag, int>(0, (i, ct) => i + ct.LogFiles.Count());
+            DeleteCartridgeLogsCommand.RefreshCanExecute();
         }
 
         private void RefreshCartridgeStore()

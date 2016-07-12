@@ -460,8 +460,11 @@ namespace Geowigo.ViewModels
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
-							// Starts logging.
-							Model.Core.StartLogging(CartridgeTag.CreateLogFile());
+                            // Starts logging.
+                            if (Model.Settings.CanGenerateCartridgeLog)
+                            {
+                                Model.Core.StartLogging(CartridgeTag.CreateLogFile()); 
+                            }
 							
 							// Restores the game.
 							Model.Core.InitAndRestoreCartridgeAsync(filename, gwsFilename)
@@ -490,8 +493,11 @@ namespace Geowigo.ViewModels
                     RunOrDeferIfNotReady(
                         new Action(() =>
                         {
-							// Starts logging.
-                            Model.Core.StartLogging(CartridgeTag.CreateLogFile());
+                            // Starts logging.
+                            if (Model.Settings.CanGenerateCartridgeLog)
+                            {
+                                Model.Core.StartLogging(CartridgeTag.CreateLogFile()); 
+                            }
 							
 							// Starts the game.
 							Model.Core.InitAndStartCartridgeAsync(filename)

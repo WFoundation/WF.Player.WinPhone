@@ -1,13 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using WF.Player.Core;
 using System.IO.IsolatedStorage;
 using System.IO;
@@ -17,6 +8,8 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
 using WF.Player.Core.Formats;
+using System.Windows.Media;
+using System.Windows;
 
 namespace Geowigo.Models
 {
@@ -205,6 +198,20 @@ namespace Geowigo.Models
             get
             {
                 return _savegames;
+            }
+        }
+
+        /// <summary>
+        /// Gets the existing log files for the cartridge.
+        /// </summary>
+        public IEnumerable<string> LogFiles
+        {
+            get
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    return GetLogFiles(isf);
+                }
             }
         }
 
@@ -565,6 +572,33 @@ namespace Geowigo.Models
 			// Creates a logger for this file.
 			return new GWL(fs);
 		}
+
+        /// <summary>
+        /// Removes all logs associated to this cartridge tag from isolated storage.
+        /// </summary>
+        public void RemoveAllLogs()
+        {
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                IEnumerable<string> files = GetLogFiles(isf);
+                foreach (string filepath in files)
+                {
+                    try
+                    {
+                        isf.DeleteFile(filepath);
+                    }
+                    catch (Exception e)
+                    {
+                        DebugUtils.DumpException(e, "deleting all logs for cartridge");
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<string> GetLogFiles(IsolatedStorageFile isf)
+        {
+            return isf.GetFileNames(Path.Combine(PathToLogs, "*.gwl")).Select(s => Path.Combine(PathToLogs, s));
+        }
 
 		#endregion
 
