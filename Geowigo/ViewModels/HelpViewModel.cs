@@ -472,15 +472,16 @@ namespace Geowigo.ViewModels
                 // Browse to purchase the support IAP.
                 await CurrentApp.RequestProductPurchaseAsync(LicensingManager.CustomSupportProductId);
 
-                // Enables custom support.
-                IsAppSupporterContentVisible = true;
-
                 // Shows a progress bar.
                 ProgressBarStatusText = "Setting up custom support license...";
                 IsProgressBarVisible = true;
 
                 // Validates the license.
-                await App.Current.ViewModel.LicensingManager.ValidateCustomSupportLicense();
+                if (await App.Current.ViewModel.LicensingManager.ValidateCustomSupportLicense())
+                {
+                    // Enables custom support if the license is valid.
+                    IsAppSupporterContentVisible = true;
+                }
 
                 // Hides the progress bar.
                 IsProgressBarVisible = false;
@@ -488,6 +489,7 @@ namespace Geowigo.ViewModels
             catch (Exception ex)
             {
                 // The user cancelled.
+                IsProgressBarVisible = false;
                 DebugUtils.DumpException(ex, "Custom Support Purchase", false);
             }
         }

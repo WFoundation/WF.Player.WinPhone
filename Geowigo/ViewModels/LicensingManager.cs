@@ -86,7 +86,7 @@ namespace Geowigo.ViewModels
             }
             catch (Exception)
             {
-                return false;
+                return _hasActiveCustomSupportLicense;
             }
         }
 

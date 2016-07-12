@@ -123,7 +123,7 @@
 		<Grid x:Name="ContentPanel_Menu" Grid.Row="1" Margin="12,0,12,0">
 			<ScrollViewer>
 				<StackPanel>
-                    <Button x:Name="SupportHintButton" Visibility="{Binding IsAppSupporterContentVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Template="{StaticResource NoBorderButtonTemplate}" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeNormal}">
+                    <Button x:Name="SupportHintButton" Command="{Binding PurchaseSupportCommand}" Visibility="{Binding IsAppSupporterContentVisible, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}" Template="{StaticResource NoBorderButtonTemplate}" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeNormal}">
 						<Grid x:Name="SupportHintPanel" Background="#FF006595">
 							<Image Source="/icons/appbar.star.invincible.png" Stretch="Fill" Margin="-6,0,0,0" Width="72" Height="72" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 							<TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="66,0,10,0" Text="Become a proud supporter of the app and get custom help when you need it!" Foreground="White" FontSize="{StaticResource PhoneFontSizeNormal}"/>
