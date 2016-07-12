@@ -323,7 +323,7 @@ namespace Geowigo.ViewModels
 
             if (nav.NavigationMode != System.Windows.Navigation.NavigationMode.Back)
             {
-                // Starts linking the SkyDrive provider if needed.
+                // Starts linking the OneDrive provider if needed.
                 string providerServiceName = nav.GetQueryValueOrDefault(ProviderServiceNameKey);
                 if (nav.GetQueryValueOrDefault(ProviderWizardKey) == Boolean.TrueString && providerServiceName != null)
                 {
@@ -332,7 +332,7 @@ namespace Geowigo.ViewModels
                     if (!IsOneDriveProviderEnabled && GetOneDriveProvider().ServiceName == providerServiceName)
                     {
                         // A wizard is needed.
-                        RunSkyDriveProviderLinkWizard();
+                        RunOneDriveProviderLinkWizard();
                     }
                 } 
             }
@@ -498,8 +498,9 @@ namespace Geowigo.ViewModels
                         provider.Unlink();
                         _appSettings.ProviderLinkedHint = false;
                     }
-                    catch (InvalidOperationException)
+                    catch (Exception e)
                     {
+                        DebugUtils.DumpException(e, "OneDrive unlink", true);
                         MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
                         _appSettings.ProviderLinkedHint = true;
                     }
@@ -513,13 +514,13 @@ namespace Geowigo.ViewModels
             else if (newValue && !_appSettings.ProviderLinkedHint)
             {
                 // Starts linking.
-                RunSkyDriveProviderLinkWizard();
+                RunOneDriveProviderLinkWizard();
             }
 
             RefreshOneDrive();
         }
 
-        private void RunSkyDriveProviderLinkWizard()
+        private void RunOneDriveProviderLinkWizard()
         {
             OneDriveCartridgeProvider provider = GetOneDriveProvider();
             

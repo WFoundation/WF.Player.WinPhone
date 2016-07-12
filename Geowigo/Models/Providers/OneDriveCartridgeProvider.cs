@@ -417,12 +417,6 @@ namespace Geowigo.Models.Providers
 
         public void Unlink()
         {
-            if (!IsLinked)
-            {
-                Log("The OneDrive provider is not linked.");
-                throw new InvalidOperationException("The OneDrive provider is not linked.");
-            }
-
             _authClient.Logout();
 
             IsSyncing = false;
