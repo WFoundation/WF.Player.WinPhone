@@ -377,7 +377,7 @@ namespace Geowigo.ViewModels
                         {
                             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(fs))
                             {
-                                sw.WriteLine(report);
+                                sw.WriteLine(report.Report);
                             }
                         }
                     }
