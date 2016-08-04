@@ -186,6 +186,7 @@ namespace Geowigo.ViewModels
             }
             
             // If the name already exists, asks if the old savegame should be replaced.
+            CartridgeTag tag = GetCurrentTag();
             CartridgeSavegame oldCSWithSameName = GetSavegameByName(content.Name);
             if (oldCSWithSameName != null)
             {
@@ -196,7 +197,7 @@ namespace Geowigo.ViewModels
                         MessageBoxButton.OKCancel) == MessageBoxResult.OK)
                 {
                     // Go: deletes the old savegame and continues.
-                    GetCurrentTag().RemoveSavegame(oldCSWithSameName);
+                    tag.RemoveSavegame(oldCSWithSameName);
                 }
                 else
                 {
@@ -216,7 +217,6 @@ namespace Geowigo.ViewModels
             cs.ExportToIsoStore();
 
             // Adds an history entry for this savegame.
-            CartridgeTag tag = _appViewModel.Model.CartridgeStore.GetCartridgeTag(_appViewModel.Model.Core.Cartridge);
             _appViewModel.Model.History.AddSavedGame(tag, cs);
 
             // Adds the savegame to the tag.

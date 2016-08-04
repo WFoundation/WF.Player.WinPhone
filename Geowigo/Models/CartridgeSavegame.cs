@@ -4,6 +4,7 @@ using System.IO.IsolatedStorage;
 using System.Runtime.Serialization;
 using System.Windows.Media;
 using System.Linq;
+using Geowigo.Utils;
 
 namespace Geowigo.Models
 {
@@ -304,8 +305,8 @@ namespace Geowigo.Models
 				string fname = System.IO.Path.GetFileNameWithoutExtension(tag.Cartridge.Filename);
 				SavegameFile = String.Format("{0}/{1}_{2}.gws",
 					tag.PathToSavegames,
-					Name,
-					fname
+					Name.ReplaceInvalidFileNameChars(),
+					fname.ReplaceInvalidFileNameChars()
 				);
 			}
 			else
