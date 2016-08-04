@@ -384,8 +384,9 @@ namespace Geowigo.ViewModels
 			{
 				sb.Append(" or savegame");
 			}
-			sb.Append(".\n\nIf the problem persists, you should contact the Cartridge owner, ");
-			sb.Append(cartridge.GetFullAuthor());
+			sb.Append(".\n\nIf the problem persists, you should contact Geowigo's developers (\"get support\" from the main menu) or the Cartridge owner, ");
+            string cartFullAuthor = cartridge.GetFullAuthor();
+			sb.Append(cartFullAuthor);
 			AggregateException agex = exception as AggregateException;
 			if (agex == null || 
 				(agex != null && agex.InnerExceptions != null && agex.InnerExceptions.Count > 0))
@@ -438,6 +439,9 @@ namespace Geowigo.ViewModels
 					caption = "Game crash";
 					break;
 			}
+
+            // Dump a log.
+            DebugUtils.DumpException(exception, String.Format("Exception during play. Cartridge: {0} by {1}", cartridge.Name, cartFullAuthor), false);
 
 			// Shows a message box.
 			System.Windows.MessageBox.Show(
