@@ -447,8 +447,19 @@ namespace Geowigo.ViewModels
 			);
 
 			// Goes back!
-			App.Current.ViewModel.NavigationManager.NavigateToAppHome(true);
+			NavigationManager.NavigateToAppHome(true);
 		}
+
+        /// <summary>
+        /// Called when a game started.
+        /// </summary>
+        /// <param name="tag">Cartridge that started.</param>
+        /// <param name="savegame">Optional savegame restored when the game started.</param>
+        public void HandleGameStarted(CartridgeTag tag, CartridgeSavegame savegame = null)
+        {
+            // Resets the session quick save.
+            SavegameManager.InitQuickSave(tag, savegame);
+        }
 
 		/// <summary>
 		/// Kills the current Wherigo Core instance and replaces it with a new one.
@@ -501,6 +512,14 @@ namespace Geowigo.ViewModels
         {
             // Delegates the protocol to the SavegameManager.
             SavegameManager.SaveGame(isAutoSave);
+        }
+
+        /// <summary>
+        /// Makes a quick save of the current game.
+        /// </summary>
+        public void SaveGameQuick()
+        {
+            SavegameManager.SaveGameQuick();
         }
 
 		/// <summary>

@@ -35,6 +35,12 @@ namespace Geowigo.Models
         public bool IsAutosave { get; set; }
 
         /// <summary>
+        /// Gets or sets if this savegame is a quick save.
+        /// </summary>
+        [DataMember]
+        public bool IsQuicksave { get; set; }
+
+        /// <summary>
         /// Gets or sets the hash color representing this savegame.
         /// </summary>
         [DataMember]
@@ -67,6 +73,19 @@ namespace Geowigo.Models
         {
             Timestamp = DateTime.Now;
             Name = GetDefaultName(tag);
+            HashColor = GetHashColor(Name);
+            SetFileProperties(tag);
+        }
+
+        /// <summary>
+        /// Constructs a new savegame metadata container for a Cartridge and a name.
+        /// </summary>
+        /// <param name="cartridge">Cartridge to save.</param>
+        /// <param name="name"></param>
+        public CartridgeSavegame(CartridgeTag tag, string name)
+        {
+            Timestamp = DateTime.Now;
+            Name = name;
             HashColor = GetHashColor(Name);
             SetFileProperties(tag);
         }

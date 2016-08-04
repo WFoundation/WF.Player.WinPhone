@@ -250,6 +250,23 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region QuickSaveGameCommand
+
+        private ICommand _QuickSaveGameCommand;
+
+        /// <summary>
+        /// Gets a command to quick save the game.
+        /// </summary>
+        public ICommand QuickSaveGameCommand
+        {
+            get
+            {
+                return _QuickSaveGameCommand ?? (_QuickSaveGameCommand = new RelayCommand(QuickSaveGame));
+            }
+        }
+
+        #endregion
+
 		#region ShowMapCommand
 
 		private ICommand _ShowMapCommand;
@@ -481,9 +498,12 @@ namespace Geowigo.ViewModels
 									}
 
 									// Registers a history entry.
-									Model.History.AddRestoredGame(
-                                        CartridgeTag,
-                                        CartridgeTag.Savegames.FirstOrDefault(cs => cs.SavegameFile == gwsFilename));
+									CartridgeSavegame savegame = CartridgeTag.Savegames.FirstOrDefault(cs => cs.SavegameFile == gwsFilename);
+                                    Model.History.AddRestoredGame(CartridgeTag, savegame);
+
+                                    // Lets the view model know we started the game.
+                                    App.Current.ViewModel.HandleGameStarted(CartridgeTag, savegame);
+
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
@@ -515,6 +535,10 @@ namespace Geowigo.ViewModels
 
 									// Registers a history entry.
                                     Model.History.AddStartedGame(CartridgeTag);
+
+                                    // Lets the view model know we started the game.
+                                    App.Current.ViewModel.HandleGameStarted(CartridgeTag);
+
 								}, System.Threading.Tasks.TaskScheduler.FromCurrentSynchronizationContext());
                         }));
                 }
@@ -576,6 +600,14 @@ namespace Geowigo.ViewModels
         {
 			// Saves the game!
             App.Current.ViewModel.SaveGame(false);
+        }
+
+        /// <summary>
+        /// Makes a quick save game.
+        /// </summary>
+        private void QuickSaveGame()
+        {
+            App.Current.ViewModel.SaveGameQuick();
         }
 
         /// <summary>
@@ -747,6 +779,9 @@ namespace Geowigo.ViewModels
 
 			// Adds the maps menu item.
 			ApplicationBar.CreateAndAddButton("appbar.map.treasure.png", ShowMapCommand, "map");
+
+            // Adds the quick save button.
+            ApplicationBar.CreateAndAddButton("appbar.save.png", QuickSaveGameCommand, "quick save");
 		} 
 		#endregion
 	}

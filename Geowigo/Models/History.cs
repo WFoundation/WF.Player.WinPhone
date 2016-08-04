@@ -183,17 +183,34 @@ namespace Geowigo.Models
         #region Remove from History
 
         /// <summary>
-        /// Removes all entries related to a specific cartridge GUID
-        /// from the history.
+        /// Removes all entries related to a specific cartridge GUID from the history.
         /// </summary>
-        /// <param name="cartrigeGuid"></param>
-        public void RemoveAllOf(string cartrigeGuid)
+        /// <param name="cartridgeGuid"></param>
+        public void RemoveAllOf(string cartridgeGuid)
+        {
+            RemoveAllOf(he => he.RelatedCartridgeGuid == cartridgeGuid);
+        }
+
+        /// <summary>
+        /// Removes all entries of a certain type, related to a cartridge GUID and a savegame name.
+        /// </summary>
+        /// <param name="cartridgeGuid"></param>
+        /// <param name="savegameName"></param>
+        /// <param name="entryType"></param>
+        public void RemoveAllOf(string cartridgeGuid, string savegameName, HistoryEntry.Type entryType)
+        {
+            RemoveAllOf(he => he.EntryType == entryType
+                && he.RelatedCartridgeGuid == cartridgeGuid 
+                && he.RelatedSavegameName == savegameName);
+        }
+
+        private void RemoveAllOf(Func<HistoryEntry, bool> selector)
         {
             // Disables sync.
             IsSyncedWithCache = false;
 
             // Removes all related entries.
-            List<HistoryEntry> removedItems = this.Where(he => he.RelatedCartridgeGuid == cartrigeGuid).ToList();
+            List<HistoryEntry> removedItems = this.Where(selector).ToList();
             foreach (var entry in removedItems)
             {
                 this.Remove(entry);

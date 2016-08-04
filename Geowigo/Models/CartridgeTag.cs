@@ -10,6 +10,7 @@ using System.Linq;
 using WF.Player.Core.Formats;
 using System.Windows.Media;
 using System.Windows;
+using System.Text.RegularExpressions;
 
 namespace Geowigo.Models
 {
@@ -371,19 +372,7 @@ namespace Geowigo.Models
 				System.Diagnostics.Debug.WriteLine("CartridgeTag: Renaming new savegame because an old one with same name exists: " + cs.Name);
 				
 				// What's the last savegame following the pattern "name (n)"?
-                int dbl = 0;
-                System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex(cs.Name + @" \((\d+)\)");
-                foreach (string name in Savegames.Where(c => c.Name.StartsWith(cs.Name)).Select(c => c.Name))
-                {
-                    foreach (System.Text.RegularExpressions.Match match in r.Matches(name))
-                    {
-                        int i = -1;
-                        if (int.TryParse(match.Groups[1].Value, out i) && i > dbl)
-                        {
-                            dbl = i;
-                        }
-                    }
-                }
+                int dbl = GetLastSavegameNameInteger(cs.Name, " ({0})");
 
                 // Renames the savegame.
                 using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
@@ -400,6 +389,26 @@ namespace Geowigo.Models
 
             // Notifies of a change.
             RaisePropertyChanged("Savegames");
+        }
+
+        /// <summary>
+        /// Exports a savegame to the isolated storage and adds it to this tag if it is not already there.
+        /// </summary>
+        /// <param name="cs"></param>
+        public void RefreshOrAddSavegame(CartridgeSavegame cs)
+        {
+            if (_savegames.Contains(cs))
+            {
+                // Refresh
+                cs.ExportToIsoStore();
+
+                // Notifies of a change.
+                RaisePropertyChanged("Savegames");
+            }
+            else
+            {
+                AddSavegame(cs);
+            }
         }
 
         /// <summary>
@@ -442,6 +451,36 @@ namespace Geowigo.Models
         public CartridgeSavegame GetSavegameByNameOrDefault(string name)
         {
             return Savegames.SingleOrDefault(cs => cs.Name == name);
+        }
+
+        /// <summary>
+        /// Gets the last integer suffix that matches a pattern of names for savegames currently
+        /// added to the tag.
+        /// </summary>
+        /// <param name="name">Name of the savegame root</param>
+        /// <param name="suffixFormat">Format of the integer suffix</param>
+        /// <returns>The last integer to match, or 0.</returns>
+        public int GetLastSavegameNameInteger(string name, string suffixFormat)
+        {
+            // Bakes the regex pattern
+            string regexPattern = Regex.Escape(name + String.Format(suffixFormat, @"(\d+)"));
+            regexPattern = regexPattern.Replace(@"\(\\d\+\)", @"(\d+)");
+            
+            int dbl = 0;
+            Regex r = new Regex(regexPattern);
+            foreach (string n in Savegames.Where(c => c.Name.StartsWith(name)).Select(c => c.Name))
+            {
+                foreach (Match match in r.Matches(n))
+                {
+                    int i = -1;
+                    if (int.TryParse(match.Groups[1].Value, out i) && i > dbl)
+                    {
+                        dbl = i;
+                    }
+                }
+            }
+
+            return dbl;
         }
 
 		#endregion
