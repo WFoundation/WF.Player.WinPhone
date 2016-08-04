@@ -354,7 +354,10 @@ namespace Geowigo.ViewModels
 			System.Windows.MessageBoxResult result = System.Windows.MessageBoxResult.None;
 			try
 			{
-				result = System.Windows.MessageBox.Show("Do you want to quit the game? (Your unsaved progress will be lost.)", "Exit to main menu?", MessageBoxButton.OKCancel);
+				result = System.Windows.MessageBox.Show(
+                    "The game will stop and your unsaved progress will be lost.", 
+                    "Exit to main menu?", 
+                    MessageBoxButton.OKCancel);
 			}
 			catch (Exception ex)
 			{
