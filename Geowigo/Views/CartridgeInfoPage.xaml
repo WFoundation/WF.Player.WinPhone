@@ -36,7 +36,13 @@
 		<Geowigo_Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 		<DataTemplate x:Key="SavegameListGroupItemInnerTemplate">
 			<Grid d:LayoutOverrides="HorizontalAlignment" Margin="0,0,0,20">
-				<StackPanel Orientation="Horizontal">
+                <toolkit:ContextMenuService.ContextMenu>
+                    <toolkit:ContextMenu>
+                        <!--<toolkit:MenuItem Header="export" Command="{Binding DataContext.ExportSaveGameCommand, ElementName=SavegamesListItemControl}" CommandParameter="{Binding}" />-->
+                        <toolkit:MenuItem Header="delete" Command="{Binding DataContext.DeleteSaveGameCommand, ElementName=SavegamesListItemControl}" CommandParameter="{Binding}" />
+                    </toolkit:ContextMenu>
+                </toolkit:ContextMenuService.ContextMenu>
+                <StackPanel Orientation="Horizontal">
 					<Grid Background="{Binding HashColor, Converter={StaticResource ColorToBrushConverter}, FallbackValue={StaticResource PhoneAccentBrush}}" Height="62" Margin="0,0,11,0" VerticalAlignment="Top" Width="62"/>
 					<StackPanel Orientation="Vertical">
 						<TextBlock TextWrapping="Wrap" Text="{Binding Name, FallbackValue=Name, Mode=OneWay}" d:LayoutOverrides="Width" FontFamily="{StaticResource PhoneFontFamilyNormal}" FontSize="{StaticResource PhoneFontSizeLarge}" Margin="0,-8,0,0"/>

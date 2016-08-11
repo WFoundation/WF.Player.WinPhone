@@ -12,6 +12,7 @@ using Microsoft.Phone.Tasks;
 using System.Collections.ObjectModel;
 using Microsoft.Phone.Controls;
 using System.Linq;
+using System.Text;
 
 namespace Geowigo.ViewModels
 {
@@ -226,6 +227,40 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region ExportSaveGameCommand
+
+        private ICommand _exportSaveGameCommand;
+
+        /// <summary>
+        /// Gets a command to export a save game to a user folder.
+        /// </summary>
+        public ICommand ExportSaveGameCommand
+        {
+            get
+            {
+                return _exportSaveGameCommand ?? (_exportSaveGameCommand = new RelayCommand<CartridgeSavegame>(ExportSaveGame));
+            }
+        }
+
+        #endregion
+
+        #region DeleteSaveGameCommand
+
+        private ICommand _deleteSaveGameCommand;
+
+        /// <summary>
+        /// Gets a command to delete a save game.
+        /// </summary>
+        public ICommand DeleteSaveGameCommand
+        {
+            get
+            {
+                return _deleteSaveGameCommand ?? (_deleteSaveGameCommand = new RelayCommand<CartridgeSavegame>(DeleteSaveGame));
+            }
+        }
+
+        #endregion
+
 		#endregion
 
 		#region Members
@@ -233,7 +268,7 @@ namespace Geowigo.ViewModels
 		private IApplicationBar _appBarInfo;
 
 		#endregion
-		
+
 		protected override void InitFromNavigation(NavigationInfo nav)
 		{
 			System.Windows.Navigation.NavigationContext navCtx = nav.NavigationContext;
@@ -286,7 +321,19 @@ namespace Geowigo.ViewModels
             RefreshStaticContent();
             RefreshLocatedContent();
             RefreshSavegames();
+
+            // Adds a listener for cartridge tag changes.
+            CartridgeTag.PropertyChanged -= OnCartridgeTagPropertyChanged;
+            CartridgeTag.PropertyChanged += OnCartridgeTagPropertyChanged;
 		}
+
+        private void OnCartridgeTagPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Savegames")
+            {
+                RefreshSavegames();
+            }
+        }
 
         #region Savegames Long List
 
@@ -399,6 +446,26 @@ namespace Geowigo.ViewModels
             }
             
             return Cartridge != null && !Cartridge.IsPlayAnywhere;
+        }
+
+        private void DeleteSaveGame(CartridgeSavegame savegame)
+        {
+            // Confirm
+            if (MessageBox.Show(
+                    String.Format("Savegame {0} will be deleted. Do you want to continue?", savegame.Name),
+                    "Delete savegame",
+                    MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+            {
+                return;
+            }
+
+            // Delete.
+            CartridgeTag.RemoveSavegame(savegame);
+        }
+
+        private void ExportSaveGame(CartridgeSavegame savegame)
+        {
+
         }
 
 		#endregion
