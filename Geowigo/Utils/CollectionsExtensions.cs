@@ -46,6 +46,49 @@ namespace Geowigo.Utils
 
             sett.Save();
         }
+
+
+        /// <summary>
+        /// Gets the value of a certain type for a key.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dic"></param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns>True if the value exists and has the correct tye, false otherwise.</returns>
+        public static bool TryGetValue<T>(this IDictionary<string, object> dic, string key, out T value)
+        {
+            object rval;
+            if (dic.TryGetValue(key, out rval) && rval is T)
+            {
+                value = (T)rval;
+                return true;
+            }
+            else
+            {
+                value = default(T);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of a certain type for a key, or a default value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dic"></param>
+        /// <param name="key"></param>
+        /// <param name="val"></param>
+        /// <returns></returns>
+        public static T GetValueOrDefault<T>(this IDictionary<string, object> dic, string key, T val = default(T))
+        {
+            T rval = default(T);
+            if (TryGetValue<T>(dic, key, out rval))
+            {
+                return rval;
+            }
+
+            return val;
+        }
         
         /// <summary>
 		/// Performs additions, update and removals to this ICollection

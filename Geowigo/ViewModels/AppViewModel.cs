@@ -21,6 +21,7 @@ using WF.Player.Core.Threading;
 using System.Text;
 using Geowigo.Utils;
 using System.Reflection;
+using Windows.ApplicationModel.Activation;
 
 namespace Geowigo.ViewModels
 {	
@@ -61,6 +62,8 @@ namespace Geowigo.ViewModels
         private LicensingManager _LicensingManagerInstance;
 
         private ActionPump _actionPump;
+
+        private IContinuationActivatedEventArgs _LastContractContinuationActivatedEventArgs;
 
 		#endregion
 
@@ -260,6 +263,31 @@ namespace Geowigo.ViewModels
 		public bool HasRecoveredFromTombstone { get; private set; } 
 		#endregion
 
+        #region ContinuationActivatedEventArgs
+
+        /// <summary>
+        /// Gets the event arguments for an app contract activation, if there is one.
+        /// </summary>
+        public IContinuationActivatedEventArgs ContractContinuationActivatedEventArgs
+        {
+            get
+            {
+                IContinuationActivatedEventArgs e = _LastContractContinuationActivatedEventArgs;
+
+                // Deletes the event so that it won't be used in forthcoming navigation events.
+                _LastContractContinuationActivatedEventArgs = null;
+
+                return e;
+            }
+
+            private set
+            {
+                _LastContractContinuationActivatedEventArgs = value;
+            }
+        }
+
+        #endregion
+
 		#endregion
 
         #region Constructors
@@ -349,6 +377,19 @@ namespace Geowigo.ViewModels
 				Model.Core.Resume();
 			}
 		}
+
+        /// <summary>
+        /// Called when the app is activated from a UX contract.
+        /// </summary>
+        /// <param name="e">Activation event</param>
+        public void HandleAppContractActivated(IActivatedEventArgs e)
+        {
+            if (e is IContinuationActivatedEventArgs)
+            {
+                // Stores the event args, to be used for BaseViewModel navigation logic.
+                ContractContinuationActivatedEventArgs = (IContinuationActivatedEventArgs)e;
+            }
+        }
 
 		/// <summary>
 		/// Called when a game crashed. Displays a message and goes back home.

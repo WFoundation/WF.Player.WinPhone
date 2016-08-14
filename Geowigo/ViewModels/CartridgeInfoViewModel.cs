@@ -13,6 +13,12 @@ using System.Collections.ObjectModel;
 using Microsoft.Phone.Controls;
 using System.Linq;
 using System.Text;
+using Windows.Storage.Pickers;
+using Windows.ApplicationModel.Activation;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using System.IO.IsolatedStorage;
+using System.IO;
 
 namespace Geowigo.ViewModels
 {
@@ -42,6 +48,9 @@ namespace Geowigo.ViewModels
         public static readonly string CartridgeFilenameKey = "filename";
         public static readonly string CartridgeIdKey = "cid";
         public static readonly string FileTokenKey = "fileToken";
+
+        private static readonly string ExportSavegameOperationValue = "ExportSavegame";
+        private static readonly string ExportSavegameSourceFileKey = "SourceFilename";
         #endregion
 		
 		#region Dependency Properties
@@ -325,6 +334,12 @@ namespace Geowigo.ViewModels
             // Adds a listener for cartridge tag changes.
             CartridgeTag.PropertyChanged -= OnCartridgeTagPropertyChanged;
             CartridgeTag.PropertyChanged += OnCartridgeTagPropertyChanged;
+
+            // Resumes if needed.
+            if (nav.ContinuationOperation == ExportSavegameOperationValue)
+            {
+                ExportSaveGameContinue(nav.ContinuationEventArgs);
+            }
 		}
 
         private void OnCartridgeTagPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -465,7 +480,55 @@ namespace Geowigo.ViewModels
 
         private void ExportSaveGame(CartridgeSavegame savegame)
         {
+            // Opens a save file picker.
+            FileSavePicker picker = new FileSavePicker();
+            string ext = Path.GetExtension(savegame.SavegameFile);
+            picker.DefaultFileExtension = ext;
+            picker.FileTypeChoices.Add(String.Format("Wherigo Savegame ({0})", ext), new List<string>() { ext });
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(savegame.SavegameFile);
+            picker.ContinuationData.Add(BaseViewModel.ContinuationOperationKey, ExportSavegameOperationValue);
+            picker.ContinuationData.Add(ExportSavegameSourceFileKey, savegame.SavegameFile);
+            picker.PickSaveFileAndContinue();
+        }
 
+        private async void ExportSaveGameContinue(IContinuationActivatedEventArgs e)
+        {
+            // Returns if no target file was selected.
+            FileSavePickerContinuationEventArgs args = e as FileSavePickerContinuationEventArgs;
+            if (args == null || args.File == null)
+            {
+                return;
+            }
+
+            // Gets the source filename.
+            string sourceFilename = args.ContinuationData.GetValueOrDefault<string>(ExportSavegameSourceFileKey);
+            if (sourceFilename == null)
+	        {
+                return;
+	        }
+
+            // Copies the source file to the target file.
+            StorageFile targetFile = args.File;
+            try
+            {
+                using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    using (IsolatedStorageFileStream isfs = isf.OpenFile(sourceFilename, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                    {
+                        using (Stream outputStream = await targetFile.OpenStreamForWriteAsync())
+                        {
+                            await isfs.CopyToAsync(outputStream);
+                        }
+                    }
+                }
+
+                MessageBox.Show(String.Format("Export succeeded to {0}.",  targetFile.Path), "Success", MessageBoxButton.OK);
+            }
+            catch (Exception ex)
+            {
+                DebugUtils.DumpException(ex, "Export savegame");
+                MessageBox.Show(String.Format("Cannot export savegame to {0}. An error occured: {1}", targetFile.Path, ex.Message), "Error", MessageBoxButton.OK);
+            }
         }
 
 		#endregion

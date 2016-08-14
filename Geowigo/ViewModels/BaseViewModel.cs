@@ -14,6 +14,8 @@ using System.Windows.Navigation;
 using WF.Player.Core.Engines;
 using Microsoft.Phone.Shell;
 using System.ComponentModel;
+using Windows.ApplicationModel.Activation;
+using Geowigo.Utils;
 
 namespace Geowigo.ViewModels
 {
@@ -39,10 +41,30 @@ namespace Geowigo.ViewModels
 			/// </summary>
 			public NavigationMode NavigationMode { get; private set; }
 
+            /// <summary>
+            /// Gets the continuation operation, if this navigation event was triggered by a continuation
+            /// activation event.
+            /// </summary>
+            public string ContinuationOperation { get; private set; }
+
+            /// <summary>
+            /// Gets the continuation event arguments, if this navigation event was triggered by a continuation
+            /// activation event.
+            /// </summary>
+            public IContinuationActivatedEventArgs ContinuationEventArgs { get; private set; }
+
 			public NavigationInfo(NavigationContext ctx, NavigationMode mode)
 			{
 				NavigationContext = ctx;
 				NavigationMode = mode;
+
+                // Checks for a continuation operation.
+                IContinuationActivatedEventArgs e = App.Current.ViewModel.ContractContinuationActivatedEventArgs;
+                ContinuationEventArgs = e;
+                if (e != null)
+                {
+                    ContinuationOperation = e.ContinuationData.GetValueOrDefault<string>(ContinuationOperationKey);
+                }
 			}
 
 			/// <summary>
@@ -112,8 +134,18 @@ namespace Geowigo.ViewModels
 		#endregion
 
 		#endregion
+
+        #region Constants
+
+        /// <summary>
+        /// Key for operation data in continuation activated events' ContinuationData.
+        /// </summary>
+        public const string ContinuationOperationKey = "Operation";
+
+        #endregion
 		
 		#region Fields
+
 		private Models.WherigoModel _Model;
 
 		private bool _hasMessageBoxOnScreen;
@@ -286,7 +318,8 @@ namespace Geowigo.ViewModels
 			}
 			else if (e.NavigationMode == NavigationMode.Back)
 			{
-				if (App.Current.ViewModel.HasRecoveredFromTombstone)
+				// If we're back from tombstone or from a contract activation, initialize the page again.
+                if (App.Current.ViewModel.HasRecoveredFromTombstone || nav.ContinuationEventArgs != null)
 				{
 					InitFromNavigation(nav);
 				}

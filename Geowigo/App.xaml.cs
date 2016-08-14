@@ -212,6 +212,13 @@ namespace Geowigo
 			Utils.DebugUtils.DumpException(e.ExceptionObject);
         }
 
+        // Code to execute when the application is activated (brought to foreground)
+        // This code will not execute when the application is first launched
+        private void Application_ContractActivated(object sender, Windows.ApplicationModel.Activation.IActivatedEventArgs e)
+        {
+            ViewModel.HandleAppContractActivated(e);
+        }
+
         #region Initialisation de l'application téléphonique
 
         // Éviter l'initialisation double
@@ -233,6 +240,9 @@ namespace Geowigo
 
             // Gérer les erreurs de navigation
             RootFrame.NavigationFailed += RootFrame_NavigationFailed;
+
+            // Handle contract activation such as returned values from file open or save picker
+            PhoneApplicationService.Current.ContractActivated += Application_ContractActivated;
 
             // Garantir de ne pas retenter l'initialisation
             phoneApplicationInitialized = true;

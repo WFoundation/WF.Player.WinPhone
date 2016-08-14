@@ -38,7 +38,7 @@
 			<Grid d:LayoutOverrides="HorizontalAlignment" Margin="0,0,0,20">
                 <toolkit:ContextMenuService.ContextMenu>
                     <toolkit:ContextMenu>
-                        <!--<toolkit:MenuItem Header="export" Command="{Binding DataContext.ExportSaveGameCommand, ElementName=SavegamesListItemControl}" CommandParameter="{Binding}" />-->
+                        <toolkit:MenuItem Header="export" Command="{Binding DataContext.ExportSaveGameCommand, ElementName=SavegamesListItemControl}" CommandParameter="{Binding}" />
                         <toolkit:MenuItem Header="delete" Command="{Binding DataContext.DeleteSaveGameCommand, ElementName=SavegamesListItemControl}" CommandParameter="{Binding}" />
                     </toolkit:ContextMenu>
                 </toolkit:ContextMenuService.ContextMenu>
