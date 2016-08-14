@@ -67,6 +67,10 @@
                         	<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeLogFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <TextBlock TextWrapping="Wrap" Text="Cartridge logs record all player activity during play, including interactions and location. They can help with debugging cartridge-related problems." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        	<Button Content="delete orphan savegames" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding DeleteOrphanSavegamesCommand, Mode=OneWay}"/>
+                        	<TextBlock TextWrapping="Wrap" Text="{Binding OrphanSavegamesFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
                         <Button Content="rebuild cartridge cache" HorizontalAlignment="Left" Command="{Binding ClearCartridgeCacheCommand, Mode=OneWay}"/>
                         <TextBlock TextWrapping="Wrap" Text="Rebuilding the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
                         <TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>

@@ -794,5 +794,31 @@ namespace Geowigo.Models
                 this.Items.Clear();
             }
         }
+
+        /// <summary>
+        /// Returns an enumerable of paths of savegames that don't belong to any cartridge tag.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetOrphanSavegameFiles()
+        {
+            List<string> files;
+
+            // Gets all savegame files in the isolated storage.
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                files = isf.GetAllFiles("*.gws").Select(s => "/" + s).ToList();
+            }
+
+            // Removes all savegame files that are associated to this tag.
+            foreach (CartridgeTag tag in this)
+            {
+                foreach (CartridgeSavegame cs in tag.Savegames)
+                {
+                    files.Remove(cs.SavegameFile);
+                }
+            }
+
+            return files;
+        }
     }
 }

@@ -123,8 +123,7 @@ namespace Geowigo.Models
         }
 
         /// <summary>
-        /// Imports a savegame from metadata associated to a savegame
-        /// file.
+        /// Imports a savegame from metadata associated to a savegame file.
         /// </summary>
         /// <param name="gwsFilePath">Path to the GWS savegame file.</param>
         /// <param name="isf">Isostore file to use to load.</param>

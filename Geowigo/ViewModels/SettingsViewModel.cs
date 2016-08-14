@@ -136,6 +136,22 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+        #region OrphanSavegamesFileCount
+
+
+        public int OrphanSavegamesFileCount
+        {
+            get { return (int)GetValue(OrphanSavegamesFileCountProperty); }
+            set { SetValue(OrphanSavegamesFileCountProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for OrphanSavegamesFileCount.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty OrphanSavegamesFileCountProperty =
+            DependencyProperty.Register("OrphanSavegamesFileCount", typeof(int), typeof(SettingsViewModel), new PropertyMetadata(0));
+
+
+        #endregion
+
         #endregion
 
         #region Properties
@@ -290,6 +306,23 @@ namespace Geowigo.ViewModels
         }
         #endregion
 
+        #region DeleteOrphanSavegamesCommand
+        private RelayCommand _DeleteOrphanSavegamesCommand;
+
+        public RelayCommand DeleteOrphanSavegamesCommand
+        {
+            get
+            {
+                if (_DeleteOrphanSavegamesCommand == null)
+                {
+                    _DeleteOrphanSavegamesCommand = new RelayCommand(DeleteOrphanSavegames, CanDeleteOrphanSavegamesCommandExecute);
+                }
+
+                return _DeleteOrphanSavegamesCommand;
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Constants
@@ -331,7 +364,7 @@ namespace Geowigo.ViewModels
         {
             DebugUtils.ClearCache();
 
-            RefreshLogView();
+            RefreshDebugLogView();
         }
 
         private void NavigateToGetSupport()
@@ -416,6 +449,39 @@ namespace Geowigo.ViewModels
             return CartridgeLogFileCount > 0;
         }
 
+        private void DeleteOrphanSavegames()
+        {
+            // Asks for confirmation.
+            if (MessageBox.Show(String.Format("This will delete {0} savegame files that are not associated with any installed cartridge. Continue?", OrphanSavegamesFileCount), "Confirm deletion", MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+            {
+                return;
+            }
+            
+            // Deletes all orphan savegames.
+            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                foreach (string path in Model.CartridgeStore.GetOrphanSavegameFiles())
+                {
+                    try
+                    {
+                        isf.DeleteFile(path);
+                    }
+                    catch (Exception)
+                    {
+                        // Nothing to do.
+                    }
+                }
+            }
+
+            // Refreshes the view.
+            RefreshOrphanSavegamesView();
+        }
+
+        private bool CanDeleteOrphanSavegamesCommandExecute()
+        {
+            return OrphanSavegamesFileCount > 0;
+        }
+
         #endregion
 
         protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
@@ -443,11 +509,13 @@ namespace Geowigo.ViewModels
         {
             RefreshCartridgeStore();
 
-            RefreshLogView();
+            RefreshDebugLogView();
 
             RefreshCartridgeLogView();
 
             RefreshOneDrive();
+
+            RefreshOrphanSavegamesView();
         }
 
         private OneDriveCartridgeProvider GetOneDriveProvider()
@@ -538,7 +606,7 @@ namespace Geowigo.ViewModels
             OneDriveProviderAdvancedStatus = advancedStatus;
         }
 
-        private void RefreshLogView()
+        private void RefreshDebugLogView()
         {
             LogFileCount = DebugUtils.GetDebugReportFileCount();
             ClearDebugReportCommand.RefreshCanExecute();
@@ -548,6 +616,12 @@ namespace Geowigo.ViewModels
         {
             CartridgeLogFileCount = Model.CartridgeStore.Aggregate<CartridgeTag, int>(0, (i, ct) => i + ct.LogFiles.Count());
             DeleteCartridgeLogsCommand.RefreshCanExecute();
+        }
+
+        private void RefreshOrphanSavegamesView()
+        {
+            OrphanSavegamesFileCount = Model.CartridgeStore.GetOrphanSavegameFiles().Count();
+            DeleteOrphanSavegamesCommand.RefreshCanExecute();
         }
 
         private void RefreshCartridgeStore()
@@ -665,6 +739,9 @@ namespace Geowigo.ViewModels
                 else if (source == null)
                 {
                     RefreshProgressBar(false, null);
+
+                    // Refreshes the orphan savegames view, now that tags may have been accepted.
+                    RefreshOrphanSavegamesView();
                 }
             }
         }
