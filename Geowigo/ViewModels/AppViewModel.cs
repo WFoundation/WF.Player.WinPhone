@@ -503,7 +503,7 @@ namespace Geowigo.ViewModels
         public void HandleGameStarted(CartridgeTag tag, CartridgeSavegame savegame = null)
         {
             // Resets the session quick save.
-            SavegameManager.InitQuickSave(tag, savegame);
+            SavegameManager.InitSessionSavegames(tag, savegame);
         }
 
 		/// <summary>
@@ -551,12 +551,11 @@ namespace Geowigo.ViewModels
 		}
 
         /// <summary>
-        /// Starts the protocol of saving the current game.
+        /// Makes a custom savegame and prompts the user for a name.
         /// </summary>
-        public void SaveGame(bool isAutoSave)
+        public void SaveGame()
         {
-            // Delegates the protocol to the SavegameManager.
-            SavegameManager.SaveGame(isAutoSave);
+            SavegameManager.SaveAndPrompt();
         }
 
         /// <summary>
@@ -564,7 +563,7 @@ namespace Geowigo.ViewModels
         /// </summary>
         public void SaveGameQuick()
         {
-            SavegameManager.SaveGameQuick();
+            SavegameManager.SaveQuick();
         }
 
 		/// <summary>
@@ -727,8 +726,8 @@ namespace Geowigo.ViewModels
 
         private void Core_SaveRequested(object sender, SavingEventArgs e)
         {
-            // Saves game.
-            SaveGame(true);
+            // Saves game (autosave).
+            SavegameManager.SaveAuto();
 
             // If e.CloseAfterSave, close the game.
             if (e.CloseAfterSave)

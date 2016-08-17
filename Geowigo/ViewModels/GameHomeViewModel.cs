@@ -602,7 +602,7 @@ namespace Geowigo.ViewModels
         private void StartSaveGame()
         {
 			// Saves the game!
-            App.Current.ViewModel.SaveGame(false);
+            App.Current.ViewModel.SaveGame();
         }
 
         /// <summary>
