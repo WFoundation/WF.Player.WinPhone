@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-  <Identity Name="47437WherigoFoundation.Wherigo" Publisher="CN=8077B7E2-80E8-491C-8222-295BEB7BACC1" Version="1.0.31.1" />
+  <Identity Name="47437WherigoFoundation.Wherigo" Publisher="CN=8077B7E2-80E8-491C-8222-295BEB7BACC1" Version="1.0.32.0" />
   <mp:PhoneIdentity PhoneProductId="6f8c9b05-79ef-4e41-a890-b1b0295a233d" PhonePublisherId="8077B7E2-80E8-491C-8222-295BEB7BACC1" />
   <Properties>
     <DisplayName>Geowigo</DisplayName>
