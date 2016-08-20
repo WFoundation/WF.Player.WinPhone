@@ -483,7 +483,7 @@ namespace Geowigo.ViewModels
         private void RefreshAllCartridges()
         {
             // Creates a list of groups of cartridges.
-            AlphaGroupedCartridges = AlphaKeyGroup<CartridgeTag>.CreateGroups(Model.CartridgeStore, System.Globalization.CultureInfo.CurrentUICulture, ct => AlphaKeyGroup<CartridgeTag>.GetFirstAlphaNumChar(ct.Title), true);
+            AlphaGroupedCartridges = AlphaKeyGroup<CartridgeTag>.CreateGroups(Model.CartridgeStore.ToArray(), System.Globalization.CultureInfo.CurrentUICulture, ct => AlphaKeyGroup<CartridgeTag>.GetFirstAlphaNumChar(ct.Title), true);
         }
 
         private void OnHistoryCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
