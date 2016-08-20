@@ -39,10 +39,18 @@ namespace Geowigo.ViewModels
 				// Opens the file and starts playing.
 				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
-					using (IsolatedStorageFileStream fs = isf.OpenFile(isoStoreFile, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+					try
 					{
-						_soundPlayer.SetSource(fs);
-						_soundPlayer.Play();
+						using (IsolatedStorageFileStream fs = isf.OpenFile(isoStoreFile, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+						{
+							_soundPlayer.SetSource(fs);
+							_soundPlayer.Play();
+						}
+					}
+					catch (Exception ex)
+					{
+						// Logs the exception.
+						DebugUtils.DumpException(ex, "play sound " + System.IO.Path.GetFileName(isoStoreFile), true);
 					}
 				}
 			}
