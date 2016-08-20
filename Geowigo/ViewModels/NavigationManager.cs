@@ -615,7 +615,7 @@ namespace Geowigo.ViewModels
 					_parent.Model.Core.StopAndResetAsync().ContinueWith(
 						t => 
 							{
-								if (t.IsFaulted)
+								if (t.Exception != null)
 								{
 									// The nice way didn't work.
 									// So hard reset the engine.
