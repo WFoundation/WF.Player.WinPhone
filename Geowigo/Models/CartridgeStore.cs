@@ -511,7 +511,15 @@ namespace Geowigo.Models
 						{
 							// This cartridge seems improper to load.
 							// Let's just dump the exception and return.
-							DebugUtils.DumpException(ex, dumpOnBugSenseToo: true);
+							string cartInfo = "Loading cartridge: ";
+							try
+							{
+								cartInfo += String.Format("{0}, by {1} ({2})", cart.Name, cart.AuthorName, cart.Guid);
+							}
+							catch (Exception)
+							{
+							}
+							DebugUtils.DumpException(ex, cartInfo, dumpOnBugSenseToo: true);
 							System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Loading failed, ignored : " + filename);
 							isAborted = true;
 						}
