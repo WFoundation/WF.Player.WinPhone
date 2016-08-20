@@ -579,22 +579,33 @@ namespace Geowigo.Models
 			// Gets the cartridge this savegame is associated with.
 			bool isAborted = false;
 			WF.Player.Core.Formats.GWS.Metadata saveMetadata = null;
-			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			try
 			{
-				if (!isf.FileExists(filename))
+				using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
 				{
-					System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Savegame file not found: " + filename);
-
-					isAborted = true;
-				}
-
-				if (!isAborted)
-				{
-					using (IsolatedStorageFileStream fs = isf.OpenFile(filename, System.IO.FileMode.Open))
+					if (!isf.FileExists(filename))
 					{
-						saveMetadata = WF.Player.Core.Formats.GWS.LoadMetadata(fs);
-					} 
+						System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Savegame file not found: " + filename);
+
+						isAborted = true;
+					}
+
+					if (!isAborted)
+					{
+						using (IsolatedStorageFileStream fs = isf.OpenFile(filename, System.IO.FileMode.Open))
+						{
+							saveMetadata = WF.Player.Core.Formats.GWS.LoadMetadata(fs);
+						}
+					}
 				}
+			}
+			catch (Exception ex)
+			{
+				// Logs this.
+				DebugUtils.DumpException(ex, "loading savegame metadata", true);
+
+				// Abort!
+				isAborted = true;
 			}
 
             bool foundMatch = false;
