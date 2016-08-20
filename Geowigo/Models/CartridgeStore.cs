@@ -545,13 +545,16 @@ namespace Geowigo.Models
 
 				    // The cartridge does not exist in the store yet. Creates an entry for it.
 				    newCC = new CartridgeTag(cart);
-
-				    // Adds the context to the store.
-					this.Items.Add(newCC);
 				}
 
 				// Makes the cache.
-				newCC.ImportOrMakeCache(); 
+				newCC.ImportOrMakeCache();
+
+				// Adds the context to the store.
+				lock (_syncRoot)
+				{
+					this.Items.Add(newCC); 
+				}
 			}
 
 			// Refreshes the progress.
