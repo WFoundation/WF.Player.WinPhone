@@ -42,6 +42,16 @@ namespace Geowigo.Utils
 
 			return sb.ToString();
 		}
+
+		/// <summary>
+		/// Gets a displayable identification of this cartridge.
+		/// </summary>
+		/// <param name="c"></param>
+		/// <returns></returns>
+		public static string GetDebugIdentification(this Cartridge c)
+		{
+			return String.Format("{0}, by {1} ({2})", c.Name, c.AuthorName, c.Guid);
+		}
 		
 		/// <summary>
 		/// Gets a GeoCoordinate representing this ZonePoint.

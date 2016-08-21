@@ -485,6 +485,7 @@ namespace Geowigo.Models
 
             // Creates a cartridge object.
 			Cartridge cart = new Cartridge(filename);
+			string cartInfo = null;
 
 			// Loads the cartridge.
 			CartridgeTag existingCC;
@@ -506,20 +507,14 @@ namespace Geowigo.Models
 						try
 						{
 							WF.Player.Core.Formats.CartridgeLoaders.Load(isfs, cart);
+							cartInfo = cart.GetDebugIdentification();
 						}
 						catch (Exception ex)
 						{
 							// This cartridge seems improper to load.
 							// Let's just dump the exception and return.
-							string cartInfo = "Loading cartridge: ";
-							try
-							{
-								cartInfo += String.Format("{0}, by {1} ({2})", cart.Name, cart.AuthorName, cart.Guid);
-							}
-							catch (Exception)
-							{
-							}
-							DebugUtils.DumpException(ex, cartInfo, dumpOnBugSenseToo: true);
+							cartInfo = System.IO.Path.GetFileName(filename);
+							DebugUtils.DumpException(ex, "Loading cartridge: " + filename, dumpOnBugSenseToo: true);
 							System.Diagnostics.Debug.WriteLine("CartridgeStore: WARNING: Loading failed, ignored : " + filename);
 							isAborted = true;
 						}
@@ -545,15 +540,26 @@ namespace Geowigo.Models
 
 				    // The cartridge does not exist in the store yet. Creates an entry for it.
 				    newCC = new CartridgeTag(cart);
-				}
 
-				// Makes the cache.
-				newCC.ImportOrMakeCache();
+					// Makes the cache.
+					try
+					{
+						newCC.ImportOrMakeCache();
+					}
+					catch (Exception ex)
+					{
+						// Dumps the exception.
+						DebugUtils.DumpException(ex, "Generating cache: " + cartInfo);
 
-				// Adds the context to the store.
-				lock (_syncRoot)
-				{
-					this.Items.Add(newCC); 
+						// Aborts.
+						isAborted = true;
+					}
+
+					if (!isAborted)
+					{
+						// Adds the cartridge to the store.
+						this.Items.Add(newCC);
+					}
 				}
 			}
 
@@ -562,7 +568,7 @@ namespace Geowigo.Models
 
 			// Returns the new cartridge context or null if the operation
 			// was aborted.
-			return newCC;
+			return !isAborted ? newCC : null;
 		}
 
 		private bool AcceptSavegame(string filename)
