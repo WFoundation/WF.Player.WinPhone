@@ -789,28 +789,30 @@ namespace Geowigo.ViewModels
 
 			if (e.PropertyName == "FirstWorkingSource")
             {
-                string source = _progress.FirstWorkingSource as string;
+				isProgressBarVisible = true;
+				shouldUpdateProgressBar = true;
+				
+				string source = _progress.FirstWorkingSource as string;
 				if (source == ProgressSourceCartridgeStore)
                 {
-                    isProgressBarVisible = true;
 					progressBarMessage = "Preparing cartridges...";
-					shouldUpdateProgressBar = true;
-                }
+				}
 				else if (source == ProgressSourceOneDriveLink)
 				{
-					isProgressBarVisible = true;
 					progressBarMessage = "Linking to OneDrive...";
-					shouldUpdateProgressBar = true;
 				}
                 else if (source == null)
                 {
 					isProgressBarVisible = false;
 					progressBarMessage = null;
-					shouldUpdateProgressBar = true;
 
                     // Refreshes the orphan savegames view, now that tags may have been accepted.
-                    RefreshOrphanSavegamesView();
+					Dispatcher.BeginInvoke(RefreshOrphanSavegamesView);
                 }
+				else
+				{
+					shouldUpdateProgressBar = false;
+				}
             }
 
 			// Applies the progress bar settings.
