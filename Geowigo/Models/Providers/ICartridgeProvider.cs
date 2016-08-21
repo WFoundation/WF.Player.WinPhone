@@ -41,6 +41,11 @@ namespace Geowigo.Models.Providers
 		string IsoStoreCartridgeContentPath { get; set; }
 
 		/// <summary>
+		/// Raised when a link has aborted.
+		/// </summary>
+		event EventHandler<CartridgeProviderFailEventArgs> LinkAborted;
+
+		/// <summary>
 		/// Raised when a synchronization has completed.
 		/// </summary>
 		/// <remarks>The event arguments recapitulate all the
@@ -56,10 +61,9 @@ namespace Geowigo.Models.Providers
 		event EventHandler<CartridgeProviderSyncEventArgs> SyncProgress;
 
 		/// <summary>
-		/// Raised when the synchronization has aborted because it
-		/// timed out.
+		/// Raised when the synchronization has aborted.
 		/// </summary>
-		event EventHandler<CartridgeProviderSyncAbortEventArgs> SyncAborted;
+		event EventHandler<CartridgeProviderFailEventArgs> SyncAborted;
 
 		/// <summary>
 		/// Starts to sync this provider's isolated storage folder with

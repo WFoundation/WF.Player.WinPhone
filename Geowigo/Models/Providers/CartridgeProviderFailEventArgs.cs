@@ -11,11 +11,16 @@ using System.Windows.Shapes;
 
 namespace Geowigo.Models.Providers
 {
-	public class CartridgeProviderSyncAbortEventArgs : EventArgs
+	public class CartridgeProviderFailEventArgs : EventArgs
 	{
 		/// <summary>
-		/// Gets or sets if the sync has aborted because of a timeout.
+		/// Gets or sets if the failure is because of a timeout.
 		/// </summary>
 		public bool HasTimedOut { get; set; }
+
+		/// <summary>
+		/// Gets or sets the exception which caused the failure.
+		/// </summary>
+		public Exception Exception { get; set; }
 	}
 }

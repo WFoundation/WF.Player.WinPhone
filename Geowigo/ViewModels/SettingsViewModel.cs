@@ -328,6 +328,9 @@ namespace Geowigo.ViewModels
         #region Constants
         public static readonly string ProviderServiceNameKey = "providerServiceName";
         public static readonly string ProviderWizardKey = "providerLinkWizard";
+
+		private static readonly string ProgressSourceCartridgeStore = "CartridgeStore";
+		private static readonly string ProgressSourceOneDriveLink = "OneDriveLink";
         #endregion
 
         #region Fields
@@ -336,6 +339,7 @@ namespace Geowigo.ViewModels
         private bool _isReady;
         private ProgressAggregator _progress;
         private Models.Settings _appSettings;
+		private bool _navigateBackIfProviderLinkWizardTerminates;
 
         #endregion
 
@@ -356,153 +360,42 @@ namespace Geowigo.ViewModels
             _appSettings.PropertyChanged += OnAppSettingsPropertyChanged;
 
             Model.CartridgeStore.PropertyChanged += OnCartridgeStorePropertyChanged;
+
+			ICartridgeProvider oneDrive = GetOneDriveProvider();
+			oneDrive.LinkAborted += OnOneDriveProviderLinkAborted;
+			oneDrive.PropertyChanged += OnOneDriveProviderPropertyChanged;
         }
  
-        #region Command Actions
-
-        private void ClearDebugReport()
-        {
-            DebugUtils.ClearCache();
-
-            RefreshDebugLogView();
-        }
-
-        private void NavigateToGetSupport()
-        {
-            App.Current.ViewModel.NavigationManager.NavigateToHelp();
-        }
-
-        private bool CanDebugReportCommandExecute()
-        {
-            return DebugUtils.GetDebugReportFileCount() > 0;
-        }
-
-        private async void DisplayAdvancedSettings()
-        {
-            // Fetches some potentially expansive data now.
-            LicensingManager licensingManager = App.Current.ViewModel.LicensingManager;
-            CustomSupportStatus = "Custom Support IAP: "
-                + (await licensingManager.ValidateCustomSupportLicense() ? "Yes" : "No")
-                + (licensingManager.HasCustomSupportCertificate ? ", Installed" : "");
-            
-            // Displays!
-            AreAdvancedSettingsDisplayed = true;
-        }
-
-        private void NavigateToDeviceInfo()
-        {
-            App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
-        }
-
-        private void NavigateToPrivacyPolicy()
-        {
-            WebBrowserTask task = new WebBrowserTask()
-            {
-                Uri = new Uri("http://mangatome.net/tools/geowigo/privacy.html", UriKind.Absolute)
-            };
-            task.Show();
-        }
-
-        private void ClearCartridgeCache()
-        {
-            if (_clearCacheWorker.IsBusy)
-            {
-                return;
-            }
-
-            _clearCacheWorker.RunWorkerAsync();
-        }
-
-        private void ClearCartridgeCacheCore(object sender, DoWorkEventArgs e)
-        {
-            // Clears the cache.
-            AppViewModel vm = App.Current.ViewModel;
-            vm.Model.CartridgeStore.ClearCache();
-
-            // Syncs all again.
-            vm.Model.CartridgeStore.SyncFromIsoStore();
-        }
-
-        private void ClearHistory()
-        {
-            // Asks for clearing the history.
-            if (System.Windows.MessageBox.Show("Do you want to delete all entries of the history?", "Clear history", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
-            {
-                App.Current.ViewModel.ClearHistory();
-            }
-        }
-
-        private void DeleteCartridgeLogs()
-        {
-            // Deletes all logs.
-            foreach (CartridgeTag tag in Model.CartridgeStore)
-            {
-                tag.RemoveAllLogs();
-            }
-
-            // Refreshes the view.
-            RefreshCartridgeLogView();
-        }
-
-        private bool CanDeleteCartridgeLogsCommandExecute()
-        {
-            return CartridgeLogFileCount > 0;
-        }
-
-        private void DeleteOrphanSavegames()
-        {
-            // Asks for confirmation.
-            if (MessageBox.Show(String.Format("This will delete {0} savegame files that are not associated with any installed cartridge. Continue?", OrphanSavegamesFileCount), "Confirm deletion", MessageBoxButton.OKCancel) != MessageBoxResult.OK)
-            {
-                return;
-            }
-            
-            // Deletes all orphan savegames.
-            using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                foreach (string path in Model.CartridgeStore.GetOrphanSavegameFiles())
-                {
-                    try
-                    {
-                        isf.DeleteFile(path);
-                    }
-                    catch (Exception)
-                    {
-                        // Nothing to do.
-                    }
-                }
-            }
-
-            // Refreshes the view.
-            RefreshOrphanSavegamesView();
-        }
-
-        private bool CanDeleteOrphanSavegamesCommandExecute()
-        {
-            return OrphanSavegamesFileCount > 0;
-        }
-
-        #endregion
+		internal void OnPageReady()
+		{
+			// The page is now ready and the user is interacting.
+			_isReady = true;
+		}
 
         protected override void InitFromNavigation(BaseViewModel.NavigationInfo nav)
         {
             RefreshAll();
 
-            if (nav.NavigationMode != System.Windows.Navigation.NavigationMode.Back)
-            {
-                // Starts linking the OneDrive provider if needed.
-                string providerServiceName = nav.GetQueryValueOrDefault(ProviderServiceNameKey);
-                if (nav.GetQueryValueOrDefault(ProviderWizardKey) == Boolean.TrueString && providerServiceName != null)
-                {
-                    // A wizard should be performed if needed.
+			// Determines if we are here because a provider wizard is needed.
+			bool isBackNav = nav.NavigationMode == System.Windows.Navigation.NavigationMode.Back;
+			string providerServiceName = nav.GetQueryValueOrDefault(ProviderServiceNameKey);
+			if (nav.GetQueryValueOrDefault(ProviderWizardKey) == Boolean.TrueString && providerServiceName != null)
+			{
+				// A wizard should be performed if needed.
 
-                    if (!IsOneDriveProviderEnabled && GetOneDriveProvider().ServiceName == providerServiceName)
-                    {
-                        // A wizard is needed.
-                        RunOneDriveProviderLinkWizard();
-                    }
-                } 
-            }
+				if (GetOneDriveProvider().ServiceName == providerServiceName)
+				{
+					// A wizard for OneDrive is needed.
+
+					_navigateBackIfProviderLinkWizardTerminates = true;
+
+					if (!isBackNav && !IsOneDriveProviderEnabled)
+					{
+						// We just got here, and OneDrive is not linked: run the wizard. 
+						RunOneDriveProviderLinkWizard();
+					}
+				}
+			} 
         }
 
         private void RefreshAll()
@@ -516,94 +409,6 @@ namespace Geowigo.ViewModels
             RefreshOneDrive();
 
             RefreshOrphanSavegamesView();
-        }
-
-        private OneDriveCartridgeProvider GetOneDriveProvider()
-        {
-            return Model.CartridgeStore.Providers.OfType<OneDriveCartridgeProvider>().FirstOrDefault();
-        }
-
-        private void RefreshOneDrive()
-        {
-            // Refresh provider info.
-            OneDriveCartridgeProvider provider = GetOneDriveProvider();
-            if (provider == null)
-            {
-                // We're sure the provider is not linked.
-                _appSettings.ProviderLinkedHint = false;
-                IsOneDriveProviderEnabled = false;
-            }
-            else if (provider.IsLinked)
-            {
-                // We know the provider is linked, keep this memory.
-                _appSettings.ProviderLinkedHint = true;
-                IsOneDriveProviderEnabled = true;
-            }
-            else
-            {
-                // We're not sure if the provider is unlinked, or if the internet is just off.
-                // Use previously stored data to figure it out.
-                IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
-            }
-
-            // Refresh simple status.
-            string simpleStatus = null;
-            if (provider != null && (provider.IsLinked || provider.CartridgeCount > 0))
-            {
-                simpleStatus = "";
-                
-                if (provider.IsLinked && !String.IsNullOrEmpty(provider.OwnerName))
-                {
-                    simpleStatus += provider.OwnerName + ", ";
-                }
-                
-                simpleStatus += String.Format("{0} cartridges", provider.CartridgeCount);
-            }
-            OneDriveProviderSimpleStatus = simpleStatus;
-
-            // Refresh advanced status.
-            string advancedStatus = null;
-            if (provider != null)
-            {
-                if (provider.IsLinked || provider.IsSyncing)
-                {
-                    // Provider is linked: sync status.
-                    
-                    if (provider.IsSyncing)
-                    {
-                        advancedStatus = "Syncing...";
-                    }
-                    else
-                    {
-                        advancedStatus = "Synchronized. ";
-
-                        advancedStatus += "Downloads from OneDrive folder /Geowigo. ";
-
-                        if (_appSettings.CanProviderUpload)
-                        {
-                            advancedStatus += "Uploads to OneDrive folder /Geowigo/Uploads. ";
-                        }
-                        else
-                        {
-                            advancedStatus += "Upload disabled. ";
-                        }
-                    }
-                }
-                else if (provider.CartridgeCount > 0)
-                {
-                    // Provider not linked but local content exists.
-
-                    if (_appSettings.ProviderLinkedHint)
-                    {
-                        advancedStatus = "Cartridges and savegames will not be synchronized with the cloud until the device can reach the Internet.";
-                    }
-                    else
-                    {
-                        advancedStatus = "Cartridges and savegames are not synchronized with the cloud unless you link your OneDrive account.";
-                    }
-                }
-            }
-            OneDriveProviderAdvancedStatus = advancedStatus;
         }
 
         private void RefreshDebugLogView()
@@ -626,16 +431,7 @@ namespace Geowigo.ViewModels
 
         private void RefreshCartridgeStore()
         {
-            _progress["CartridgeStore"] = Model.CartridgeStore.IsBusy;
-        }
-
-        private void RefreshProgressBar(bool isVisible, string message)
-        {
-            Dispatcher.BeginInvoke(() =>
-            {
-                IsProgressBarVisible = isVisible;
-                ProgressBarStatusText = message;
-            });
+            _progress[ProgressSourceCartridgeStore] = Model.CartridgeStore.IsBusy;
         }
 
         private void OnAppSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -661,89 +457,371 @@ namespace Geowigo.ViewModels
             }
         }
 
-        private void OnIsOneDriveProviderEnabledChanged(bool newValue)
-        {
-            if (!_isReady)
-            {
-                return;
-            }
-            
-            OneDriveCartridgeProvider provider = GetOneDriveProvider();
+		#region Command Actions
 
-            if (!newValue && _appSettings.ProviderLinkedHint)
-            {
-                // Coerce value.
-                if (MessageBox.Show("Geowigo will forget the link to your OneDrive account. Cartridges and savegames will be kept and playable until you link to OneDrive again.", "Unlink OneDrive", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
-                {
-                    // Unlink.
-                    try
-                    {
-                        provider.Unlink();
-                        _appSettings.ProviderLinkedHint = false;
-                    }
-                    catch (Exception e)
-                    {
-                        DebugUtils.DumpException(e, "OneDrive unlink", true);
-                        MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
-                        _appSettings.ProviderLinkedHint = true;
-                    }
-                }
-                else
-                {
-                    // Restores the previous state.
-                    IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
-                }
-            }
-            else if (newValue && !_appSettings.ProviderLinkedHint)
-            {
-                // Starts linking.
-                RunOneDriveProviderLinkWizard();
-            }
+		private void ClearDebugReport()
+		{
+			DebugUtils.ClearCache();
 
-            RefreshOneDrive();
-        }
+			RefreshDebugLogView();
+		}
 
-        private void RunOneDriveProviderLinkWizard()
-        {
-            OneDriveCartridgeProvider provider = GetOneDriveProvider();
-            
-            // Coerce value.
-            if (provider.CartridgeCount == 0 ||
-                MessageBox.Show("Cartridges and savegames from a previous OneDrive link are still stored locally. They may be deleted, depending on the OneDrive account you are about to link to.", "Overwriting Link", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
-            {
-                // Starts the link.
-                provider.BeginLink();
-            }
-            else
-            {
-                // Restores the previous state.
-                IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
-            }
-        }
+		private void NavigateToGetSupport()
+		{
+			App.Current.ViewModel.NavigationManager.NavigateToHelp();
+		}
 
-        internal void OnPageReady()
-        {
-            // The page is now ready and the user is interacting.
-            _isReady = true;
-        }
+		private bool CanDebugReportCommandExecute()
+		{
+			return DebugUtils.GetDebugReportFileCount() > 0;
+		}
+
+		private async void DisplayAdvancedSettings()
+		{
+			// Fetches some potentially expansive data now.
+			LicensingManager licensingManager = App.Current.ViewModel.LicensingManager;
+			CustomSupportStatus = "Custom Support IAP: "
+				+ (await licensingManager.ValidateCustomSupportLicense() ? "Yes" : "No")
+				+ (licensingManager.HasCustomSupportCertificate ? ", Installed" : "");
+
+			// Displays!
+			AreAdvancedSettingsDisplayed = true;
+		}
+
+		private void NavigateToDeviceInfo()
+		{
+			App.Current.ViewModel.NavigationManager.NavigateToPlayerInfo();
+		}
+
+		private void NavigateToPrivacyPolicy()
+		{
+			WebBrowserTask task = new WebBrowserTask()
+			{
+				Uri = new Uri("http://mangatome.net/tools/geowigo/privacy.html", UriKind.Absolute)
+			};
+			task.Show();
+		}
+
+		private void ClearCartridgeCache()
+		{
+			if (_clearCacheWorker.IsBusy)
+			{
+				return;
+			}
+
+			_clearCacheWorker.RunWorkerAsync();
+		}
+
+		private void ClearCartridgeCacheCore(object sender, DoWorkEventArgs e)
+		{
+			// Clears the cache.
+			AppViewModel vm = App.Current.ViewModel;
+			vm.Model.CartridgeStore.ClearCache();
+
+			// Syncs all again.
+			vm.Model.CartridgeStore.SyncFromIsoStore();
+		}
+
+		private void ClearHistory()
+		{
+			// Asks for clearing the history.
+			if (System.Windows.MessageBox.Show("Do you want to delete all entries of the history?", "Clear history", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
+			{
+				App.Current.ViewModel.ClearHistory();
+			}
+		}
+
+		private void DeleteCartridgeLogs()
+		{
+			// Deletes all logs.
+			foreach (CartridgeTag tag in Model.CartridgeStore)
+			{
+				tag.RemoveAllLogs();
+			}
+
+			// Refreshes the view.
+			RefreshCartridgeLogView();
+		}
+
+		private bool CanDeleteCartridgeLogsCommandExecute()
+		{
+			return CartridgeLogFileCount > 0;
+		}
+
+		private void DeleteOrphanSavegames()
+		{
+			// Asks for confirmation.
+			if (MessageBox.Show(String.Format("This will delete {0} savegame files that are not associated with any installed cartridge. Continue?", OrphanSavegamesFileCount), "Confirm deletion", MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+			{
+				return;
+			}
+
+			// Deletes all orphan savegames.
+			using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForApplication())
+			{
+				foreach (string path in Model.CartridgeStore.GetOrphanSavegameFiles())
+				{
+					try
+					{
+						isf.DeleteFile(path);
+					}
+					catch (Exception)
+					{
+						// Nothing to do.
+					}
+				}
+			}
+
+			// Refreshes the view.
+			RefreshOrphanSavegamesView();
+		}
+
+		private bool CanDeleteOrphanSavegamesCommandExecute()
+		{
+			return OrphanSavegamesFileCount > 0;
+		}
+
+		#endregion
+
+		#region OneDrive
+
+		private OneDriveCartridgeProvider GetOneDriveProvider()
+		{
+			return Model.CartridgeStore.Providers.OfType<OneDriveCartridgeProvider>().FirstOrDefault();
+		}
+
+		private void RefreshOneDrive()
+		{
+			// Refresh provider info.
+			OneDriveCartridgeProvider provider = GetOneDriveProvider();
+			if (provider == null)
+			{
+				// We're sure the provider is not linked.
+				_appSettings.ProviderLinkedHint = false;
+				IsOneDriveProviderEnabled = false;
+			}
+			else if (provider.IsLinked)
+			{
+				// We know the provider is linked, keep this memory.
+				_appSettings.ProviderLinkedHint = true;
+				IsOneDriveProviderEnabled = true;
+			}
+			else
+			{
+				// We're not sure if the provider is unlinked, or if the internet is just off.
+				// Use previously stored data to figure it out.
+				IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
+			}
+
+			// Refresh simple status.
+			string simpleStatus = null;
+			if (provider != null && (provider.IsLinked || provider.CartridgeCount > 0))
+			{
+				simpleStatus = "";
+
+				if (provider.IsLinked && !String.IsNullOrEmpty(provider.OwnerName))
+				{
+					simpleStatus += provider.OwnerName + ", ";
+				}
+
+				simpleStatus += String.Format("{0} cartridges", provider.CartridgeCount);
+			}
+			OneDriveProviderSimpleStatus = simpleStatus;
+
+			// Refresh advanced status.
+			string advancedStatus = null;
+			if (provider != null)
+			{
+				if (provider.IsLinked || provider.IsSyncing)
+				{
+					// Provider is linked: sync status.
+
+					if (provider.IsSyncing)
+					{
+						advancedStatus = "Syncing...";
+					}
+					else
+					{
+						advancedStatus = "Synchronized. ";
+
+						advancedStatus += "Downloads from OneDrive folder /Geowigo. ";
+
+						if (_appSettings.CanProviderUpload)
+						{
+							advancedStatus += "Uploads to OneDrive folder /Geowigo/Uploads. ";
+						}
+						else
+						{
+							advancedStatus += "Upload disabled. ";
+						}
+					}
+				}
+				else if (provider.CartridgeCount > 0)
+				{
+					// Provider not linked but local content exists.
+
+					if (_appSettings.ProviderLinkedHint)
+					{
+						advancedStatus = "Cartridges and savegames will not be synchronized with the cloud until the device can reach the Internet.";
+					}
+					else
+					{
+						advancedStatus = "Cartridges and savegames are not synchronized with the cloud unless you link your OneDrive account.";
+					}
+				}
+			}
+			OneDriveProviderAdvancedStatus = advancedStatus;
+		}
+
+		private void OnIsOneDriveProviderEnabledChanged(bool newValue)
+		{
+			if (!_isReady)
+			{
+				return;
+			}
+
+			OneDriveCartridgeProvider provider = GetOneDriveProvider();
+
+			if (!newValue && _appSettings.ProviderLinkedHint)
+			{
+				// Coerce value.
+				if (MessageBox.Show("Geowigo will forget the link to your OneDrive account. Cartridges and savegames will be kept and playable until you link to OneDrive again.", "Unlink OneDrive", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+				{
+					// Unlink.
+					try
+					{
+						provider.Unlink();
+						_appSettings.ProviderLinkedHint = false;
+					}
+					catch (Exception e)
+					{
+						DebugUtils.DumpException(e, "OneDrive unlink", true);
+						MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
+						_appSettings.ProviderLinkedHint = true;
+					}
+				}
+				else
+				{
+					// Restores the previous state.
+					IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
+				}
+			}
+			else if (newValue && !_appSettings.ProviderLinkedHint)
+			{
+				// Starts linking.
+				RunOneDriveProviderLinkWizard();
+			}
+
+			RefreshOneDrive();
+		}
+
+		private void RunOneDriveProviderLinkWizard()
+		{
+			OneDriveCartridgeProvider provider = GetOneDriveProvider();
+
+			// Coerce value.
+			if (provider.CartridgeCount == 0 ||
+				MessageBox.Show("Cartridges and savegames from a previous OneDrive link are still stored locally. They may be deleted, depending on the OneDrive account you are about to link to.", "Overwriting Link", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+			{
+				// Progress bar.
+				_progress[ProgressSourceOneDriveLink] = true;
+
+				// Starts the link.
+				provider.BeginLink();
+			}
+			else
+			{
+				// Restores the previous state.
+				IsOneDriveProviderEnabled = _appSettings.ProviderLinkedHint;
+			}
+		}
+
+		private void OnOneDriveProviderLinkAborted(object sender, CartridgeProviderFailEventArgs e)
+		{
+			// No more progress bar.
+			_progress[ProgressSourceOneDriveLink] = false;
+
+			// Nothing to do if the page is not visible.
+			if (!IsPageVisible)
+			{
+				return;
+			}
+
+			// Shows a message because something happened.
+			if (MessageBox.Show("Linking to OneDrive was cancelled. Do you want to try again?", "Cancelled", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+			{
+				// Try again.
+				RunOneDriveProviderLinkWizard();
+			}
+			else if (_navigateBackIfProviderLinkWizardTerminates)
+			{
+				// Exits.
+				App.Current.ViewModel.NavigationManager.NavigateToAppHome();
+			}
+		}
+
+		private void OnOneDriveProviderPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == "IsLinked")
+			{
+				RefreshOneDrive();
+
+				if (IsOneDriveProviderEnabled)
+				{
+					// No more progress bar for the link wizard.
+					_progress[ProgressSourceOneDriveLink] = false;
+
+					// Exits the screen if needed.
+					if (_navigateBackIfProviderLinkWizardTerminates)
+					{
+						App.Current.ViewModel.NavigationManager.NavigateToAppHome();
+					}
+				}
+			}
+		} 
+		#endregion
 
         private void OnProgressAggregatorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "FirstWorkingSource")
+			bool isProgressBarVisible = false;
+			string progressBarMessage = null;
+			bool shouldUpdateProgressBar = false;
+
+			if (e.PropertyName == "FirstWorkingSource")
             {
                 string source = _progress.FirstWorkingSource as string;
-                if (source == "CartridgeStore")
+				if (source == ProgressSourceCartridgeStore)
                 {
-                    RefreshProgressBar(true, "Preparing cartridges...");
+                    isProgressBarVisible = true;
+					progressBarMessage = "Preparing cartridges...";
+					shouldUpdateProgressBar = true;
                 }
+				else if (source == ProgressSourceOneDriveLink)
+				{
+					isProgressBarVisible = true;
+					progressBarMessage = "Linking to OneDrive...";
+					shouldUpdateProgressBar = true;
+				}
                 else if (source == null)
                 {
-                    RefreshProgressBar(false, null);
+					isProgressBarVisible = false;
+					progressBarMessage = null;
+					shouldUpdateProgressBar = true;
 
                     // Refreshes the orphan savegames view, now that tags may have been accepted.
                     RefreshOrphanSavegamesView();
                 }
             }
+
+			// Applies the progress bar settings.
+			if (shouldUpdateProgressBar)
+			{
+				Dispatcher.BeginInvoke(() =>
+					{
+						IsProgressBarVisible = isProgressBarVisible;
+						ProgressBarStatusText = progressBarMessage;
+					}); 
+			}
         }
     }
 }

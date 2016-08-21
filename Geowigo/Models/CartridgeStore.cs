@@ -685,7 +685,7 @@ namespace Geowigo.Models
 			provider.PropertyChanged += new PropertyChangedEventHandler(OnProviderPropertyChanged);
 			provider.SyncCompleted += new EventHandler<CartridgeProviderSyncEventArgs>(OnProviderSyncCompleted);
 			provider.SyncProgress += new EventHandler<CartridgeProviderSyncEventArgs>(OnProviderSyncProgress);
-			provider.SyncAborted += new EventHandler<CartridgeProviderSyncAbortEventArgs>(OnProviderSyncAborted);
+			provider.SyncAborted += new EventHandler<CartridgeProviderFailEventArgs>(OnProviderSyncAborted);
 			
 			// Sets the provider up.
 			provider.IsoStoreCartridgesPath = String.Format("{0}/From {1}", IsoStoreCartridgesPath, provider.ServiceName);
@@ -698,7 +698,7 @@ namespace Geowigo.Models
 			OnPropertyChanged(new PropertyChangedEventArgs("Providers"));
 		}
 
-		private void OnProviderSyncAborted(object sender, CartridgeProviderSyncAbortEventArgs e)
+		private void OnProviderSyncAborted(object sender, CartridgeProviderFailEventArgs e)
 		{
 			_isBusyAggregator[sender] = false;
 		}

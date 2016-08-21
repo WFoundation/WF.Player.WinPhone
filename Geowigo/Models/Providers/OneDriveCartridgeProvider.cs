@@ -194,11 +194,13 @@ namespace Geowigo.Models.Providers
 
 		#region Events
 
+		public event EventHandler<CartridgeProviderFailEventArgs> LinkAborted;
+
 		public event EventHandler<CartridgeProviderSyncEventArgs> SyncCompleted;
 
 		public event EventHandler<CartridgeProviderSyncEventArgs> SyncProgress;
 
-		public event EventHandler<CartridgeProviderSyncAbortEventArgs> SyncAborted;
+		public event EventHandler<CartridgeProviderFailEventArgs> SyncAborted;
 
 		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 
@@ -335,6 +337,9 @@ namespace Geowigo.Models.Providers
 				// Ignores but dumps the exception.
                 Log("LiveAuthException: " + ex.Message);
 				Geowigo.Utils.DebugUtils.DumpException(ex, dumpOnBugSenseToo: false);
+				
+				// Raises an event.
+				RaiseLinkAbort(ex);
 			}
 		}
 
@@ -342,7 +347,8 @@ namespace Geowigo.Models.Providers
 		{
             if (!CheckTaskCompleted(task, "Not connected. Failed to initialize client."))
             {
-                return;
+				RaiseLinkAbort(task.Exception);
+				return;
             }
 
             LiveLoginResult result = task.Result;
@@ -394,7 +400,8 @@ namespace Geowigo.Models.Providers
 		{
             if (!CheckTaskCompleted(task, "Not connected. Failed to login client."))
             {
-                return;
+				RaiseLinkAbort(task.Exception);
+				return;
             }
 
             LiveLoginResult result = task.Result;
@@ -405,9 +412,6 @@ namespace Geowigo.Models.Providers
             {
                 // We're online, get the client.
                 MakeClientFromSession(result.Session);
-
-                // Notify we're linked.
-                IsLinked = true;
             }
 		}
 
@@ -1044,6 +1048,17 @@ namespace Geowigo.Models.Providers
 			}
 		}
 
+		private void RaiseLinkAbort(Exception exception)
+		{
+			Deployment.Current.Dispatcher.BeginInvoke(() =>
+			{
+				if (LinkAborted != null)
+				{
+					LinkAborted(this, new CartridgeProviderFailEventArgs() { Exception = exception });
+				}
+			});
+		}
+
 		private void RaiseSyncProgress(IEnumerable<string> addedFiles = null, IEnumerable<string> toRemoveFiles = null)
 		{
 			// Raises an event for this file path.
@@ -1063,7 +1078,7 @@ namespace Geowigo.Models.Providers
 			{
 				if (SyncAborted != null)
 				{
-					SyncAborted(this, new CartridgeProviderSyncAbortEventArgs()
+					SyncAborted(this, new CartridgeProviderFailEventArgs()
 					{
 						HasTimedOut = hasTimeout
 					});
