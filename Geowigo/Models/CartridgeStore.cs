@@ -541,25 +541,19 @@ namespace Geowigo.Models
 				    // The cartridge does not exist in the store yet. Creates an entry for it.
 				    newCC = new CartridgeTag(cart);
 
-					// Makes the cache.
-					try
-					{
-						newCC.ImportOrMakeCache();
-					}
-					catch (Exception ex)
-					{
-						// Dumps the exception.
-						DebugUtils.DumpException(ex, "Generating cache: " + cartInfo);
+					// Adds the cartridge to the store.
+					this.Items.Add(newCC);
+				}
 
-						// Aborts.
-						isAborted = true;
-					}
-
-					if (!isAborted)
-					{
-						// Adds the cartridge to the store.
-						this.Items.Add(newCC);
-					}
+				// Makes the cache.
+				try
+				{
+					newCC.ImportOrMakeCache();
+				}
+				catch (Exception ex)
+				{
+					// Dumps the exception.
+					DebugUtils.DumpException(ex, "Generating cache: " + cartInfo);
 				}
 			}
 
