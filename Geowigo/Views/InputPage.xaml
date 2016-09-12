@@ -115,7 +115,7 @@
         						<Geowigo_Controls:InputTemplateSelector.TextTemplate>
         							<DataTemplate>
         								<StackPanel Orientation="Horizontal">
-											<TextBox Text="{Binding DataContext.Answer, ElementName=ThisIP, Mode=TwoWay}" MinWidth="370"/>
+											<TextBox Text="{Binding DataContext.Answer, ElementName=ThisIP, Mode=TwoWay}" MinWidth="370" MaxWidth="370" Width="370"/>
 											<Button Command="{Binding DataContext.AcceptAnswerCommand, ElementName=ThisIP}" Content="OK" />
         								</StackPanel>
         							</DataTemplate>
