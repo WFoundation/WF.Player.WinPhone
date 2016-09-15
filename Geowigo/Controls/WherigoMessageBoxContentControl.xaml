@@ -3,7 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:local="clr-namespace:Geowigo.Controls" x:Class="Geowigo.Controls.WherigoMessageBoxContentControl"
+    xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" 
+    xmlns:local="clr-namespace:Geowigo.Controls" 
+    x:Class="Geowigo.Controls.WherigoMessageBoxContentControl"
     mc:Ignorable="d"
 	x:Name="ThisWMBCC"
     d:DesignHeight="480" d:DesignWidth="480">
@@ -23,7 +25,7 @@
     
     <ScrollViewer x:Name="LayoutRoot" Margin="10,10,30,0" VerticalScrollBarVisibility="Visible" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" MaxHeight="580" >
 		<StackPanel>
-			<Image Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=ThisWMBCC}" Stretch="None" Margin="0,0,0,40" Visibility="{Binding MessageBox.Image, ElementName=ThisWMBCC, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+			<local:ImageControl Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=ThisWMBCC}" Margin="0,0,0,40" Visibility="{Binding MessageBox.Image, ElementName=ThisWMBCC, Converter={StaticResource ObjectToVisibilityConverter}}"/>
 			<TextBlock TextWrapping="Wrap" Text="{Binding MessageBox.Text, ElementName=ThisWMBCC, FallbackValue=Description, Mode=OneWay}" Margin="0" Style="{StaticResource MessageBoxDefaultTextStyle}" />
 		</StackPanel>
 	</ScrollViewer>

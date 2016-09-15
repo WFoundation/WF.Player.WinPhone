@@ -165,6 +165,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AlphaKeyGroup.cs" />
+    <Compile Include="Controls\ImageControl.xaml.cs">
+      <DependentUpon>ImageControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\NavigationLongListSelector.cs" />
     <Compile Include="Converters\SafeDateTimeConverter.cs" />
     <Compile Include="Converters\LongListSelectorColorConverter.cs" />
@@ -297,6 +300,10 @@
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ImageControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ListSummaryControl.xaml">
       <SubType>Designer</SubType>

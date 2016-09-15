@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:Geowigo_Views="clr-namespace:Geowigo.Views"
     xmlns:Geowigo_Converters="clr-namespace:Geowigo.Converters" xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
+    xmlns:Geowigo_Controls="clr-namespace:Geowigo.Controls"
     x:Class="Geowigo.Views.TaskPage"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
@@ -60,7 +61,7 @@
     	</StackPanel>
         <ScrollViewer x:Name="ContentPanel" Margin="12,0,12,0" Grid.Row="1" >
         	<StackPanel Margin="0,0,0,15">
-        		<Image Source="{Binding WherigoObject.Media.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Stretch="None" Margin="0,0,0,40"/>
+        		<Geowigo_Controls:ImageControl Source="{Binding WherigoObject.Media.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Margin="0,0,0,40"/>
         		<TextBlock TextWrapping="Wrap" Text="{Binding WherigoObject.Name, Converter={StaticResource UppercaseStringConverter}, FallbackValue=NAME}" Margin="0,0,0,5" Style="{StaticResource ThingTitleTextStyle}"/>
         		<TextBlock TextWrapping="Wrap" Margin="0,0,0,20" Text="{Binding StatusText, FallbackValue=STATUS TEXT}" Foreground="{StaticResource PhoneAccentBrush}" Style="{StaticResource ThingTitleTextStyle}"/>
         		<TextBlock TextWrapping="Wrap"/>
