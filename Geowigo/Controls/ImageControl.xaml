@@ -10,9 +10,7 @@
     d:DesignHeight="480" d:DesignWidth="480"
     x:Name="ThisIC">
     
-    <ScrollViewer x:Name="LayoutRoot" Background="{x:Null}" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel>
-            <Image x:Name="InnerImage" Source="{Binding Source, ElementName=ThisIC}" Stretch="Fill" HorizontalAlignment="Center" Loaded="OnImageControlLoaded"/>
-        </StackPanel>
-    </ScrollViewer>
+    <Grid x:Name="LayoutRoot" Background="{x:Null}">
+        <Image x:Name="InnerImage" Source="{Binding Source, ElementName=ThisIC}" Stretch="Fill" HorizontalAlignment="Center" Loaded="OnImageControlLoaded"/>
+    </Grid>
 </UserControl>
