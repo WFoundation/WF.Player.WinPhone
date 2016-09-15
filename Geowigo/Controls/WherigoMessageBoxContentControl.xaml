@@ -25,7 +25,7 @@
     
     <ScrollViewer x:Name="LayoutRoot" Margin="10,10,30,0" VerticalScrollBarVisibility="Visible" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" MaxHeight="580" >
 		<StackPanel>
-			<local:ImageControl Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=ThisWMBCC}" Margin="0,0,0,40" Visibility="{Binding MessageBox.Image, ElementName=ThisWMBCC, Converter={StaticResource ObjectToVisibilityConverter}}"/>
+            <local:ImageControl Source="{Binding MessageBox.Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}, ElementName=ThisWMBCC}" Style="{StaticResource WherigoObjectImageControlStyle}" Visibility="{Binding MessageBox.Image, ElementName=ThisWMBCC, Converter={StaticResource ObjectToVisibilityConverter}}"/>
 			<TextBlock TextWrapping="Wrap" Text="{Binding MessageBox.Text, ElementName=ThisWMBCC, FallbackValue=Description, Mode=OneWay}" Margin="0" Style="{StaticResource MessageBoxDefaultTextStyle}" />
 		</StackPanel>
 	</ScrollViewer>

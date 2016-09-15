@@ -106,8 +106,8 @@
 						<TextBlock TextWrapping="Wrap" Style="{StaticResource PhoneTextBlockBase}" Margin="10"><Run Text="This input seems to be looping"/><Run Text=". It will keep "/><Run Text="on "/><Run Text="showing up "/><Run Text="until you give the right answer."/><Run Text=" "/><LineBreak/><Run/><Run Text="Tap here to exit"/><Run Text=" the game"/><Run Text="."/></TextBlock>
 					</Button>
 				</Grid>
-        		<Geowigo_Controls:ImageControl Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Margin="0"/>
-        		<TextBlock TextWrapping="Wrap" Text="{Binding Text}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,40,0,20" />
+                <Geowigo_Controls:ImageControl Source="{Binding Image.Data, Converter={StaticResource ByteArrayToImageSourceConverter}}" Style="{StaticResource WherigoObjectImageControlStyle}"/>
+        		<TextBlock TextWrapping="Wrap" Text="{Binding Text}" FontSize="{StaticResource PhoneFontSizeMediumLarge}" Margin="0,0,0,20" />
 				<ContentPresenter x:Name="AnswerControl" Content="{Binding}">
         			<ContentPresenter.ContentTemplate>
         				<DataTemplate>

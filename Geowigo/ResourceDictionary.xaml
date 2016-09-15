@@ -131,4 +131,9 @@
         <Setter Property="Foreground" Value="{StaticResource PhoneContrastForegroundBrush}" />
     </Style>
     
+    <Style x:Key="WherigoObjectImageControlStyle" TargetType="Geowigo_Controls:ImageControl">
+        <Setter Property="Margin" Value="30,0,30,30" />
+        <Setter Property="MaxHeight" Value="500" />
+    </Style>
+    
 </ResourceDictionary>

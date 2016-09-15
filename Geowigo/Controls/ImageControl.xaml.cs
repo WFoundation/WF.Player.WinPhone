@@ -40,7 +40,6 @@ namespace Geowigo.Controls
 
 		#region Constants
 		private const double MaxScale = 1.0;
-		private const double BorderThreshold = 0.8;
 		#endregion
 
 		#region Fields
@@ -63,7 +62,7 @@ namespace Geowigo.Controls
 
 		private void OnImageControlLoaded(object sender, RoutedEventArgs e)
 		{
-			Dispatcher.BeginInvoke(InitImage);
+			InitImage();
 		}
 
 		private void InitImage()
@@ -96,8 +95,8 @@ namespace Geowigo.Controls
 				// Calculate the minimum scale:
 				// - if the image is bigger than the viewport, scale it down so that it fits it.
 				// - if the image is smaller than the viewport, let it be scaled 100%.
-				double minScaleX = Math.Min(LayoutRoot.ActualWidth * BorderThreshold / _bitmap.PixelWidth, 1.0);
-				double minScaleY = Math.Min(LayoutRoot.ActualHeight * BorderThreshold / _bitmap.PixelHeight, 1.0);
+				double minScaleX = Math.Min(LayoutRoot.ActualWidth / _bitmap.PixelWidth, 1.0);
+				double minScaleY = LayoutRoot.ActualHeight > 0 ? Math.Min(LayoutRoot.ActualHeight / _bitmap.PixelHeight, 1.0) : minScaleX;
 				_minScale = Math.Min(minScaleX, minScaleY);
 			}
 

@@ -12,7 +12,7 @@
     
     <ScrollViewer x:Name="LayoutRoot" Background="{x:Null}" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-            <Image x:Name="InnerImage" Source="{Binding Source, ElementName=ThisIC}" Stretch="Fill" RenderTransformOrigin="0.5,0" HorizontalAlignment="Center" Loaded="OnImageControlLoaded"/>
+            <Image x:Name="InnerImage" Source="{Binding Source, ElementName=ThisIC}" Stretch="Fill" HorizontalAlignment="Center" Loaded="OnImageControlLoaded"/>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
