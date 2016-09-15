@@ -569,7 +569,15 @@ namespace Geowigo.ViewModels
 			if (zones != null)
 			{
 				IEnumerable<ZoneData> data = zones.
-                    Select(z => new ZoneData(z.Points.ToGeoCoordinateCollection(), z.Bounds.Center.ToGeoCoordinate(), z.Name));
+                    Select(z => {
+						if (z == null || z.Points == null || z.Bounds == null || z.Bounds.Center == null)
+						{
+							return null;
+						}
+
+						return new ZoneData(z.Points.ToGeoCoordinateCollection(), z.Bounds.Center.ToGeoCoordinate(), z.Name);
+					})
+					.Where(zd => zd != null);
 
                 ClearAndAddRange(Zones, data);
 			}
