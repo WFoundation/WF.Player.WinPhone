@@ -32,9 +32,6 @@
         <DataTemplate x:Key="ZoneLabelsPushpinsItemTemplate">
             <toolkitMaps:Pushpin GeoCoordinate="{Binding NameAnchor}" Content="{Binding Name}" ContentTemplate="{StaticResource LandmarkPushpinContentTemplate}" Background="{x:Null}" />
         </DataTemplate>
-        <DataTemplate x:Key="Prout">
-            <toolkitMaps:Pushpin GeoCoordinate="45.651390839766, 5.86409479379654" Content="Prout" />
-        </DataTemplate>
         <sys:String x:Key="ListPickerFullModeHeader">Select map background</sys:String>
         <DataTemplate x:Key="CartographicModeListPickerItemTemplate">
             <Grid>

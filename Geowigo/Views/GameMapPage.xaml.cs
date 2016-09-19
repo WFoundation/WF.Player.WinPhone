@@ -52,7 +52,7 @@ namespace Geowigo.Views
 
             // Inits the brushes.
             _polygonFillColor = GetColorClone(Colors.Cyan, 64);
-            _polygonStrokeColor = Colors.White;
+            _polygonStrokeColor = Colors.Black;
             _playerAccuracyFillColor = GetColorClone(Colors.White, 64);
             _playerAccuracyStrokeColor = Colors.Black;
 
