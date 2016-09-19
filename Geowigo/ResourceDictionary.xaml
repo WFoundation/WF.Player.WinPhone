@@ -114,7 +114,16 @@
     </DataTemplate>
     <DataTemplate x:Key="LandmarkPushpinContentTemplate">
         <Grid d:DesignWidth="144" d:DesignHeight="46">
-            <TextBlock TextWrapping="Wrap" Text="{Binding}" d:LayoutOverrides="Width, Height" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <!-- Old skool text outline effect -->
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="-2,-2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="-2,0,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="-2,2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="0,-2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="0,2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="2,-2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="2,0,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" Margin="2,2,0,0" Foreground="#97747474" FontSize="{StaticResource PhoneFontSizeLarge}"/>
+            <TextBlock TextWrapping="Wrap" Text="{Binding}" FontSize="{StaticResource PhoneFontSizeLarge}"/>
         </Grid>
     </DataTemplate>
 
