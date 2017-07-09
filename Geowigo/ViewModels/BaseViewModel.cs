@@ -53,10 +53,16 @@ namespace Geowigo.ViewModels
             /// </summary>
             public IContinuationActivatedEventArgs ContinuationEventArgs { get; private set; }
 
-			public NavigationInfo(NavigationContext ctx, NavigationMode mode)
+			/// <summary>
+			/// Gets the Uri that was navigated to.
+			/// </summary>
+			public Uri Uri { get; private set; }
+
+			public NavigationInfo(NavigationContext ctx, NavigationMode mode, Uri uri)
 			{
 				NavigationContext = ctx;
 				NavigationMode = mode;
+				Uri = uri;
 
                 // Checks for a continuation operation.
                 IContinuationActivatedEventArgs e = App.Current.ViewModel.ContractContinuationActivatedEventArgs;
@@ -306,7 +312,7 @@ namespace Geowigo.ViewModels
 			IsPageVisible = true;
 
 			// Always perform the common initializations.
-			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode);
+			NavigationInfo nav = new NavigationInfo(navCtx, e.NavigationMode, e.Uri);
 			InitFromNavigationInternal(nav);
 			
 			// This view model needs to be init'ed only if the navigation 

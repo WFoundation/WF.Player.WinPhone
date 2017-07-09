@@ -155,6 +155,12 @@ namespace Geowigo.ViewModels
 
 		#endregion
 
+		#region Fields
+
+		private Uri _startUri;
+
+		#endregion
+
 		#region ZCommand execution
 		private void RaiseCommandTargetRequested(Command command)
 		{
@@ -193,6 +199,13 @@ namespace Geowigo.ViewModels
 		} 
 		#endregion
 
+		protected override void InitFromNavigation(NavigationInfo nav)
+		{
+			base.InitFromNavigation(nav);
+
+			_startUri = nav.Uri;
+		}
+
 		protected override void OnPageNavigatedBackToOverride()
 		{
 			// Makes sure the page still should be shown.
@@ -212,7 +225,7 @@ namespace Geowigo.ViewModels
 			else
 			{
 				Thing cont = WherigoObject.Container;
-				shouldGoBack = IsPageVisible && // The page must be visible to be able to trigger a navigation.
+				shouldGoBack = _startUri != null && IsPageVisible && // The page must be visible to be able to trigger a navigation.
 					(!WherigoObject.Visible // The object is not supposed to be visible.
 					|| (WherigoObject is Zone && !((Zone)WherigoObject).Active) // The zone is not active.
 					|| (cont == null && containerChanged) // The item or character has no container.
@@ -222,7 +235,7 @@ namespace Geowigo.ViewModels
 
 			if (shouldGoBack)
 			{
-				App.Current.ViewModel.NavigationManager.NavigateBack(); 
+				App.Current.ViewModel.NavigationManager.NavigateBackOrForget(_startUri);
 			}
 		}
 

@@ -53,7 +53,15 @@ namespace Geowigo.ViewModels
 		{
 			#region Nested Classes
 
-			private class Job
+			private abstract class Job
+			{
+				/// <summary>
+				/// Gets or sets the Uri related to this job.
+				/// </summary>
+				public Uri Uri { get; set; }
+			}
+
+			private class NavigationJob : Job
 			{
 				/// <summary>
 				/// Gets or sets if this job represents a forward navigation.
@@ -61,17 +69,18 @@ namespace Geowigo.ViewModels
 				public bool IsForwardNavigation { get; set; }
 
 				/// <summary>
-				/// Gets or sets the Uri of this job (only used for forward
-				/// navigations).
-				/// </summary>
-				public Uri Uri { get; set; }
-
-				/// <summary>
 				/// Gets or sets if this job should be cancelled if its target
 				/// Uri is the same as the Uri of the page currently on-screen.
 				/// (Only used for forward navigations).
 				/// </summary>
-				public bool CancelIfDuplicate { get; set; }
+				public bool CancelIfCurrentSource { get; set; }
+
+				/// <summary>
+				/// Gets or sets if this job should be cancelled if its target
+				/// Uri is the not same as the Uri of the page currently on-screen.
+				/// (Only used for back navigations).
+				/// </summary>
+				public bool CancelIfNotCurrentSource { get; set; }
 
 				/// <summary>
 				/// Gets or sets if this job should be executed preferredly
@@ -79,6 +88,15 @@ namespace Geowigo.ViewModels
 				/// (Only used for forward navigations).
 				/// </summary>
 				public bool PreferBackNavigation { get; set; }
+			}
+
+			private class StackJob : Job
+			{
+				/// <summary>
+				/// Gets or sets if this job should clear the stack from all
+				/// occurrences of the Uri before running.
+				/// </summary>
+				public bool ClearBackStackFromUri { get; set; }
 			}
 
 			#endregion
@@ -132,20 +150,34 @@ namespace Geowigo.ViewModels
 			#endregion
 
 			#region Accept Jobs
-			public void AcceptNavigate(Uri uri, bool cancelIfAlreadyActive, bool preferBackNav)
-			{
-				AcceptJobAndRun(new Job() 
+			public void AcceptNavigate(Uri uri, bool cancelIfCurrentSource, bool preferBackNav)
+			{				
+				AcceptJobAndRun(new NavigationJob() 
 				{ 
 					Uri = uri, 
 					IsForwardNavigation = true,
 					PreferBackNavigation = preferBackNav,
-					CancelIfDuplicate = cancelIfAlreadyActive
+					CancelIfCurrentSource = cancelIfCurrentSource
 				});
 			}
 
 			public void AcceptNavigateBack()
 			{
-				AcceptJobAndRun(new Job() { IsForwardNavigation = false });
+				AcceptJobAndRun(new NavigationJob() { IsForwardNavigation = false });
+			}
+
+			public void AcceptNavigateBack(Uri initiatorUri, bool cancelIfNotCurrentSource)
+			{
+				AcceptJobAndRun(new NavigationJob()
+				{
+					Uri = initiatorUri,
+					CancelIfNotCurrentSource = cancelIfNotCurrentSource
+				});
+			}
+
+			public void AcceptClearStackOf(Uri targetUri) 
+			{
+				AcceptJobAndRun(new StackJob() { Uri = targetUri, ClearBackStackFromUri = true });
 			}
 
 			private void AcceptJobAndRun(Job job)
@@ -232,6 +264,22 @@ namespace Geowigo.ViewModels
 
 			private void RunJob(Job nextJob)
 			{
+				if (nextJob is NavigationJob)
+				{
+					RunNavigationJob((NavigationJob)nextJob);
+				}
+				else if (nextJob is StackJob)
+				{
+					RunStackJob((StackJob)nextJob);
+				}
+				else
+				{
+					throw new NotImplementedException();
+				}
+			}
+
+			private void RunNavigationJob(NavigationJob nextJob)
+			{
 				// We're going to navigate.
                 IsNavigating = true;
 				
@@ -263,6 +311,15 @@ namespace Geowigo.ViewModels
 				else
 				{
 					RunNavigateBack();
+				}
+			}
+
+			private void RunStackJob(StackJob nextJob)
+			{
+				// If the job wants it, removes all instances of the Uri from the stack.
+				if (nextJob.ClearBackStackFromUri && nextJob.Uri != null)
+				{
+					ClearBackStackOf(nextJob.Uri);
 				}
 			}
 
@@ -322,18 +379,32 @@ namespace Geowigo.ViewModels
 
 			private bool CanJobRun(Job nextJob)
 			{
-				// Checks if the navigation target is already on screen.
-				if (nextJob.IsForwardNavigation
-					&& nextJob.CancelIfDuplicate
-					&& _rootFrame.CurrentSource.OriginalString == nextJob.Uri.OriginalString)
+				// Navigation job tests.
+				if (nextJob is NavigationJob)
 				{
-					return false;
-				}
+					NavigationJob navJob = (NavigationJob)nextJob;
+					
+					// Checks if the navigation target is already on screen.
+					if (navJob.IsForwardNavigation
+						&& navJob.CancelIfCurrentSource
+						&& _rootFrame.CurrentSource.OriginalString == navJob.Uri.OriginalString)
+					{
+						return false;
+					}
 
-				// Checks if the previous page is valid (Back navigation only).
-				if (!nextJob.IsForwardNavigation && !IsPreviousPageValid())
-				{
-					return false;
+					// Checks if the navigation initiator is not already on screen.
+					if (!navJob.IsForwardNavigation
+						&& navJob.CancelIfNotCurrentSource
+						&& _rootFrame.CurrentSource.OriginalString != navJob.Uri.OriginalString)
+					{
+						return false;
+					}
+
+					// Checks if the previous page is valid (Back navigation only).
+					if (!navJob.IsForwardNavigation && !IsPreviousPageValid())
+					{
+						return false;
+					} 
 				}
 
 				// Checks if another navigation was scheduled after this one.
@@ -390,6 +461,19 @@ namespace Geowigo.ViewModels
                     _rootFrame.RemoveBackEntry();
                 }
             }
+
+			private bool ClearBackStackOf(Uri uriToRemove)
+			{
+				// If the previous back entry has the same Uri, removes it.
+				JournalEntry backEntry = _rootFrame.BackStack.FirstOrDefault();
+				if (backEntry != null && backEntry.Source.OriginalString == uriToRemove.OriginalString)
+				{
+					_rootFrame.RemoveBackEntry();
+					return true;
+				}
+
+				return false;
+			}
 
 			private bool ClearBackStackFor(Uri source)
 			{
@@ -816,6 +900,25 @@ namespace Geowigo.ViewModels
 		{
 			// Goes back.
 			_queue.AcceptNavigateBack();
+		}
+
+		/// <summary>
+		/// Navigates one step back in the game activity only if the supplied Uri corresponds to
+		/// the page currently on-screen. In any case, forgets all occurrences of this Uri in
+		/// the back stack.
+		/// </summary>
+		/// <param name="initiatorUri"></param>
+		public void NavigateBackOrForget(Uri initiatorUri)
+		{
+			// Sanity check.
+			if (GetPageScope(initiatorUri) != PageScope.Game)
+			{
+				throw new ArgumentException("Unsupported scope to be forgotten");
+			}
+
+			// Schedules the jobs.
+			_queue.AcceptClearStackOf(initiatorUri);
+			_queue.AcceptNavigateBack(initiatorUri, true);
 		}
 
 		/// <summary>
