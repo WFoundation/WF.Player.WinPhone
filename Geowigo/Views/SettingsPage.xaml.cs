@@ -8,6 +8,7 @@ using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using Geowigo.ViewModels;
+using Geowigo.Converters;
 
 namespace Geowigo.Views
 {
@@ -26,6 +27,9 @@ namespace Geowigo.Views
             InitializeComponent();
 
             this.AddBlockingContentPresenter();
+
+			ItemSourceToStringConverter converter = (ItemSourceToStringConverter)this.Resources["LengthUnitItemSourceToStringConverter"];
+			converter.Strings = ViewModel.LengthUnitDescriptions;
         }
 
         protected override void OnReady()

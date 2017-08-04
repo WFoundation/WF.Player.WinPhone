@@ -248,7 +248,7 @@ namespace Geowigo.Controls
                 }
                 else
                 {
-                    DistanceText.Text = newDistance.BestMeasureAs(DistanceUnit.Meters);
+                    DistanceText.Text = newDistance.BestMeasureAs(App.Current.Model.Settings.LengthUnit);
                     VisualStateManager.GoToState(this, this.OutsideState.Name, true);
                 }
 

@@ -9,28 +9,35 @@
     xmlns:Geowigo_ViewModels="clr-namespace:Geowigo.ViewModels"
     xmlns:Converters="clr-namespace:Geowigo.Converters" xmlns:Controls="clr-namespace:Microsoft.Live.Controls;assembly=Microsoft.Live.Controls"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:Core="clr-namespace:WF.Player.Core;assembly=WF.Player.Core"
     x:Class="Geowigo.Views.SettingsPage"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d"
     shell:SystemTray.IsVisible="True">
     
-	<phone:PhoneApplicationPage.Resources>
+	<Geowigo_Views:BasePage.Resources>
 		<Converters:ObjectToVisibilityConverter x:Key="ObjectToVisibilityConverter"/>
 		<Converters:UppercaseStringConverter x:Key="UppercaseStringConverter"/>
-	</phone:PhoneApplicationPage.Resources>
-	<phone:PhoneApplicationPage.FontFamily>
+        <Converters:ItemSourceToStringConverter x:Key="LengthUnitItemSourceToStringConverter"/>
+		<DataTemplate x:Key="LengthUnitItemTemplate">
+			<Grid>
+				<TextBlock HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Converter={StaticResource LengthUnitItemSourceToStringConverter}, Mode=OneWay}" VerticalAlignment="Top"/>
+			</Grid>
+		</DataTemplate>
+    </Geowigo_Views:BasePage.Resources>
+	<Geowigo_Views:BasePage.FontFamily>
 		<StaticResource ResourceKey="PhoneFontFamilyNormal"/>
-	</phone:PhoneApplicationPage.FontFamily>
-	<phone:PhoneApplicationPage.FontSize>
+	</Geowigo_Views:BasePage.FontFamily>
+	<Geowigo_Views:BasePage.FontSize>
 		<StaticResource ResourceKey="PhoneFontSizeNormal"/>
-	</phone:PhoneApplicationPage.FontSize>
-	<phone:PhoneApplicationPage.Foreground>
+	</Geowigo_Views:BasePage.FontSize>
+	<Geowigo_Views:BasePage.Foreground>
 		<StaticResource ResourceKey="PhoneForegroundBrush"/>
-	</phone:PhoneApplicationPage.Foreground>
+	</Geowigo_Views:BasePage.Foreground>
     
-    <phone:PhoneApplicationPage.DataContext>
+    <Geowigo_Views:BasePage.DataContext>
         <Geowigo_ViewModels:SettingsViewModel/>
-    </phone:PhoneApplicationPage.DataContext>
+    </Geowigo_Views:BasePage.DataContext>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
 	<Grid x:Name="LayoutRoot" Background="Transparent">
@@ -55,34 +62,36 @@
 					</toolkit:ToggleSwitch>
 					<TextBlock TextWrapping="Wrap" Text="{Binding OneDriveProviderAdvancedStatus}" Foreground="{StaticResource PhoneSubtleBrush}"/>
 					<CheckBox Content="Sync automatically on app start-up" IsChecked="{Binding Model.Settings.SyncOnStartUp, FallbackValue=True, Mode=TwoWay}"/>
-                    <CheckBox Content="Upload savegames and logs" IsChecked="{Binding Model.Settings.CanProviderUpload, FallbackValue=True, Mode=TwoWay}"/>
+					<CheckBox Content="Upload savegames and logs" IsChecked="{Binding Model.Settings.CanProviderUpload, FallbackValue=True, Mode=TwoWay}"/>
 					<Button Content="clear history" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding ClearHistoryCommand, Mode=OneWay}"/>
 					<TextBlock TextWrapping="Wrap" Text="Removes all data about which games you played recently. Does not delete cartridges or savegames." Foreground="{StaticResource PhoneSubtleBrush}"/>
-					<Button Content="location+compass" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding NavigateToDeviceInfoCommand, Mode=OneWay}"/>
+					<Button Content="location+compass" HorizontalAlignment="Left" Margin="0,20" Command="{Binding NavigateToDeviceInfoCommand, Mode=OneWay}"/>
+					<TextBlock TextWrapping="Wrap" Text="Units of length:"/>
+					<toolkit:ListPicker ItemsSource="{Binding SupportedLengthUnitsItemsSource}" ItemTemplate="{StaticResource LengthUnitItemTemplate}" SelectedItem="{Binding Model.Settings.LengthUnit, Mode=TwoWay}" Margin="12,6,12,12"/>
 					<Button Content="advanced settings" HorizontalAlignment="Left" Margin="0,20" Command="{Binding DisplayAdvancedSettingsCommand, Mode=OneWay}" Visibility="{Binding AreAdvancedSettingsDisplayed, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
-                    <StackPanel x:Name="AdvancedPanel" Orientation="Vertical" Margin="0,20,0,30" Visibility="{Binding AreAdvancedSettingsDisplayed, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <CheckBox Content="Generate cartridge logs during play" IsChecked="{Binding Model.Settings.CanGenerateCartridgeLog, Mode=TwoWay}"/>
-                        <StackPanel Orientation="Horizontal">
-                        	<Button Content="delete cartridge logs" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding DeleteCartridgeLogsCommand}"/>
-                        	<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeLogFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <TextBlock TextWrapping="Wrap" Text="Cartridge logs record all player activity during play, including interactions and location. They can help with debugging cartridge-related problems." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                        	<Button Content="delete orphan savegames" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding DeleteOrphanSavegamesCommand, Mode=OneWay}"/>
-                        	<TextBlock TextWrapping="Wrap" Text="{Binding OrphanSavegamesFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <Button Content="rebuild cartridge cache" HorizontalAlignment="Left" Command="{Binding ClearCartridgeCacheCommand, Mode=OneWay}"/>
-                        <TextBlock TextWrapping="Wrap" Text="Rebuilding the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
-                        <TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
-                            <Button Content="get support" HorizontalAlignment="Left" Command="{Binding GetSupportCommand, Mode=OneWay}"/>
-                            <Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
-                        </StackPanel>
-                        <TextBlock TextWrapping="Wrap" Text="{Binding AppVersion, FallbackValue=Geowigo Version: Unknown, StringFormat=Geowigo Version: \{0\}}" Foreground="{StaticResource PhoneSubtleBrush}"/>
-                        <TextBlock TextWrapping="Wrap" Text="{Binding CustomSupportStatus, FallbackValue=Custom Support IAP: Unknown}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
-                        <HyperlinkButton Content="Privacy Policy" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="0,10,0,20" Command="{Binding NavigateToPrivacyPolicyCommand, Mode=OneWay}"/>
-                    </StackPanel>
-                </StackPanel>
+					<StackPanel x:Name="AdvancedPanel" Orientation="Vertical" Margin="0,20,0,30" Visibility="{Binding AreAdvancedSettingsDisplayed, Converter={StaticResource ObjectToVisibilityConverter}}">
+						<CheckBox Content="Generate cartridge logs during play" IsChecked="{Binding Model.Settings.CanGenerateCartridgeLog, Mode=TwoWay}"/>
+						<StackPanel Orientation="Horizontal">
+							<Button Content="delete cartridge logs" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding DeleteCartridgeLogsCommand}"/>
+							<TextBlock TextWrapping="Wrap" Text="{Binding CartridgeLogFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
+						</StackPanel>
+						<TextBlock TextWrapping="Wrap" Text="Cartridge logs record all player activity during play, including interactions and location. They can help with debugging cartridge-related problems." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
+						<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+							<Button Content="delete orphan savegames" HorizontalAlignment="Left" VerticalAlignment="Top" Command="{Binding DeleteOrphanSavegamesCommand, Mode=OneWay}"/>
+							<TextBlock TextWrapping="Wrap" Text="{Binding OrphanSavegamesFileCount, StringFormat=\{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}" VerticalAlignment="Center"/>
+						</StackPanel>
+						<Button Content="rebuild cartridge cache" HorizontalAlignment="Left" Command="{Binding ClearCartridgeCacheCommand, Mode=OneWay}"/>
+						<TextBlock TextWrapping="Wrap" Text="Rebuilding the cartridge cache may help in case of missing sounds during gameplay. This may take a while." Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding LogFileCount, FallbackValue=Troubleshooting log, StringFormat=Troubleshooting log: \{0\} files}" Foreground="{StaticResource PhoneSubtleBrush}"/>
+						<StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+							<Button Content="get support" HorizontalAlignment="Left" Command="{Binding GetSupportCommand, Mode=OneWay}"/>
+							<Button Content="clear" HorizontalAlignment="Left" Command="{Binding ClearDebugReportCommand, Mode=OneWay}"/>
+						</StackPanel>
+						<TextBlock TextWrapping="Wrap" Text="{Binding AppVersion, FallbackValue=Geowigo Version: Unknown, StringFormat=Geowigo Version: \{0\}}" Foreground="{StaticResource PhoneSubtleBrush}"/>
+						<TextBlock TextWrapping="Wrap" Text="{Binding CustomSupportStatus, FallbackValue=Custom Support IAP: Unknown}" Foreground="{StaticResource PhoneSubtleBrush}" Margin="0,0,0,20"/>
+						<HyperlinkButton Content="Privacy Policy" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="{StaticResource PhoneFontSizeMedium}" Margin="0,10,0,20" Command="{Binding NavigateToPrivacyPolicyCommand, Mode=OneWay}"/>
+					</StackPanel>
+				</StackPanel>
 			</ScrollViewer>
 		</StackPanel>
 

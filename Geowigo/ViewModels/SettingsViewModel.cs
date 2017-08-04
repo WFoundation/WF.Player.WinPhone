@@ -13,6 +13,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Microsoft.Phone.Tasks;
 using Geowigo.Models;
+using WF.Player.Core;
 
 namespace Geowigo.ViewModels
 {
@@ -152,6 +153,20 @@ namespace Geowigo.ViewModels
 
         #endregion
 
+		#region SupportedLengthUnitsItemsSource
+
+		public IList<DistanceUnit> SupportedLengthUnitsItemsSource
+		{
+			get { return (IList<DistanceUnit>)GetValue(SupportedLengthUnitsItemsSourceProperty); }
+			set { SetValue(SupportedLengthUnitsItemsSourceProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for SupportedLengthUnitsItemsSource.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty SupportedLengthUnitsItemsSourceProperty =
+			DependencyProperty.Register("SupportedLengthUnitsItemsSource", typeof(IList<DistanceUnit>), typeof(SettingsViewModel), new PropertyMetadata(null));
+
+		#endregion
+
         #endregion
 
         #region Properties
@@ -165,6 +180,20 @@ namespace Geowigo.ViewModels
             }
         }
         #endregion
+
+		#region LengthUnitDescriptions
+		private Dictionary<object, string> _lengthUnitDescriptions;
+		public Dictionary<object, string> LengthUnitDescriptions
+		{
+			get
+			{
+				return _lengthUnitDescriptions ?? (_lengthUnitDescriptions = new Dictionary<object, string>() {
+					{ DistanceUnit.Meters, String.Format("Metric ({0}, {1})", DistanceUnit.Meters.ToSymbol(), DistanceUnit.Kilometers.ToSymbol())},
+					{ DistanceUnit.Feet, String.Format("Imperial ({0}, {1})", DistanceUnit.Feet.ToSymbol(), DistanceUnit.Miles.ToSymbol())}
+				});
+			}
+		}
+		#endregion
 
         #endregion
 
@@ -364,6 +393,8 @@ namespace Geowigo.ViewModels
 			ICartridgeProvider oneDrive = GetOneDriveProvider();
 			oneDrive.LinkAborted += OnOneDriveProviderLinkAborted;
 			oneDrive.PropertyChanged += OnOneDriveProviderPropertyChanged;
+
+			SupportedLengthUnitsItemsSource = new List<DistanceUnit>() { DistanceUnit.Meters, DistanceUnit.Feet };
         }
  
 		internal void OnPageReady()
@@ -551,7 +582,7 @@ namespace Geowigo.ViewModels
 		private void DeleteOrphanSavegames()
 		{
 			// Asks for confirmation.
-			if (MessageBox.Show(String.Format("This will delete {0} savegame files that are not associated with any installed cartridge. Continue?", OrphanSavegamesFileCount), "Confirm deletion", MessageBoxButton.OKCancel) != MessageBoxResult.OK)
+			if (System.Windows.MessageBox.Show(String.Format("This will delete {0} savegame files that are not associated with any installed cartridge. Continue?", OrphanSavegamesFileCount), "Confirm deletion", MessageBoxButton.OKCancel) != System.Windows.MessageBoxResult.OK)
 			{
 				return;
 			}
@@ -685,7 +716,7 @@ namespace Geowigo.ViewModels
 			if (!newValue && _appSettings.ProviderLinkedHint)
 			{
 				// Coerce value.
-				if (MessageBox.Show("Geowigo will forget the link to your OneDrive account. Cartridges and savegames will be kept and playable until you link to OneDrive again.", "Unlink OneDrive", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+				if (System.Windows.MessageBox.Show("Geowigo will forget the link to your OneDrive account. Cartridges and savegames will be kept and playable until you link to OneDrive again.", "Unlink OneDrive", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
 				{
 					// Unlink.
 					try
@@ -696,7 +727,7 @@ namespace Geowigo.ViewModels
 					catch (Exception e)
 					{
 						DebugUtils.DumpException(e, "OneDrive unlink", true);
-						MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
+						System.Windows.MessageBox.Show("An error occurred while trying to unlink your OneDrive account. Make sure the device can reach the internet.", "Error", MessageBoxButton.OK);
 						_appSettings.ProviderLinkedHint = true;
 					}
 				}
@@ -721,7 +752,7 @@ namespace Geowigo.ViewModels
 
 			// Coerce value.
 			if (provider.CartridgeCount == 0 ||
-				MessageBox.Show("Cartridges and savegames from a previous OneDrive link are still stored locally. They may be deleted, depending on the OneDrive account you are about to link to.", "Overwriting Link", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+				System.Windows.MessageBox.Show("Cartridges and savegames from a previous OneDrive link are still stored locally. They may be deleted, depending on the OneDrive account you are about to link to.", "Overwriting Link", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
 			{
 				// Progress bar.
 				_progress[ProgressSourceOneDriveLink] = true;
@@ -748,7 +779,7 @@ namespace Geowigo.ViewModels
 			}
 
 			// Shows a message because something happened.
-			if (MessageBox.Show("Linking to OneDrive was cancelled. Do you want to try again?", "Cancelled", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+			if (System.Windows.MessageBox.Show("Linking to OneDrive was cancelled. Do you want to try again?", "Cancelled", MessageBoxButton.OKCancel) == System.Windows.MessageBoxResult.OK)
 			{
 				// Try again.
 				RunOneDriveProviderLinkWizard();
