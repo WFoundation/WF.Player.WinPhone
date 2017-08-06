@@ -6,6 +6,7 @@ using System.Text;
 using Geowigo.Utils;
 using System.ComponentModel;
 using WF.Player.Core;
+using System.Globalization;
 
 namespace Geowigo.Models
 {
@@ -172,7 +173,6 @@ namespace Geowigo.Models
 
 		#region LengthUnit
 		private static string LengthUnitSettingKey = "Engine.LengthUnit";
-		private static DistanceUnit LengthUnitSettingDefaultValue = DistanceUnit.Meters;
 
 		/// <summary>
 		/// Gets or sets the default length unit for displayed distances.
@@ -181,13 +181,17 @@ namespace Geowigo.Models
 		{
 			get
 			{
-				return _settings.GetValueOrDefault<DistanceUnit>(LengthUnitSettingKey, LengthUnitSettingDefaultValue);
+				return _settings.GetValueOrDefault<DistanceUnit>(
+					LengthUnitSettingKey, 
+					RegionInfo.CurrentRegion.IsMetric ? DistanceUnit.Meters : DistanceUnit.Feet);
 			}
 
 			set
 			{
-				bool changed = value != _settings.GetValueOrDefault<DistanceUnit>(LengthUnitSettingKey, LengthUnitSettingDefaultValue);
-
+				bool changed = value != _settings.GetValueOrDefault<DistanceUnit>(
+					LengthUnitSettingKey, 
+					RegionInfo.CurrentRegion.IsMetric ? DistanceUnit.Meters : DistanceUnit.Feet);
+				
 				_settings.SetValueAndSave(LengthUnitSettingKey, value);
 
 				if (changed)

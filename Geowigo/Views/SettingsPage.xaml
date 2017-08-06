@@ -66,7 +66,7 @@
 					<Button Content="clear history" HorizontalAlignment="Left" Margin="0,20,0,0" Command="{Binding ClearHistoryCommand, Mode=OneWay}"/>
 					<TextBlock TextWrapping="Wrap" Text="Removes all data about which games you played recently. Does not delete cartridges or savegames." Foreground="{StaticResource PhoneSubtleBrush}"/>
 					<Button Content="location+compass" HorizontalAlignment="Left" Margin="0,20" Command="{Binding NavigateToDeviceInfoCommand, Mode=OneWay}"/>
-					<TextBlock TextWrapping="Wrap" Text="Units of length:"/>
+					<TextBlock TextWrapping="Wrap" Text="Units of distance"/>
 					<toolkit:ListPicker ItemsSource="{Binding SupportedLengthUnitsItemsSource}" ItemTemplate="{StaticResource LengthUnitItemTemplate}" SelectedItem="{Binding Model.Settings.LengthUnit, Mode=TwoWay}" Margin="12,6,12,12"/>
 					<Button Content="advanced settings" HorizontalAlignment="Left" Margin="0,20" Command="{Binding DisplayAdvancedSettingsCommand, Mode=OneWay}" Visibility="{Binding AreAdvancedSettingsDisplayed, ConverterParameter=invert, Converter={StaticResource ObjectToVisibilityConverter}}"/>
 					<StackPanel x:Name="AdvancedPanel" Orientation="Vertical" Margin="0,20,0,30" Visibility="{Binding AreAdvancedSettingsDisplayed, Converter={StaticResource ObjectToVisibilityConverter}}">
